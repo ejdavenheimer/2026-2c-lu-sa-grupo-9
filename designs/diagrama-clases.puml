@@ -1,0 +1,125 @@
+@startuml diagrama-clases
+
+enum UnidadCompromiso {
+    HORAS_TOTALES
+    HORAS_SEMANALES
+    HORAS_MENSUALES
+}
+
+enum ModalidadColaboracion {
+    GRATUITA
+    CON_INCENTIVO_ECONOMICO
+    CON_POSIBILIDAD_CONTRATACION
+}
+
+enum TipoCuenta {
+    GITHUB
+    GITLAB
+}
+
+enum EstadoProyecto {
+    PUBLICADO
+    CERRADO
+}
+
+class Colectivo {
+    nombre: String
+    descripcion: String
+    tipo: TipoColectivo
+    ubicacion: Ubicacion
+    proyectos: Proyecto[]
+    agregarProyecto(proyecto)
+    finalizarProyecto(proyecto)
+}
+class TipoColectivo {
+    nombre: String
+}
+
+class Ubicacion {
+    pais: Pais
+    provinicia: Provincia
+    ciudad: String
+}
+
+class Pais {
+    nombre: String
+}
+
+class Provincia {
+    nombre: String
+}
+
+
+
+
+
+class Proyecto {
+    titulo: String
+    descripcion: String
+    unidadCompromiso: UnidadCompromiso
+    cantidadHoras: int
+    modalidadesColaboracion: ModalidadColaboracion[]
+    estado: EstadoProyecto
+    fechaAlta: Date
+    fechaCierre: Date
+    colectivo: Colectivo
+    habilidadesRequeridas: Habilidad[]
+    colaboraciones: Colaboracion[]
+    --
+    agregarColaboracion(PersonaColaboradora) 
+'   se instancia la colaboracion y se pasa por parametro la persona colaboradora
+    validarColaborador(PersonaColaboradora)
+}
+
+class Colaboracion {
+    fechaInscripcion: Date
+    personaColaboradora: PersonaColaboradora
+    proyecto: Proyecto
+}
+
+class PersonaColaboradora {
+    nombreFantasia: String
+    nombre: String
+    apellido: String
+    pronombres: String[]
+    presentacion: String
+    cuentas: Cuenta[]
+    habilidades: Habilidad[]
+    colaboraciones: Colaboracion[]
+    agregarHabilidad(habilidad)
+    agregarColaboracion(colaboracion)
+}
+
+class Habilidad {
+    titulo: String
+    codigo: String
+    descripcion: String
+}
+
+class Cuenta {
+    nombreUsuario: String
+    tipo: TipoCuenta
+}
+
+Colectivo --> TipoColectivo
+Colectivo --> Ubicacion
+
+Ubicacion --> Pais
+Ubicacion -->Provincia
+
+Proyecto <--> Colectivo
+Proyecto <--> Colaboracion
+Proyecto --> Habilidad
+Proyecto --> EstadoProyecto
+Proyecto --> ModalidadColaboracion
+Proyecto --> UnidadCompromiso
+
+Colaboracion <--> PersonaColaboradora
+
+PersonaColaboradora --> Habilidad
+PersonaColaboradora --> Cuenta
+
+Cuenta --> TipoCuenta
+
+
+@enduml
