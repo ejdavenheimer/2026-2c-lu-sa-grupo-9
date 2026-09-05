@@ -49,10 +49,6 @@ class Provincia {
     nombre: String
 }
 
-
-
-
-
 class Proyecto {
     titulo: String
     descripcion: String
