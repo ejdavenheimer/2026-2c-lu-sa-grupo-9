@@ -1,0 +1,21 @@
+export const UnidadCompromiso = {
+    HORAS_TOTALES: "HORAS_TOTALES",
+    HORAS_SEMANALES: "HORAS_SEMANALES",
+    HORAS_MENSUALES: "HORAS_MENSUALES"
+};
+
+export const ModalidadColaboracion = {
+    GRATUITA: "GRATUITA",
+    CON_INCENTIVO_ECONOMICO: "CON_INCENTIVO_ECONOMICO",
+    CON_POSIBILIDAD_CONTRATACION: "CON_POSIBILIDAD_CONTRATACION"
+};
+
+export const EstadoProyecto = {
+    PUBLICADO: "PUBLICADO",
+    CERRADO: "CERRADO"
+};
+
+export const TipoCuenta = {
+    GITHUB: "GITHUB",
+    GITLAB: "GITLAB"
+};
