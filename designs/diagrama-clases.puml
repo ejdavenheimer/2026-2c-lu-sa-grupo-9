@@ -84,6 +84,7 @@ class PersonaColaboradora {
     colaboraciones: Colaboracion[]
     agregarHabilidad(habilidad)
     agregarColaboracion(colaboracion)
+    finalizarProyecto()
 }
 
 class Habilidad {
