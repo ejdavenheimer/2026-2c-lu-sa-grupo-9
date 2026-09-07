@@ -22,7 +22,7 @@ export class Colectivo{
     finalizarProyecto(proyecto){
         const indice = this.proyectos.findIndex((p) => p.nombre === proyecto.nombre);
         const proyectoExistente = this.proyectos[indice];
-        proyectoExistente.estado = EstadoProyecto.CERRADO;
+        proyectoExistente.cerrarProyecto();
     }
 
 
