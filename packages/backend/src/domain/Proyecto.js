@@ -4,8 +4,8 @@ import { Colaboracion } from "./Colaboracion.js"
 import { Habilidad } from "./Habilidad.js"
 
 export class Proyecto {
-    constructor({titulo, descripcion, unidadCompromiso, cantidadHoras, modalidadesColaboracion, estado, fechaAlta, colectivo, habilidadesRequeridas, colaboraciones}) {
-        if(!titulo || !descripcion || !unidadCompromiso || !cantidadHoras || !modalidadesColaboracion || !estado || !fechaAlta || !colectivo || !habilidadesRequeridas || !colaboraciones) {
+    constructor({titulo, descripcion, unidadCompromiso, cantidadHoras, modalidadesColaboracion, fechaAlta, colectivo, habilidadesRequeridas, colaboraciones}) {
+        if(!titulo || !descripcion || !unidadCompromiso || !cantidadHoras || !modalidadesColaboracion || !fechaAlta || !colectivo || !habilidadesRequeridas || !colaboraciones) {
             throw new Error("El proyecto requiere un titulo, descripcion, unidadCompromiso, cantidadHoras, modalidadesColaboracion, estado, fechaAlta, colectivo, habilidadesRequeridas y una colaboracion");
         }
         this.titulo = titulo;
