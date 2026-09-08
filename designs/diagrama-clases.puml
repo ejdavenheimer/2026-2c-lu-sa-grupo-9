@@ -37,7 +37,7 @@ class TipoColectivo {
 
 class Ubicacion {
     pais: Pais
-    provinicia: Provincia
+    provincia: Provincia
     ciudad: String
 }
 
@@ -48,10 +48,6 @@ class Pais {
 class Provincia {
     nombre: String
 }
-
-
-
-
 
 class Proyecto {
     titulo: String
