@@ -37,7 +37,7 @@ class TipoColectivo {
 
 class Ubicacion {
     pais: Pais
-    provinicia: Provincia
+    provincia: Provincia
     ciudad: String
 }
 
@@ -84,7 +84,6 @@ class PersonaColaboradora {
     colaboraciones: Colaboracion[]
     agregarHabilidad(habilidad)
     agregarColaboracion(colaboracion)
-    finalizarProyecto()
 }
 
 class Habilidad {
