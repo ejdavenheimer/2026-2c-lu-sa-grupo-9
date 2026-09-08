@@ -10,9 +10,9 @@ export class PersonaColaboradora {
         cuentas = [],
         habilidades = [],
         colaboraciones = []
-    }) {
-        if (!nombreFantasia || cuentas.length === 0) {
-            throw new Error("La persona colaboradora debe poseer al menos un nombre de fantasia");
+    } = {}) {
+        if (!nombreFantasia && (!nombre || !apellido)) {
+            throw new Error("La persona colaboradora debe poseer al menos un nombre de fantasia o nombre y apellido");
         }
         this.nombreFantasia = nombreFantasia;
         this.nombre = nombre;
@@ -42,11 +42,5 @@ export class PersonaColaboradora {
         }
         this.colaboraciones.push(colaboracion);
     }
-
-    finalizarProyecto(proyecto) {
-        if (proyecto && typeof proyecto.cerrarProyecto === "function") {
-            proyecto.cerrarProyecto();
-        }
-    }
-
 }
+
