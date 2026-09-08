@@ -13,14 +13,14 @@ export class Colectivo {
     }
 
     agregarProyecto(proyecto) {
-        const indice = this.proyectos.findIndex((p) => p.nombre === proyecto.nombre);
+        const indice = this.proyectos.findIndex((p) => p.titulo === proyecto.titulo);
         if (indice === -1) {
             this.proyectos.push(proyecto);
         }
     }
 
     finalizarProyecto(proyecto) {
-        const indice = this.proyectos.findIndex((p) => p.nombre === proyecto.nombre);
+        const indice = this.proyectos.findIndex((p) => p.titulo === proyecto.titulo);
         const proyectoExistente = this.proyectos[indice];
         proyectoExistente.cerrarProyecto();
     }
