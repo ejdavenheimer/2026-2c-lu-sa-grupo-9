@@ -11,7 +11,7 @@ export class PersonaColaboradora {
         habilidades = [],
         colaboraciones = []
     } = {}) {
-        if (!nombreFantasia && (!nombre || !apellido)) {
+        if (!nombreFantasia && (!nombre || !apellido) && cuentas.length === 0)  {
             throw new Error("La persona colaboradora debe poseer al menos un nombre de fantasia o nombre y apellido");
         }
         this.nombreFantasia = nombreFantasia;
