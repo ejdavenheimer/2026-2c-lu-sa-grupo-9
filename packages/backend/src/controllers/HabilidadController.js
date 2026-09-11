@@ -1,10 +1,21 @@
+import { z } from "zod";
 import { HabilidadService } from "../services/HabilidadService.js";
+
+const habilidadEsquema = z.object({
+    titulo: z.string().min(1, "El título de la habilidad es requerido"),
+    codigo: z.string().optional(),
+    descripcion: z.string().optional()
+});
 
 export class HabilidadController {
     static crear(req, res) {
+        const parseResult = habilidadEsquema.safeParse(req.body);
+        if (!parseResult.success) {
+            return res.status(400).json(parseResult.error.issues);
+        }
+
         try {
-            const { titulo, codigo, descripcion } = req.body;
-            const nuevaHabilidad = HabilidadService.crearHabilidad({ titulo, codigo, descripcion });
+            const nuevaHabilidad = HabilidadService.crearHabilidad(parseResult.data);
             return res.status(201).json(nuevaHabilidad);
         } catch (error) {
             return res.status(400).json({
@@ -36,4 +47,5 @@ export class HabilidadController {
         }
     }
 }
+
 
