@@ -3,6 +3,7 @@ import { Colaboracion } from "./Colaboracion.js";
 
 export class Proyecto {
     constructor({
+        id,
         titulo,
         descripcion,
         unidadCompromiso,
@@ -13,9 +14,10 @@ export class Proyecto {
         habilidadesRequeridas,
         colaboraciones = []
     } = {}) {
-        if (!titulo || !descripcion || !unidadCompromiso || !cantidadHoras || !modalidadesColaboracion || !colectivo || !habilidadesRequeridas) {
-            throw new Error("El proyecto requiere titulo, descripcion, unidadCompromiso, cantidadHoras, modalidadesColaboracion, colectivo y habilidadesRequeridas");
+        if (!id ||!titulo || !descripcion || !unidadCompromiso || !cantidadHoras || !modalidadesColaboracion || !colectivo || !habilidadesRequeridas) {
+            throw new Error("El proyecto requiere id, titulo, descripcion, unidadCompromiso, cantidadHoras, modalidadesColaboracion, colectivo y habilidadesRequeridas");
         }
+        this.id;
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.unidadCompromiso = unidadCompromiso;
