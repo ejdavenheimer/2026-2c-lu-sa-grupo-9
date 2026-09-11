@@ -14,10 +14,10 @@ export class Proyecto {
         habilidadesRequeridas,
         colaboraciones = []
     } = {}) {
-        if (!id ||!titulo || !descripcion || !unidadCompromiso || !cantidadHoras || !modalidadesColaboracion || !colectivo || !habilidadesRequeridas) {
-            throw new Error("El proyecto requiere id, titulo, descripcion, unidadCompromiso, cantidadHoras, modalidadesColaboracion, colectivo y habilidadesRequeridas");
+        if (!titulo || !descripcion || !unidadCompromiso || !cantidadHoras || !modalidadesColaboracion || !colectivo || !habilidadesRequeridas) {
+            throw new Error("El proyecto requiere: titulo, descripcion, unidadCompromiso, cantidadHoras, modalidadesColaboracion, colectivo y habilidadesRequeridas");
         }
-        this.id;
+        this.id = id;
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.unidadCompromiso = unidadCompromiso;
