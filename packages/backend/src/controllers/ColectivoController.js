@@ -1,7 +1,5 @@
 import { z } from 'zod';
 import { ColectivoService } from '../services/ColectivoService.js';
-import { ColectivoRepository } from '../repositories/ColectivoRepository.js';
-
 
 const ubicacionEsquema = z.object({
     pais: z.string(),
@@ -39,13 +37,13 @@ export class ColectivoController {
     crear = (req, res) => {
         const esquemaValido = colectivoEsquema.safeParse(req.body)
         if(esquemaValido.error){
-            res.status(400).json(esquemaValido.error.issues)
+            return res.status(400).json(esquemaValido.error.issues)
         }
         try{
             const nuevoColectivo = this.colectivoService.crearColectivo(esquemaValido.data)
-            res.status(201).json(nuevoColectivo)
+            return res.status(201).json(nuevoColectivo)
         } catch(error){
-            res.status(409).json(error.message)
+            return res.status(409).json(error.message)
         }
         
     }

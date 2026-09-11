@@ -25,7 +25,7 @@ export class PersonaColaboradoraService{
         if(!personaColaboradora){
             throw new Error("Persona colaboradora no encontrada")
         }
-        personaColaboradora.habilidades.push(habilidad)
+        personaColaboradora.agregarHabilidad(habilidad)
         return PersonaColaboradoraRepository.guardar(personaColaboradora)
     }
 }

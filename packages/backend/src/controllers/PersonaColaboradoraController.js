@@ -18,37 +18,37 @@ const habilidadEsquema = z.object({
     descripcion: z.string()
 })
 
-export class PersonaColaboradoraController{
-    
-    constructor(personaColaboradoraService = new PersonaColaboradoraService()){
+export class PersonaColaboradoraController {
+
+    constructor(personaColaboradoraService = new PersonaColaboradoraService()) {
         this.personaColaboradoraService = personaColaboradoraService
     }
-    
+
     obtenerPersonasColaboradoras = (req, res) => {
         res.status(200).json(this.personaColaboradoraService.listarPersonasColaboradoras())
     }
-    
+
     obtenerPersonaColaboradoraPorId = (req, res) => {
         try {
-            const {codigo} = req.param
+            const { codigo } = req.params;
             res.status(200).json(this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(codigo))
-        } catch (error) { 
+        } catch (error) {
             return res.status(404).json({
                 error: error.message
             });
         }
     }
-    
+
     crearPersonaColaboradora = (req, res) => {
         const body = req.body
         const esquemaValido = personaColaboradoraValida.safeParse(body)
-        if(esquemaValido.error){
-            res.status(400).json(esquemaValido.error.issues)
+        if (esquemaValido.error) {
+            return res.status(400).json(esquemaValido.error.issues)
         }
-        try{
-            res.status(201).json(this.personaColaboradoraService.crearPersonaColaboradora(body))
-        } catch (error){
-            res.status(409).json(error.message)
+        try {
+            return res.status(201).json(this.personaColaboradoraService.crearPersonaColaboradora(esquemaValido.data))
+        } catch (error) {
+            return res.status(409).json(error.message)
         }
     }
 
@@ -56,15 +56,15 @@ export class PersonaColaboradoraController{
         const habilidadValida = habilidadEsquema.safeParse(req.body)
         const id = req.params.codigo
 
-        if(habilidadValida.error){
-            res.status(400).json(habilidadValida.error.issues)
+        if (habilidadValida.error) {
+            return res.status(400).json(habilidadValida.error.issues)
         }
 
-        try { 
-            res.status(200).json(this.personaColaboradoraService.agregarHabilidad(id, habilidadValida.data))
+        try {
+            return res.status(200).json(this.personaColaboradoraService.agregarHabilidad(id, habilidadValida.data))
         } catch (error) {
-            res.status(404).json({error: error.message});
+            return res.status(404).json({ error: error.message });
         }
-        
+
     }
 }
