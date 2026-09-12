@@ -7,7 +7,7 @@ function crearColectivoDePrueba() {
     return new Colectivo({ nombre: "Colectivo Test", descripcion: "desc", tipo: "ONG" });
 }
 
-function crearProyectoDePrueba(colectivo) {
+function crearProyectoDePrueba(colectivo, overrides = {}) {
     return new Proyecto({
         titulo: "Proyecto Test",
         descripcion: "desc",
@@ -15,7 +15,8 @@ function crearProyectoDePrueba(colectivo) {
         cantidadHoras: 10,
         modalidadesColaboracion: ["GRATUITA"],
         colectivo,
-        habilidadesRequeridas: [{ titulo: "React", codigo: "react", descripcion: "desc" }]
+        habilidadesRequeridas: [{ titulo: "React", codigo: "react", descripcion: "desc" }],
+        ...overrides
     });
 }
 
@@ -26,7 +27,7 @@ describe("Proyecto", () => {
     });
 
     test("lanza un error si falta un dato obligatorio", () => {
-        expect(() => new Proyecto({ titulo: "Sin datos" })).toThrow();
+        expect(() => crearProyectoDePrueba(crearColectivoDePrueba(), { titulo: undefined })).toThrow();
     });
 
     test("cerrarProyecto cambia el estado a CERRADO", () => {
