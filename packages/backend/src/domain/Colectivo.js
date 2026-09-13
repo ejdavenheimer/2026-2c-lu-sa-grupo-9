@@ -13,17 +13,28 @@ export class Colectivo {
     }
 
     agregarProyecto(proyecto) {
-        const indice = this.proyectos.findIndex((p) => p.titulo === proyecto.titulo);
-        if (indice === -1) {
-            this.proyectos.push(proyecto);
+        if (!proyecto) {
+            throw new Error('Debe proporcionar un proyecto válido');
         }
+        const indice = this.proyectos.findIndex((p) => p.titulo === proyecto.titulo);
+        if (indice !== -1) {
+            throw new Error(`El proyecto '${proyecto.titulo}' ya existe en el colectivo`);
+        }
+        this.proyectos.push(proyecto);
     }
 
     finalizarProyecto(proyecto) {
+        if (!proyecto) {
+            throw new Error('Debe proporcionar un proyecto válido');
+        }
         const indice = this.proyectos.findIndex((p) => p.titulo === proyecto.titulo);
+        if (indice === -1) {
+            throw new Error(`El proyecto '${proyecto.titulo}' no pertenece a este colectivo`);
+        }
         const proyectoExistente = this.proyectos[indice];
         proyectoExistente.cerrarProyecto();
     }
+
 
 
 }
