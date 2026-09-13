@@ -31,10 +31,13 @@ export class PersonaColaboradora {
             throw new Error("Debe proporcionar una habilidad para agregar");
         }
 
-        if (!this.habilidades.some((h) => h.codigo === habilidad.codigo)) {
-            this.habilidades.push(habilidad);
+        if (this.habilidades.some((h) => h.codigo === habilidad.codigo)) {
+            throw new Error(`La habilidad '${habilidad.titulo || habilidad.codigo}' ya fue agregada a esta persona colaboradora`);
         }
+
+        this.habilidades.push(habilidad);
     }
+
 
     agregarColaboracion(colaboracion) {
         if (!colaboracion) {
