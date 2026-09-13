@@ -45,12 +45,12 @@ describe("PersonaColaboradora", () => {
         expect(persona.habilidades[0]).toBe(habilidad);
     });
 
-    test("agregarHabilidad no agrega una habilidad si ya existe en la lista", () => {
+    test("agregarHabilidad lanza un error si ya existe una habilidad con el mismo código", () => {
         const persona = crearPersonaColaboradoraDePrueba();
         const habilidad1 = { codigo: "habilidad1" };
         const habilidad2 = { codigo: "habilidad1" };
         persona.agregarHabilidad(habilidad1);
-        persona.agregarHabilidad(habilidad2);
+        expect(() => persona.agregarHabilidad(habilidad2)).toThrow("ya fue agregada a esta persona colaboradora");
         expect(persona.habilidades.length).toBe(1);
     });
 

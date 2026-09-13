@@ -33,17 +33,15 @@ describe("ColectivoService", () => {
         expect(() => colectivoService.crearColectivo(datos)).toThrow("El colectivo debe poseer un nombre y un tipo");
     });
 
-    test("crearColectivo con un nombre repetido sobrescribe el colectivo existente", () => {
+    test("crearColectivo lanza un error si ya existe un colectivo con el mismo nombre", () => {
         const datos1 = datosColectivoDePrueba({ nombre: "Colectivo Repetido" });
         const datos2 = datosColectivoDePrueba({ nombre: "Colectivo Repetido", descripcion: "Nueva descripción" });
 
         colectivoService.crearColectivo(datos1);
-        const colectivo2 = colectivoService.crearColectivo(datos2);
+        expect(() => colectivoService.crearColectivo(datos2)).toThrow("Ya existe un colectivo con el nombre 'Colectivo Repetido'");
 
         const colectivos = colectivoService.obtenerColectivos();
         expect(colectivos).toHaveLength(1);
-        expect(colectivos[0].id).toBe(colectivo2.id);
-        expect(colectivos[0].descripcion).toBe("Nueva descripción");
     });
 
     test("obtenerColectivos devuelve una lista vacía si no hay colectivos guardados", () => {

@@ -42,9 +42,10 @@ describe("HabilidadService", () => {
         expect(habilidadCreada.codigo).toBe("desarrollo_web_react");
     });
 
-    test("crearHabilidad lanza un error si no se indica descripción", () => {
+    test("crearHabilidad usa una descripción vacía si no se indica", () => {
         const datos = datosHabilidadDePrueba({ descripcion: null });
-        expect(() => HabilidadService.crearHabilidad(datos)).toThrow("La habilidad requiere un titulo, codigo y descripcion");
+        const habilidadCreada = HabilidadService.crearHabilidad(datos);
+        expect(habilidadCreada.descripcion).toBe("");
     });
 
     test("crearHabilidad lanza un error si falta el título", () => {

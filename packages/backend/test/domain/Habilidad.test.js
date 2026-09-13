@@ -20,18 +20,17 @@ describe("Habilidad", () => {
     test("lanza un error si falta el titulo", () => {
         expect(() => {
             crearHabilidadDePrueba({ titulo: null });
-        }).toThrow("La habilidad requiere un titulo, codigo y descripcion");
+        }).toThrow("La habilidad requiere un titulo y codigo");
     });
 
     test("lanza un error si falta el codigo", () => {
         expect(() => {
             crearHabilidadDePrueba({ codigo: null });
-        }).toThrow("La habilidad requiere un titulo, codigo y descripcion");
+        }).toThrow("La habilidad requiere un titulo y codigo");
     });
 
-    test("lanza un error si falta la descripcion", () => {
-        expect(() => {
-            crearHabilidadDePrueba({ descripcion: null });
-        }).toThrow("La habilidad requiere un titulo, codigo y descripcion");
+    test("usa una descripción vacía si no se indica", () => {
+        const habilidad = crearHabilidadDePrueba({ descripcion: null });
+        expect(habilidad.descripcion).toBe("");
     });
 });

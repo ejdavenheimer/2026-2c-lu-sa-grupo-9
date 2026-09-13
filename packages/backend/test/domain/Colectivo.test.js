@@ -40,12 +40,12 @@ describe("Colectivo", () => {
         expect(colectivo.proyectos[0]).toBe(proyecto);
     });
 
-    test("agregarProyecto no agrega el proyecto si ya existe uno con el mismo título", () => {
+    test("agregarProyecto lanza un error si ya existe un proyecto con el mismo título", () => {
         const colectivo = crearColectivoDePrueba();
         const proyecto1 = { titulo: "Proyecto Test" };
         const proyecto2 = { titulo: "Proyecto Test" };
         colectivo.agregarProyecto(proyecto1);
-        colectivo.agregarProyecto(proyecto2);
+        expect(() => colectivo.agregarProyecto(proyecto2)).toThrow("El proyecto 'Proyecto Test' ya existe en el colectivo");
         expect(colectivo.proyectos.length).toBe(1);
     });
 

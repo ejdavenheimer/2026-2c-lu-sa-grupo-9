@@ -28,17 +28,15 @@ describe("PersonaColaboradoraService", () => {
         expect(() => personaColaboradoraService.crearPersonaColaboradora(personaColaboradora)).toThrow("La persona colaboradora debe poseer al menos un nombre de fantasia o nombre y apellido");
     });
 
-    test("crearPersonaColaboradora con el mismo nombreFantasia sobrescribe a la existente", () => {
+    test("crearPersonaColaboradora lanza un error si ya existe una persona con el mismo nombreFantasia", () => {
         const personaColaboradora1 = datosPersonaColaboradoraDePrueba({ nombreFantasia: "Persona Test" });
         const personaColaboradora2 = datosPersonaColaboradoraDePrueba({ nombreFantasia: "Persona Test" });
 
         personaColaboradoraService.crearPersonaColaboradora(personaColaboradora1);
-        const personaCreada2 = personaColaboradoraService.crearPersonaColaboradora(personaColaboradora2);
+        expect(() => personaColaboradoraService.crearPersonaColaboradora(personaColaboradora2)).toThrow("Ya existe una persona colaboradora con el nombre de fantasía 'Persona Test'");
 
         const personas = personaColaboradoraService.listarPersonasColaboradoras();
         expect(personas).toHaveLength(1);
-        expect(personas[0].id).toBe(personaCreada2.id);
-        expect(personas[0].nombreFantasia).toBe(personaColaboradora2.nombreFantasia);
     });
 
     test("listarPersonasColaboradoras devuelve una lista vacía si no hay personas guardadas", () => {
