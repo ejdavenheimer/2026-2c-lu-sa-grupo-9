@@ -25,10 +25,10 @@ Esta es la especificación y guía de uso de la **API REST** de *Código a Volun
 | | `GET` | `/api/proyectos/:id` | Obtener el detalle de un proyecto |
 | | `POST` | `/api/proyectos/:id/colaboraciones` | Anotar a una persona colaboradora en un proyecto |
 | | `PATCH` | `/api/proyectos/:id/cerrar` | Cierre manual de un proyecto publicado |
-| **Personas Colaboradoras** | `GET` | `/api/personasColaboradoras` | Listar todas las personas colaboradoras |
-| | `POST` | `/api/personasColaboradoras` | Registrar una nueva persona colaboradora |
-| | `GET` | `/api/personasColaboradoras/:id` | Obtener el perfil de un colaborador por ID |
-| | `POST` | `/api/personasColaboradoras/:id` | Asignar una habilidad al perfil de un colaborador |
+| **Personas Colaboradoras** | `GET` | `/api/personas-colaboradoras` | Listar todas las personas colaboradoras |
+| | `POST` | `/api/personas-colaboradoras` | Registrar una nueva persona colaboradora |
+| | `GET` | `/api/personas-colaboradoras/:id` | Obtener el perfil de un colaborador por ID |
+| | `POST` | `/api/personas-colaboradoras/:id/habilidades` | Asignar una habilidad al perfil de un colaborador |
 | **Habilidades** | `GET` | `/api/habilidades` | Listar catálogo de habilidades disponibles |
 | | `POST` | `/api/habilidades` | Registrar una nueva habilidad en el catálogo |
 | | `GET` | `/api/habilidades/:codigo` | Obtener información de una habilidad por su código |
@@ -285,14 +285,14 @@ Cierra manualmente un proyecto. A partir de este momento, se establece la `fecha
 
 ## 👩‍💻 4. Personas Colaboradoras
 
-### `GET /api/personasColaboradoras`
+### `GET /api/personas-colaboradoras`
 Lista todas las personas colaboradoras registradas.
 
 * **Respuesta Exitosa (`200 OK`):** Array con objetos `PersonaColaboradora`.
 
 ---
 
-### `POST /api/personasColaboradoras`
+### `POST /api/personas-colaboradoras`
 Crea una nueva persona colaboradora.
 
 * **Regla de Validación:** Debe tener al menos `nombreFantasia`, o `nombre` y `apellido`, o al menos una cuenta en `cuentas`.
@@ -338,7 +338,7 @@ Crea una nueva persona colaboradora.
 
 ---
 
-### `GET /api/personasColaboradoras/:id`
+### `GET /api/personas-colaboradoras/:id`
 Obtiene el perfil y las habilidades de una persona colaboradora.
 
 * **Parámetros de Ruta:** `id` (string, ej. `colab-1`).
@@ -347,7 +347,7 @@ Obtiene el perfil y las habilidades de una persona colaboradora.
 
 ---
 
-### `POST /api/personasColaboradoras/:id`
+### `POST /api/personas-colaboradoras/:id/habilidades`
 Asocia una habilidad al perfil de la persona colaboradora.
 
 * **Parámetros de Ruta:** `id` (string, ej. `colab-1`).

@@ -334,7 +334,7 @@ export const swaggerDocument = {
         }
       }
     },
-    "/personasColaboradoras": {
+    "/personas-colaboradoras": {
       get: {
         tags: ["Personas Colaboradoras"],
         summary: "Listar personas colaboradoras",
@@ -390,7 +390,7 @@ export const swaggerDocument = {
         }
       }
     },
-    "/personasColaboradoras/{id}": {
+    "/personas-colaboradoras/{id}": {
       get: {
         tags: ["Personas Colaboradoras"],
         summary: "Obtener persona colaboradora por ID",
@@ -422,7 +422,9 @@ export const swaggerDocument = {
             description: "Persona colaboradora no encontrada"
           }
         }
-      },
+      }
+    },
+    "/personas-colaboradoras/{id}/habilidades": {
       post: {
         tags: ["Personas Colaboradoras"],
         summary: "Agregar una habilidad a una persona colaboradora",
