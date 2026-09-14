@@ -12,11 +12,11 @@ const proyectoEsquema = z.object({
         .min(1, "Debe indicar al menos una modalidad de colaboración"),
     colectivoId: z.string().min(1, "El ID del colectivo es requerido"),
     habilidadesRequeridasCodigos: z.array(z.string()).min(1, "Debe indicar al menos una habilidad requerida")
-});
+}).strict();
 
 const anotacionEsquema = z.object({
     personaColaboradoraId: z.string().min(1, "El ID de la persona colaboradora es requerido")
-});
+}).strict();
 
 export class ProyectoController {
 
