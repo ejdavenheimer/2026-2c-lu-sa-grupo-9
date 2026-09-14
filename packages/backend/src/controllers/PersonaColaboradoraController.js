@@ -10,13 +10,13 @@ const personaColaboradoraValida = z.object({
     cuentas: z.array().default([]),
     habilidades: z.array().default([]),
     colaboraciones: z.array().default([])
-})
+}.strict())
 
 const habilidadEsquema = z.object({
-    titulo: z.string(),
-    codigo: z.string(),
-    descripcion: z.string()
-})
+    titulo: z.string().default(""),
+    codigo: z.string().default(""),
+    descripcion: z.string().default("")
+}.strict())
 
 export class PersonaColaboradoraController {
 
