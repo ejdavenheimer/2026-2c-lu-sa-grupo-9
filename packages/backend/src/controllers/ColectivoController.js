@@ -5,7 +5,7 @@ const ubicacionEsquema = z.object({
     pais: z.string(),
     provincia: z.string().optional(),
     ciudad: z.string().optional()
-}.strict())
+}).strict()
 
 const colectivoEsquema = z.object({
     nombre: z.string(),

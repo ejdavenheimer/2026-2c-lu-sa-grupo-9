@@ -11,4 +11,27 @@ export class Colaboracion {
         this.proyecto = proyecto;
         this.fechaInscripcion = fechaInscripcion || new Date();
     }
+
+    toJSON() {
+        return {
+            id: this.id,
+            fechaInscripcion: this.fechaInscripcion,
+            personaColaboradora: this.personaColaboradora ? {
+                id: this.personaColaboradora.id,
+                nombreFantasia: this.personaColaboradora.nombreFantasia,
+                nombre: this.personaColaboradora.nombre,
+                apellido: this.personaColaboradora.apellido,
+                pronombres: this.personaColaboradora.pronombres,
+                presentacion: this.personaColaboradora.presentacion,
+                cuentas: this.personaColaboradora.cuentas,
+                habilidades: this.personaColaboradora.habilidades
+            } : null,
+            proyecto: this.proyecto ? {
+                id: this.proyecto.id,
+                titulo: this.proyecto.titulo,
+                descripcion: this.proyecto.descripcion,
+                estado: this.proyecto.estado
+            } : null
+        };
+    }
 }
