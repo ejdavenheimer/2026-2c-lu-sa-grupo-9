@@ -25,7 +25,7 @@ export class ColectivoController {
     }
 
     obtenerPorCodigo = (req, res) => {
-        const id = req.params.codigo;
+        const id = req.params.id;
         try{
             const colectivo = this.colectivoService.obtenerColectivoPorId(id);
             res.status(200).json(colectivo)

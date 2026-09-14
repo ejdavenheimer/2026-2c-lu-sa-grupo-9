@@ -5,11 +5,9 @@ const colectivoController = new ColectivoController();
 
 const router = Router();
 
-router.route("/")
-    .get((req, res) => colectivoController.listar(req, res))
-    .post((req, res) => colectivoController.crear(req, res));
+router.get("/", colectivoController.listar)
+router.post("/", colectivoController.crear);
     
-router.route("/:codigo")
-    .get((req, res) => colectivoController.obtenerPorCodigo(req, res));
+router.get("/:id", colectivoController.obtenerPorCodigo);
 
 export default router;

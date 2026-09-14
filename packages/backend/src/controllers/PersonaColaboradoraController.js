@@ -30,8 +30,8 @@ export class PersonaColaboradoraController {
 
     obtenerPersonaColaboradoraPorId = (req, res) => {
         try {
-            const { codigo } = req.params;
-            res.status(200).json(this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(codigo))
+            const { id } = req.params;
+            res.status(200).json(this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(id))
         } catch (error) {
             return res.status(404).json({
                 error: error.message
@@ -54,7 +54,7 @@ export class PersonaColaboradoraController {
 
     agregarHabilidad = (req, res) => {
         const habilidadValida = habilidadEsquema.safeParse(req.body)
-        const id = req.params.codigo
+        const id = req.params.id
 
         if (habilidadValida.error) {
             return res.status(400).json(habilidadValida.error.issues)
