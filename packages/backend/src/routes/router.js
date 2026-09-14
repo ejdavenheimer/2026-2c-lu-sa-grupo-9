@@ -11,5 +11,5 @@ router.use(HealthRoutes);
 router.use("/habilidades", HabilidadRoutes);
 router.use("/proyectos", ProyectoRoutes);
 router.use("/colectivos", ColectivoRoutes);
-router.use("/personasColaboradoras", PersonaColaboradoraRoutes)
+router.use("/personas-colaboradoras", PersonaColaboradoraRoutes)
 export default router;
