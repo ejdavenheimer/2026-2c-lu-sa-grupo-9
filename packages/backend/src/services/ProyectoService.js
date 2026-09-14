@@ -5,7 +5,7 @@ import { PersonaColaboradoraRepository } from "../repositories/PersonaColaborado
 import { HabilidadRepository } from "../repositories/HabilidadRepository.js";
 
 export class ProyectoService {
-    static crearProyecto({
+    crearProyecto = ({
         titulo,
         descripcion,
         unidadCompromiso,
@@ -15,7 +15,7 @@ export class ProyectoService {
         colectivo,
         habilidadesRequeridasCodigos = [],
         habilidadesRequeridas = []
-    }) {
+    }) => {
         let colectivoAsociado = colectivo;
         if (!colectivoAsociado && colectivoId) {
             colectivoAsociado = ColectivoRepository.buscarPorId(colectivoId);
@@ -58,11 +58,11 @@ export class ProyectoService {
         return ProyectoRepository.guardar(nuevoProyecto);
     }
 
-    static obtenerProyectos() {
+    obtenerProyectos = () => {
         return ProyectoRepository.buscarTodos();
     }
 
-    static obtenerProyectoPorId(id) {
+    obtenerProyectoPorId = (id) => {
         const proyecto = ProyectoRepository.buscarPorId(id);
         if (!proyecto) {
             throw new Error(`No se encontró el proyecto con ID '${id}'`);
@@ -70,7 +70,7 @@ export class ProyectoService {
         return proyecto;
     }
 
-    static anotarColaborador(proyectoId, { personaColaboradoraId, personaColaboradora }) {
+    anotarColaborador = (proyectoId, { personaColaboradoraId, personaColaboradora }) => {
         const proyecto = this.obtenerProyectoPorId(proyectoId);
 
         let colaborador = personaColaboradora;
@@ -92,7 +92,7 @@ export class ProyectoService {
         return nuevaColaboracion;
     }
 
-    static cerrarProyecto(proyectoId) {
+    cerrarProyecto = (proyectoId) => {
         const proyecto = this.obtenerProyectoPorId(proyectoId);
         proyecto.cerrarProyecto();
         ProyectoRepository.guardar(proyecto);

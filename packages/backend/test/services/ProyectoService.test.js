@@ -47,11 +47,14 @@ function crearPersonaColaboradoraDePrueba(overrides = {}) {
 }
 
 describe("ProyectoService", () => {
+    let proyectoService;
+
     beforeEach(() => {
         ProyectoRepository.limpiar();
         ColectivoRepository.limpiar();
         PersonaColaboradoraRepository.limpiar();
         HabilidadRepository.limpiar();
+        proyectoService = new ProyectoService();
     });
 
     describe("crearProyecto", () => {
@@ -64,7 +67,7 @@ describe("ProyectoService", () => {
                 habilidadesRequeridas: [habilidad]
             });
 
-            const proyectoCreado = ProyectoService.crearProyecto(datos);
+            const proyectoCreado = proyectoService.crearProyecto(datos);
 
             expect(proyectoCreado).toHaveProperty("id");
             expect(proyectoCreado.titulo).toBe(datos.titulo);
@@ -89,7 +92,7 @@ describe("ProyectoService", () => {
                 habilidadesRequeridasCodigos: ["react_native"]
             });
 
-            const proyectoCreado = ProyectoService.crearProyecto(datos);
+            const proyectoCreado = proyectoService.crearProyecto(datos);
 
             expect(proyectoCreado.id).toBeDefined();
             expect(proyectoCreado.colectivo.id).toBe(colectivo.id);
@@ -108,7 +111,7 @@ describe("ProyectoService", () => {
                 modalidadesColaboracion: "PAGA"
             });
 
-            const proyectoCreado = ProyectoService.crearProyecto(datos);
+            const proyectoCreado = proyectoService.crearProyecto(datos);
             expect(proyectoCreado.modalidadesColaboracion).toEqual(["PAGA"]);
         });
 
@@ -118,7 +121,7 @@ describe("ProyectoService", () => {
                 habilidadesRequeridas: [habilidad]
             });
 
-            expect(() => ProyectoService.crearProyecto(datos)).toThrow("El proyecto requiere un colectivo asociado");
+            expect(() => proyectoService.crearProyecto(datos)).toThrow("El proyecto requiere un colectivo asociado");
         });
 
         test("lanza un error si el colectivoId no existe", () => {
@@ -128,7 +131,7 @@ describe("ProyectoService", () => {
                 habilidadesRequeridas: [habilidad]
             });
 
-            expect(() => ProyectoService.crearProyecto(datos)).toThrow("No se encontró el colectivo con ID 'id-inexistente'");
+            expect(() => proyectoService.crearProyecto(datos)).toThrow("No se encontró el colectivo con ID 'id-inexistente'");
         });
 
         test("lanza un error si no se indican habilidades requeridas", () => {
@@ -139,7 +142,7 @@ describe("ProyectoService", () => {
                 habilidadesRequeridasCodigos: []
             });
 
-            expect(() => ProyectoService.crearProyecto(datos)).toThrow("El proyecto requiere al menos una habilidad requerida");
+            expect(() => proyectoService.crearProyecto(datos)).toThrow("El proyecto requiere al menos una habilidad requerida");
         });
 
         test("lanza un error si un código en habilidadesRequeridasCodigos no existe", () => {
@@ -149,7 +152,7 @@ describe("ProyectoService", () => {
                 habilidadesRequeridasCodigos: ["codigo_fantasma"]
             });
 
-            expect(() => ProyectoService.crearProyecto(datos)).toThrow("No se encontró la habilidad requerida con código 'codigo_fantasma'");
+            expect(() => proyectoService.crearProyecto(datos)).toThrow("No se encontró la habilidad requerida con código 'codigo_fantasma'");
         });
 
         test("lanza un error si ya existe un proyecto con el mismo título en el colectivo", () => {
@@ -167,14 +170,14 @@ describe("ProyectoService", () => {
                 habilidadesRequeridas: [habilidad]
             });
 
-            ProyectoService.crearProyecto(datos1);
-            expect(() => ProyectoService.crearProyecto(datos2)).toThrow("El proyecto 'Proyecto Único' ya existe en el colectivo");
+            proyectoService.crearProyecto(datos1);
+            expect(() => proyectoService.crearProyecto(datos2)).toThrow("El proyecto 'Proyecto Único' ya existe en el colectivo");
         });
     });
 
     describe("obtenerProyectos", () => {
         test("devuelve un array vacío si no hay proyectos", () => {
-            const proyectos = ProyectoService.obtenerProyectos();
+            const proyectos = proyectoService.obtenerProyectos();
             expect(proyectos).toEqual([]);
         });
 
@@ -182,18 +185,18 @@ describe("ProyectoService", () => {
             const colectivo = crearColectivoDePrueba();
             const habilidad = crearHabilidadDePrueba();
 
-            ProyectoService.crearProyecto(datosProyectoDePrueba({
+            proyectoService.crearProyecto(datosProyectoDePrueba({
                 titulo: "Proyecto 1",
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
-            ProyectoService.crearProyecto(datosProyectoDePrueba({
+            proyectoService.crearProyecto(datosProyectoDePrueba({
                 titulo: "Proyecto 2",
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
 
-            const proyectos = ProyectoService.obtenerProyectos();
+            const proyectos = proyectoService.obtenerProyectos();
             expect(proyectos).toHaveLength(2);
             expect(proyectos.map((p) => p.titulo)).toEqual(["Proyecto 1", "Proyecto 2"]);
         });
@@ -204,17 +207,17 @@ describe("ProyectoService", () => {
             const colectivo = crearColectivoDePrueba();
             const habilidad = crearHabilidadDePrueba();
 
-            const creado = ProyectoService.crearProyecto(datosProyectoDePrueba({
+            const creado = proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
 
-            const obtenido = ProyectoService.obtenerProyectoPorId(creado.id);
+            const obtenido = proyectoService.obtenerProyectoPorId(creado.id);
             expect(obtenido).toEqual(creado);
         });
 
         test("lanza un error si el proyecto no existe", () => {
-            expect(() => ProyectoService.obtenerProyectoPorId("id-inexistente")).toThrow("No se encontró el proyecto con ID 'id-inexistente'");
+            expect(() => proyectoService.obtenerProyectoPorId("id-inexistente")).toThrow("No se encontró el proyecto con ID 'id-inexistente'");
         });
     });
 
@@ -226,12 +229,12 @@ describe("ProyectoService", () => {
                 habilidades: [habilidad]
             });
 
-            const proyecto = ProyectoService.crearProyecto(datosProyectoDePrueba({
+            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
 
-            const colaboracion = ProyectoService.anotarColaborador(proyecto.id, {
+            const colaboracion = proyectoService.anotarColaborador(proyecto.id, {
                 personaColaboradoraId: persona.id
             });
 
@@ -246,7 +249,7 @@ describe("ProyectoService", () => {
 
         test("lanza un error si el proyecto a anotar no existe", () => {
             const persona = crearPersonaColaboradoraDePrueba();
-            expect(() => ProyectoService.anotarColaborador("id-invalido", {
+            expect(() => proyectoService.anotarColaborador("id-invalido", {
                 personaColaboradoraId: persona.id
             })).toThrow("No se encontró el proyecto con ID 'id-invalido'");
         });
@@ -254,23 +257,23 @@ describe("ProyectoService", () => {
         test("lanza un error si no se pasa colaborador ni ID de colaborador", () => {
             const colectivo = crearColectivoDePrueba();
             const habilidad = crearHabilidadDePrueba();
-            const proyecto = ProyectoService.crearProyecto(datosProyectoDePrueba({
+            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
 
-            expect(() => ProyectoService.anotarColaborador(proyecto.id, {})).toThrow("Debe indicar una persona colaboradora para anotar en el proyecto");
+            expect(() => proyectoService.anotarColaborador(proyecto.id, {})).toThrow("Debe indicar una persona colaboradora para anotar en el proyecto");
         });
 
         test("lanza un error si el personaColaboradoraId no existe", () => {
             const colectivo = crearColectivoDePrueba();
             const habilidad = crearHabilidadDePrueba();
-            const proyecto = ProyectoService.crearProyecto(datosProyectoDePrueba({
+            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
 
-            expect(() => ProyectoService.anotarColaborador(proyecto.id, {
+            expect(() => proyectoService.anotarColaborador(proyecto.id, {
                 personaColaboradoraId: "id-inexistente"
             })).toThrow("No se encontró la persona colaboradora con ID 'id-inexistente'");
         });
@@ -280,12 +283,12 @@ describe("ProyectoService", () => {
             const habilidadProyecto = crearHabilidadDePrueba({ codigo: "rust" });
             const persona = crearPersonaColaboradoraDePrueba({ habilidades: [] });
 
-            const proyecto = ProyectoService.crearProyecto(datosProyectoDePrueba({
+            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidadProyecto]
             }));
 
-            expect(() => ProyectoService.anotarColaborador(proyecto.id, {
+            expect(() => proyectoService.anotarColaborador(proyecto.id, {
                 personaColaboradoraId: persona.id
             })).toThrow("El colaborador no cuenta con las habilidades requeridas para este proyecto");
         });
@@ -295,13 +298,13 @@ describe("ProyectoService", () => {
             const habilidad = crearHabilidadDePrueba();
             const persona = crearPersonaColaboradoraDePrueba({ habilidades: [habilidad] });
 
-            const proyecto = ProyectoService.crearProyecto(datosProyectoDePrueba({
+            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
-            ProyectoService.cerrarProyecto(proyecto.id);
+            proyectoService.cerrarProyecto(proyecto.id);
 
-            expect(() => ProyectoService.anotarColaborador(proyecto.id, {
+            expect(() => proyectoService.anotarColaborador(proyecto.id, {
                 personaColaboradoraId: persona.id
             })).toThrow("No se pueden agregar colaboraciones a un proyecto cerrado");
         });
@@ -312,12 +315,12 @@ describe("ProyectoService", () => {
             const colectivo = crearColectivoDePrueba();
             const habilidad = crearHabilidadDePrueba();
 
-            const proyecto = ProyectoService.crearProyecto(datosProyectoDePrueba({
+            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
 
-            const proyectoCerrado = ProyectoService.cerrarProyecto(proyecto.id);
+            const proyectoCerrado = proyectoService.cerrarProyecto(proyecto.id);
 
             expect(proyectoCerrado.estado).toBe(EstadoProyecto.CERRADO);
             expect(proyectoCerrado.fechaCierre).toBeInstanceOf(Date);
@@ -328,7 +331,7 @@ describe("ProyectoService", () => {
         });
 
         test("lanza un error si se intenta cerrar un proyecto inexistente", () => {
-            expect(() => ProyectoService.cerrarProyecto("id-inexistente")).toThrow("No se encontró el proyecto con ID 'id-inexistente'");
+            expect(() => proyectoService.cerrarProyecto("id-inexistente")).toThrow("No se encontró el proyecto con ID 'id-inexistente'");
         });
     });
 });

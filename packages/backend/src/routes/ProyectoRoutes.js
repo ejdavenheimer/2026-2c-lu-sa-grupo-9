@@ -1,12 +1,18 @@
 import { Router } from "express";
 import { ProyectoController } from "../controllers/ProyectoController.js";
 
+const proyectoController = new ProyectoController();
+
 const router = Router();
 
-router.post("/", ProyectoController.crear);
-router.get("/", ProyectoController.listar);
-router.get("/:id", ProyectoController.obtenerPorId);
-router.post("/:id/colaboraciones", ProyectoController.anotarColaboracion);
-router.patch("/:id/cerrar", ProyectoController.cerrar);
+router.route("/")
+    .get((req, res) => proyectoController.listar(req, res))
+    .post((req, res) => proyectoController.crear(req, res));
+
+router.route("/:id")
+    .get((req, res) => proyectoController.obtenerPorId(req, res));
+
+router.post("/:id/colaboraciones", (req, res) => proyectoController.anotarColaboracion(req, res));
+router.patch("/:id/cerrar", (req, res) => proyectoController.cerrar(req, res));
 
 export default router;
