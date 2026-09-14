@@ -5,18 +5,18 @@ const personaColaboradoraValida = z.object({
     nombreFantasia: z.string().default(null),
     nombre: z.string().default(null),
     apellido: z.string().default(null),
-    pronombres: z.array().default([]),
+    pronombres: z.array(z.string()).default([]),
     presentacion: z.string().default(""),
-    cuentas: z.array().default([]),
-    habilidades: z.array().default([]),
-    colaboraciones: z.array().default([])
-})
+    cuentas: z.array(z.any()).default([]),
+    habilidades: z.array(z.any()).default([]),
+    colaboraciones: z.array(z.any()).default([])
+}).strict();
 
 const habilidadEsquema = z.object({
-    titulo: z.string(),
-    codigo: z.string(),
-    descripcion: z.string()
-})
+    titulo: z.string().default(""),
+    codigo: z.string().default(""),
+    descripcion: z.string().default("")
+}).strict();
 
 export class PersonaColaboradoraController {
 
@@ -30,8 +30,8 @@ export class PersonaColaboradoraController {
 
     obtenerPersonaColaboradoraPorId = (req, res) => {
         try {
-            const { codigo } = req.params;
-            res.status(200).json(this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(codigo))
+            const { id } = req.params;
+            res.status(200).json(this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(id))
         } catch (error) {
             return res.status(404).json({
                 error: error.message
@@ -54,7 +54,7 @@ export class PersonaColaboradoraController {
 
     agregarHabilidad = (req, res) => {
         const habilidadValida = habilidadEsquema.safeParse(req.body)
-        const id = req.params.codigo
+        const id = req.params.id
 
         if (habilidadValida.error) {
             return res.status(400).json(habilidadValida.error.issues)

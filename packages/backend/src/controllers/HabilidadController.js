@@ -5,7 +5,7 @@ const habilidadEsquema = z.object({
     titulo: z.string().min(1, "El título de la habilidad es requerido"),
     codigo: z.string().optional(),
     descripcion: z.string().optional()
-});
+}).strict();
 
 export class HabilidadController {
     static crear(req, res) {

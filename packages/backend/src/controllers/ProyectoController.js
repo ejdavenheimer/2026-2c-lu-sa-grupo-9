@@ -12,22 +12,26 @@ const proyectoEsquema = z.object({
         .min(1, "Debe indicar al menos una modalidad de colaboración"),
     colectivoId: z.string().min(1, "El ID del colectivo es requerido"),
     habilidadesRequeridasCodigos: z.array(z.string()).min(1, "Debe indicar al menos una habilidad requerida")
-});
-
+}).strict();
 
 const anotacionEsquema = z.object({
     personaColaboradoraId: z.string().min(1, "El ID de la persona colaboradora es requerido")
-});
+}).strict();
 
 export class ProyectoController {
-    static crear(req, res) {
+
+    constructor(proyectoService = new ProyectoService()) {
+        this.proyectoService = proyectoService;
+    }
+
+    crear = (req, res) => {
         const parseResult = proyectoEsquema.safeParse(req.body);
         if (!parseResult.success) {
             return res.status(400).json(parseResult.error.issues);
         }
 
         try {
-            const nuevoProyecto = ProyectoService.crearProyecto(parseResult.data);
+            const nuevoProyecto = this.proyectoService.crearProyecto(parseResult.data);
             return res.status(201).json(nuevoProyecto);
         } catch (error) {
             return res.status(400).json({
@@ -36,9 +40,9 @@ export class ProyectoController {
         }
     }
 
-    static listar(req, res) {
+    listar = (req, res) => {
         try {
-            const proyectos = ProyectoService.obtenerProyectos();
+            const proyectos = this.proyectoService.obtenerProyectos();
             return res.status(200).json(proyectos);
         } catch (error) {
             return res.status(500).json({
@@ -47,10 +51,10 @@ export class ProyectoController {
         }
     }
 
-    static obtenerPorId(req, res) {
+    obtenerPorId = (req, res) => {
         try {
             const { id } = req.params;
-            const proyecto = ProyectoService.obtenerProyectoPorId(id);
+            const proyecto = this.proyectoService.obtenerProyectoPorId(id);
             return res.status(200).json(proyecto);
         } catch (error) {
             return res.status(404).json({
@@ -59,7 +63,7 @@ export class ProyectoController {
         }
     }
 
-    static anotarColaboracion(req, res) {
+    anotarColaboracion = (req, res) => {
         const parseResult = anotacionEsquema.safeParse(req.body);
         if (!parseResult.success) {
             return res.status(400).json(parseResult.error.issues);
@@ -68,7 +72,7 @@ export class ProyectoController {
         try {
             const { id } = req.params;
             const { personaColaboradoraId } = parseResult.data;
-            const colaboracion = ProyectoService.anotarColaborador(id, { personaColaboradoraId });
+            const colaboracion = this.proyectoService.anotarColaborador(id, { personaColaboradoraId });
             return res.status(201).json(colaboracion);
         } catch (error) {
             const status = error.message.includes("No se encontró") ? 404 : 400;
@@ -78,10 +82,10 @@ export class ProyectoController {
         }
     }
 
-    static cerrar(req, res) {
+    cerrar = (req, res) => {
         try {
             const { id } = req.params;
-            const proyectoCerrado = ProyectoService.cerrarProyecto(id);
+            const proyectoCerrado = this.proyectoService.cerrarProyecto(id);
             return res.status(200).json({
                 message: "Proyecto cerrado exitosamente",
                 proyecto: proyectoCerrado
@@ -94,4 +98,3 @@ export class ProyectoController {
         }
     }
 }
-

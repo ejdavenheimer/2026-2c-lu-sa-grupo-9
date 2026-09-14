@@ -35,6 +35,24 @@ export class Colectivo {
         proyectoExistente.cerrarProyecto();
     }
 
-
-
+    toJSON() {
+        return {
+            id: this.id,
+            nombre: this.nombre,
+            descripcion: this.descripcion,
+            tipo: this.tipo,
+            ubicacion: this.ubicacion,
+            proyectos: this.proyectos.map((p) => ({
+                id: p.id,
+                titulo: p.titulo,
+                descripcion: p.descripcion,
+                estado: p.estado,
+                unidadCompromiso: p.unidadCompromiso,
+                cantidadHoras: p.cantidadHoras,
+                modalidadesColaboracion: p.modalidadesColaboracion,
+                fechaAlta: p.fechaAlta,
+                fechaCierre: p.fechaCierre
+            }))
+        };
+    }
 }

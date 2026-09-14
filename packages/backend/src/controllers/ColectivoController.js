@@ -5,7 +5,7 @@ const ubicacionEsquema = z.object({
     pais: z.string(),
     provincia: z.string().optional(),
     ciudad: z.string().optional()
-})
+}).strict()
 
 const colectivoEsquema = z.object({
     nombre: z.string(),
@@ -25,7 +25,7 @@ export class ColectivoController {
     }
 
     obtenerPorCodigo = (req, res) => {
-        const id = req.params.codigo;
+        const id = req.params.id;
         try{
             const colectivo = this.colectivoService.obtenerColectivoPorId(id);
             res.status(200).json(colectivo)
