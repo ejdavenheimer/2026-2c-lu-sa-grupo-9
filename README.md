@@ -88,3 +88,11 @@ Para iniciar el backend en modo `dev` y el frontend simultáneamente, usá:
 ```bash
 npm run start:dev
 ```
+
+## 📚 Documentación y Entregables
+
+* 📖 **[Documentación de la API REST](docs/API.md)**: Especificación detallada de endpoints, parámetros, modelos de datos JSON y códigos de estado HTTP.
+* ⚡ **Swagger UI (Interactivo)**: Al levantar el backend, se encuentra disponible en [`http://localhost:3001/api-docs`](http://localhost:3001/api-docs).
+* 🔀 **[Guía de Git Flow](docs/GIT_FLOW.md)**: Estructura de ramas, convenciones de commits y flujo de Pull Requests del equipo.
+* 📐 **Diagrama de Clases**: Ubicado en [`designs/diagrama-clases.puml`](designs/diagrama-clases.puml).
+

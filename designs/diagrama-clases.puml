@@ -65,6 +65,7 @@ class Proyecto {
     agregarColaboracion(PersonaColaboradora) 
 '   se instancia la colaboracion y se pasa por parametro la persona colaboradora
     validarColaborador(PersonaColaboradora)
+    cerrarProyecto()
 }
 
 class Colaboracion {
