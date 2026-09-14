@@ -45,5 +45,28 @@ export class PersonaColaboradora {
         }
         this.colaboraciones.push(colaboracion);
     }
+
+    toJSON() {
+        return {
+            id: this.id,
+            nombreFantasia: this.nombreFantasia,
+            nombre: this.nombre,
+            apellido: this.apellido,
+            pronombres: this.pronombres,
+            presentacion: this.presentacion,
+            cuentas: this.cuentas,
+            habilidades: this.habilidades,
+            colaboraciones: this.colaboraciones.map((c) => ({
+                id: c.id,
+                fechaInscripcion: c.fechaInscripcion,
+                proyecto: c.proyecto ? {
+                    id: c.proyecto.id,
+                    titulo: c.proyecto.titulo,
+                    descripcion: c.proyecto.descripcion,
+                    estado: c.proyecto.estado
+                } : null
+            }))
+        };
+    }
 }
 

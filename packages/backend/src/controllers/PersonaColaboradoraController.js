@@ -5,18 +5,18 @@ const personaColaboradoraValida = z.object({
     nombreFantasia: z.string().default(null),
     nombre: z.string().default(null),
     apellido: z.string().default(null),
-    pronombres: z.array().default([]),
+    pronombres: z.array(z.string()).default([]),
     presentacion: z.string().default(""),
-    cuentas: z.array().default([]),
-    habilidades: z.array().default([]),
-    colaboraciones: z.array().default([])
-}.strict())
+    cuentas: z.array(z.any()).default([]),
+    habilidades: z.array(z.any()).default([]),
+    colaboraciones: z.array(z.any()).default([])
+}).strict();
 
 const habilidadEsquema = z.object({
     titulo: z.string().default(""),
     codigo: z.string().default(""),
     descripcion: z.string().default("")
-}.strict())
+}).strict();
 
 export class PersonaColaboradoraController {
 

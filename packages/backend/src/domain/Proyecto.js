@@ -66,6 +66,38 @@ export class Proyecto {
         this.fechaCierre = new Date();
         this.estado = EstadoProyecto.CERRADO;
     }
+
+    toJSON() {
+        return {
+            id: this.id,
+            titulo: this.titulo,
+            descripcion: this.descripcion,
+            unidadCompromiso: this.unidadCompromiso,
+            cantidadHoras: this.cantidadHoras,
+            modalidadesColaboracion: this.modalidadesColaboracion,
+            estado: this.estado,
+            fechaAlta: this.fechaAlta,
+            fechaCierre: this.fechaCierre,
+            colectivo: this.colectivo ? {
+                id: this.colectivo.id,
+                nombre: this.colectivo.nombre,
+                descripcion: this.colectivo.descripcion,
+                tipo: this.colectivo.tipo,
+                ubicacion: this.colectivo.ubicacion
+            } : null,
+            habilidadesRequeridas: this.habilidadesRequeridas,
+            colaboraciones: this.colaboraciones.map((c) => ({
+                id: c.id,
+                fechaInscripcion: c.fechaInscripcion,
+                personaColaboradora: c.personaColaboradora ? {
+                    id: c.personaColaboradora.id,
+                    nombreFantasia: c.personaColaboradora.nombreFantasia,
+                    nombre: c.personaColaboradora.nombre,
+                    apellido: c.personaColaboradora.apellido
+                } : null
+            }))
+        };
+    }
 }
 
 
