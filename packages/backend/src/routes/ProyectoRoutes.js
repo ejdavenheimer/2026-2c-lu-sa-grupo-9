@@ -10,9 +10,9 @@ router.route("/")
     .post((req, res) => proyectoController.crear(req, res));
 
 router.route("/:id")
-    .get((req, res) => proyectoController.obtenerPorId(req, res));
+    .get((req, res) => proyectoController.obtenerPorId(req, res))
+    .patch((req, res) => proyectoController.actualizar(req, res));
 
 router.post("/:id/colaboraciones", (req, res) => proyectoController.anotarColaboracion(req, res));
-router.patch("/:id/cerrar", (req, res) => proyectoController.cerrar(req, res));
 
 export default router;

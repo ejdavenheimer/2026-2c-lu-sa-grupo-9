@@ -243,6 +243,60 @@ export const swaggerDocument = {
             description: "Proyecto no encontrado"
           }
         }
+      },
+      patch: {
+        tags: ["Proyectos"],
+        summary: "Actualización parcial de un proyecto (cierre)",
+        description: "Permite actualizar el estado de un proyecto (ej. CERRADO para cierre manual). Marca el proyecto como CERRADO y establece su fecha de cierre. No se admitirán nuevas colaboraciones.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID del proyecto",
+            schema: {
+              type: "string",
+              example: "proy-1"
+            }
+          }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["estado"],
+                properties: {
+                  estado: {
+                    type: "string",
+                    enum: ["CERRADO"],
+                    example: "CERRADO",
+                    description: "Nuevo estado del proyecto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          "200": {
+            description: "Proyecto actualizado exitosamente",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Proyecto"
+                }
+              }
+            }
+          },
+          "400": {
+            description: "Petición inválida o error al actualizar el proyecto"
+          },
+          "404": {
+            description: "Proyecto no encontrado"
+          }
+        }
       }
     },
     "/proyectos/{id}/colaboraciones": {
@@ -296,40 +350,6 @@ export const swaggerDocument = {
           },
           "404": {
             description: "Proyecto o persona colaboradora no encontrada"
-          }
-        }
-      }
-    },
-    "/proyectos/{id}/cerrar": {
-      patch: {
-        tags: ["Proyectos"],
-        summary: "Cierre manual de un proyecto",
-        description: "Marca el proyecto como CERRADO y establece su fecha de cierre. No se admitirán nuevas colaboraciones.",
-        parameters: [
-          {
-            name: "id",
-            in: "path",
-            required: true,
-            description: "ID del proyecto",
-            schema: {
-              type: "string",
-              example: "proy-1"
-            }
-          }
-        ],
-        responses: {
-          "200": {
-            description: "Proyecto cerrado exitosamente",
-            content: {
-              "application/json": {
-                schema: {
-                  $ref: "#/components/schemas/Proyecto"
-                }
-              }
-            }
-          },
-          "404": {
-            description: "Proyecto no encontrado"
           }
         }
       }

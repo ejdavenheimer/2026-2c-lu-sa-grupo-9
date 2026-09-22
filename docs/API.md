@@ -24,7 +24,7 @@ Esta es la especificación y guía de uso de la **API REST** de *Código a Volun
 | | `POST` | `/api/proyectos` | Publicar un nuevo proyecto asociado a un colectivo |
 | | `GET` | `/api/proyectos/:id` | Obtener el detalle de un proyecto |
 | | `POST` | `/api/proyectos/:id/colaboraciones` | Anotar a una persona colaboradora en un proyecto |
-| | `PATCH` | `/api/proyectos/:id/cerrar` | Cierre manual de un proyecto publicado |
+| | `PATCH` | `/api/proyectos/:id` | Actualización parcial del proyecto (cierre manual) |
 | **Personas Colaboradoras** | `GET` | `/api/personas-colaboradoras` | Listar todas las personas colaboradoras |
 | | `POST` | `/api/personas-colaboradoras` | Registrar una nueva persona colaboradora |
 | | `GET` | `/api/personas-colaboradoras/:id` | Obtener el perfil de un colaborador por ID |
@@ -266,20 +266,41 @@ Anota a una persona colaboradora en un proyecto (estableciendo una colaboración
 
 ---
 
-### `PATCH /api/proyectos/:id/cerrar`
-Cierra manualmente un proyecto. A partir de este momento, se establece la `fechaCierre`, el estado cambia a `CERRADO` y se rechaza cualquier nuevo intento de colaboración.
+### `PATCH /api/proyectos/:id`
+Actualización parcial de un proyecto. Permite realizar el cierre manual del proyecto modificando su `estado` a `CERRADO`. A partir de este momento, se establece la `fechaCierre`, el estado cambia a `CERRADO` y se rechaza cualquier nuevo intento de colaboración.
 
 * **Parámetros de Ruta:** `id` (string, ej. `proy-1`).
+* **Cuerpo de la Petición:**
+```json
+{
+  "estado": "CERRADO"
+}
+```
 * **Respuesta Exitosa (`200 OK`):**
 ```json
 {
   "id": "proy-1",
   "titulo": "Portal Web Comunitario",
+  "descripcion": "Plataforma de difusión para actividades del barrio.",
+  "unidadCompromiso": "HORAS_SEMANALES",
+  "cantidadHoras": 10,
+  "modalidadesColaboracion": ["GRATUITA"],
   "estado": "CERRADO",
-  "fechaCierre": "2026-09-14T11:00:00.000Z"
+  "fechaAlta": "2026-09-14T10:00:00.000Z",
+  "fechaCierre": "2026-09-14T11:00:00.000Z",
+  "habilidadesRequeridas": [
+    {
+      "titulo": "Desarrollo Web React",
+      "codigo": "desarrollo_web_react",
+      "descripcion": "Frontend React"
+    }
+  ],
+  "colaboraciones": []
 }
 ```
-* **Respuesta de Error (`404 Not Found`):** Si el proyecto no existe.
+* **Respuestas de Error:**
+  * `400 Bad Request`: Si el estado enviado no es válido o el formato es incorrecto.
+  * `404 Not Found`: Si el proyecto no existe.
 
 ---
 

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { ProyectoService } from "../services/ProyectoService.js";
-import { UnidadCompromiso, ModalidadColaboracion } from "../domain/enums.js";
+import { UnidadCompromiso, ModalidadColaboracion, EstadoProyecto } from "../domain/enums.js";
 
 const proyectoEsquema = z.object({
     titulo: z.string().min(1, "El título es requerido"),
@@ -16,6 +16,10 @@ const proyectoEsquema = z.object({
 
 const anotacionEsquema = z.object({
     personaColaboradoraId: z.string().min(1, "El ID de la persona colaboradora es requerido")
+}).strict();
+
+const actualizacionProyectoEsquema = z.object({
+    estado: z.enum([EstadoProyecto.CERRADO])
 }).strict();
 
 export class ProyectoController {
@@ -82,14 +86,33 @@ export class ProyectoController {
         }
     }
 
+    actualizar = (req, res) => {
+        const parseResult = actualizacionProyectoEsquema.safeParse(req.body);
+        if (!parseResult.success) {
+            return res.status(400).json(parseResult.error.issues);
+        }
+
+        try {
+            const { id } = req.params;
+            const { estado } = parseResult.data;
+
+            if (estado === EstadoProyecto.CERRADO) {
+                const proyectoCerrado = this.proyectoService.cerrarProyecto(id);
+                return res.status(200).json(proyectoCerrado);
+            }
+        } catch (error) {
+            const status = error.message.includes("No se encontró") ? 404 : 400;
+            return res.status(status).json({
+                error: error.message
+            });
+        }
+    }
+
     cerrar = (req, res) => {
         try {
             const { id } = req.params;
             const proyectoCerrado = this.proyectoService.cerrarProyecto(id);
-            return res.status(200).json({
-                message: "Proyecto cerrado exitosamente",
-                proyecto: proyectoCerrado
-            });
+            return res.status(200).json(proyectoCerrado);
         } catch (error) {
             const status = error.message.includes("No se encontró") ? 404 : 400;
             return res.status(status).json({
