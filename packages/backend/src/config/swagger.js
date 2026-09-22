@@ -32,6 +32,10 @@ export const swaggerDocument = {
     {
       name: "Habilidades",
       description: "Gestión y catálogo de habilidades requeridas"
+    },
+    {
+      name: "Ubicaciones",
+      description: "Servicio geográfico para consulta de provincias y países (API Georef)"
     }
   ],
   paths: {
@@ -579,6 +583,61 @@ export const swaggerDocument = {
           }
         }
       }
+    },
+    "/ubicaciones/provincias": {
+      get: {
+        tags: ["Ubicaciones"],
+        summary: "Listar provincias disponibles",
+        description: "Obtiene el listado de provincias y CABA consultando la API oficial de Georef.",
+        responses: {
+          "200": {
+            description: "Lista de provincias",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      id: { type: "string", example: "06" },
+                      nombre: { type: "string", example: "Buenos Aires" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            description: "Error al consultar el servicio geográfico"
+          }
+        }
+      }
+    },
+    "/ubicaciones/paises": {
+      get: {
+        tags: ["Ubicaciones"],
+        summary: "Listar países disponibles",
+        description: "Obtiene el catálogo de países habilitados en la plataforma.",
+        responses: {
+          "200": {
+            description: "Lista de países",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      id: { type: "string", example: "AR" },
+                      nombre: { type: "string", example: "Argentina" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   components: {
@@ -890,12 +949,28 @@ export const swaggerDocument = {
         type: "object",
         properties: {
           pais: {
-            type: "string",
-            example: "Argentina"
+            oneOf: [
+              { type: "string", example: "Argentina" },
+              {
+                type: "object",
+                properties: {
+                  id: { type: "string", example: "AR" },
+                  nombre: { type: "string", example: "Argentina" }
+                }
+              }
+            ]
           },
           provincia: {
-            type: "string",
-            example: "Buenos Aires"
+            oneOf: [
+              { type: "string", example: "Buenos Aires" },
+              {
+                type: "object",
+                properties: {
+                  id: { type: "string", example: "06" },
+                  nombre: { type: "string", example: "Buenos Aires" }
+                }
+              }
+            ]
           },
           ciudad: {
             type: "string",

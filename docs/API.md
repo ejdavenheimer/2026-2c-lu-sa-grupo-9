@@ -32,6 +32,8 @@ Esta es la especificación y guía de uso de la **API REST** de *Código a Volun
 | **Habilidades** | `GET` | `/api/habilidades` | Listar catálogo de habilidades disponibles |
 | | `POST` | `/api/habilidades` | Registrar una nueva habilidad en el catálogo |
 | | `GET` | `/api/habilidades/:codigo` | Obtener información de una habilidad por su código |
+| **Ubicaciones** | `GET` | `/api/ubicaciones/provincias` | Listar provincias y CABA (vía API Georef) |
+| | `GET` | `/api/ubicaciones/paises` | Listar catálogo de países disponibles |
 
 ---
 
@@ -454,3 +456,48 @@ Obtiene una habilidad específica por su código.
 * **Parámetros de Ruta:** `codigo` (string, ej. `desarrollo_web_react`).
 * **Respuesta Exitosa (`200 OK`):** Objeto `Habilidad`.
 * **Respuesta de Error (`404 Not Found`):** Si el código no existe en el catálogo.
+
+---
+
+## 🌍 6. Ubicaciones (Servicio Geográfico - Georef)
+
+### `GET /api/ubicaciones/provincias`
+Consulta la API pública oficial de Georef (o catálogo de contingencia) y devuelve el listado de las 23 provincias argentinas y CABA ordenadas alfabéticamente.
+
+* **Respuesta Exitosa (`200 OK`):**
+```json
+[
+  {
+    "id": "06",
+    "nombre": "Buenos Aires"
+  },
+  {
+    "id": "02",
+    "nombre": "Ciudad Autónoma de Buenos Aires"
+  },
+  {
+    "id": "14",
+    "nombre": "Córdoba"
+  }
+]
+```
+
+---
+
+### `GET /api/ubicaciones/paises`
+Devuelve el listado de países habilitados en la plataforma con sus identificadores y nombres oficiales.
+
+* **Respuesta Exitosa (`200 OK`):**
+```json
+[
+  {
+    "id": "AR",
+    "nombre": "Argentina"
+  },
+  {
+    "id": "UY",
+    "nombre": "Uruguay"
+  }
+]
+```
+
