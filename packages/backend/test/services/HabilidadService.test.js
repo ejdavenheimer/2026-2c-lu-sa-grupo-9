@@ -87,4 +87,26 @@ describe("HabilidadService", () => {
     test("obtenerHabilidadPorCodigo lanza un error si no existe", () => {
         expect(() => HabilidadService.obtenerHabilidadPorCodigo("codigo-inexistente")).toThrow("No se encontró la habilidad con el código");
     });
+
+    test("actualizarHabilidad modifica el título y la descripción", () => {
+        const datos = datosHabilidadDePrueba();
+        HabilidadService.crearHabilidad(datos);
+
+        const actualizada = HabilidadService.actualizarHabilidad(datos.codigo, {
+            titulo: "Nuevo Titulo",
+            descripcion: "Nueva desc"
+        });
+
+        expect(actualizada.titulo).toBe("Nuevo Titulo");
+        expect(actualizada.descripcion).toBe("Nueva desc");
+    });
+
+    test("eliminarHabilidad remueve la habilidad existente", () => {
+        const datos = datosHabilidadDePrueba();
+        HabilidadService.crearHabilidad(datos);
+
+        const eliminada = HabilidadService.eliminarHabilidad(datos.codigo);
+        expect(eliminada).toBe(true);
+        expect(() => HabilidadService.obtenerHabilidadPorCodigo(datos.codigo)).toThrow();
+    });
 });

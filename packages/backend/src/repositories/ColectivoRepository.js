@@ -31,6 +31,15 @@ export class ColectivoRepository {
         return this.#colectivos.find((c) => c.id === id) || null;
     }
 
+    static eliminarPorId(id) {
+        const index = this.#colectivos.findIndex((c) => c.id === id);
+        if (index === -1) {
+            return false;
+        }
+        this.#colectivos.splice(index, 1);
+        return true;
+    }
+
     static limpiar() {
         this.#colectivos = [];
         this.#nextId = 1;

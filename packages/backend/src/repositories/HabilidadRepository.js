@@ -18,6 +18,24 @@ export class HabilidadRepository {
         return this.#habilidades.find((h) => h.codigo === codigo) || null;
     }
 
+    static actualizar(codigo, habilidadActualizada) {
+        const index = this.#habilidades.findIndex((h) => h.codigo === codigo);
+        if (index === -1) {
+            throw new Error(`No se encontró la habilidad con el código '${codigo}'`);
+        }
+        this.#habilidades[index] = habilidadActualizada;
+        return habilidadActualizada;
+    }
+
+    static eliminarPorCodigo(codigo) {
+        const index = this.#habilidades.findIndex((h) => h.codigo === codigo);
+        if (index === -1) {
+            return false;
+        }
+        this.#habilidades.splice(index, 1);
+        return true;
+    }
+
     static limpiar() {
         this.#habilidades = [];
     }

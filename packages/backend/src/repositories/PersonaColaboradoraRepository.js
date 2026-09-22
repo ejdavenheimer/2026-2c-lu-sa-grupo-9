@@ -35,6 +35,15 @@ export class PersonaColaboradoraRepository {
         return this.#colaboradores.find((c) => c.id === id) || null;
     }
 
+    static eliminarPorId(id) {
+        const index = this.#colaboradores.findIndex((c) => c.id === id);
+        if (index === -1) {
+            return false;
+        }
+        this.#colaboradores.splice(index, 1);
+        return true;
+    }
+
     static limpiar() {
         this.#colaboradores = [];
         this.#nextId = 1;

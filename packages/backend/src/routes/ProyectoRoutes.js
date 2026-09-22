@@ -11,7 +11,9 @@ router.route("/")
 
 router.route("/:id")
     .get((req, res) => proyectoController.obtenerPorId(req, res))
-    .patch((req, res) => proyectoController.actualizar(req, res));
+    .put((req, res) => proyectoController.modificar(req, res))
+    .patch((req, res) => proyectoController.actualizar(req, res))
+    .delete((req, res) => proyectoController.eliminar(req, res));
 
 router.post("/:id/colaboraciones", (req, res) => proyectoController.anotarColaboracion(req, res));
 

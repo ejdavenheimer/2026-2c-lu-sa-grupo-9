@@ -155,6 +155,76 @@ export const swaggerDocument = {
             description: "Colectivo no encontrado"
           }
         }
+      },
+      put: {
+        tags: ["Colectivos"],
+        summary: "Actualizar un colectivo existente",
+        description: "Modifica los atributos de un colectivo registrado.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID del colectivo",
+            schema: {
+              type: "string",
+              example: "col-1"
+            }
+          }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ColectivoInput"
+              }
+            }
+          }
+        },
+        responses: {
+          "200": {
+            description: "Colectivo actualizado",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Colectivo"
+                }
+              }
+            }
+          },
+          "400": {
+            description: "Datos inválidos"
+          },
+          "404": {
+            description: "Colectivo no encontrado"
+          }
+        }
+      },
+      delete: {
+        tags: ["Colectivos"],
+        summary: "Eliminar un colectivo",
+        description: "Borra un colectivo del sistema.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID del colectivo",
+            schema: {
+              type: "string",
+              example: "col-1"
+            }
+          }
+        ],
+        responses: {
+          "204": {
+            description: "Colectivo eliminado exitosamente"
+          },
+          "404": {
+            description: "Colectivo no encontrado"
+          }
+        }
       }
     },
     "/proyectos": {
@@ -296,6 +366,81 @@ export const swaggerDocument = {
           },
           "400": {
             description: "Petición inválida o error al actualizar el proyecto"
+          },
+          "404": {
+            description: "Proyecto no encontrado"
+          }
+        }
+      },
+      put: {
+        tags: ["Proyectos"],
+        summary: "Modificar datos de un proyecto",
+        description: "Actualiza los datos generales de un proyecto.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID del proyecto",
+            schema: {
+              type: "string",
+              example: "proy-1"
+            }
+          }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  titulo: { type: "string", example: "Portal Web V2" },
+                  descripcion: { type: "string", example: "Nueva descripcion" },
+                  cantidadHoras: { type: "number", example: 15 }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          "200": {
+            description: "Proyecto modificado exitosamente",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Proyecto"
+                }
+              }
+            }
+          },
+          "400": {
+            description: "Datos inválidos"
+          },
+          "404": {
+            description: "Proyecto no encontrado"
+          }
+        }
+      },
+      delete: {
+        tags: ["Proyectos"],
+        summary: "Eliminar un proyecto",
+        description: "Borra un proyecto del sistema.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID del proyecto",
+            schema: {
+              type: "string",
+              example: "proy-1"
+            }
+          }
+        ],
+        responses: {
+          "204": {
+            description: "Proyecto eliminado exitosamente"
           },
           "404": {
             description: "Proyecto no encontrado"
@@ -446,6 +591,76 @@ export const swaggerDocument = {
             description: "Persona colaboradora no encontrada"
           }
         }
+      },
+      put: {
+        tags: ["Personas Colaboradoras"],
+        summary: "Actualizar datos de una persona colaboradora",
+        description: "Modifica los atributos del perfil de un colaborador.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID de la persona colaboradora",
+            schema: {
+              type: "string",
+              example: "colab-1"
+            }
+          }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/PersonaColaboradoraInput"
+              }
+            }
+          }
+        },
+        responses: {
+          "200": {
+            description: "Persona colaboradora actualizada",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/PersonaColaboradora"
+                }
+              }
+            }
+          },
+          "400": {
+            description: "Datos inválidos"
+          },
+          "404": {
+            description: "Persona colaboradora no encontrada"
+          }
+        }
+      },
+      delete: {
+        tags: ["Personas Colaboradoras"],
+        summary: "Eliminar una persona colaboradora",
+        description: "Borra el registro de una persona colaboradora del sistema.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID de la persona colaboradora",
+            schema: {
+              type: "string",
+              example: "colab-1"
+            }
+          }
+        ],
+        responses: {
+          "204": {
+            description: "Persona colaboradora eliminada exitosamente"
+          },
+          "404": {
+            description: "Persona colaboradora no encontrada"
+          }
+        }
       }
     },
     "/personas-colaboradoras/{id}/habilidades": {
@@ -577,6 +792,80 @@ export const swaggerDocument = {
                 }
               }
             }
+          },
+          "404": {
+            description: "Habilidad no encontrada"
+          }
+        }
+      },
+      put: {
+        tags: ["Habilidades"],
+        summary: "Actualizar una habilidad",
+        description: "Modifica el título o descripción de una habilidad registrada.",
+        parameters: [
+          {
+            name: "codigo",
+            in: "path",
+            required: true,
+            description: "Código único de la habilidad",
+            schema: {
+              type: "string",
+              example: "desarrollo_web_react"
+            }
+          }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  titulo: { type: "string", example: "Desarrollo Web React Avanzado" },
+                  descripcion: { type: "string", example: "Nueva descripcion" }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          "200": {
+            description: "Habilidad actualizada",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Habilidad"
+                }
+              }
+            }
+          },
+          "400": {
+            description: "Datos inválidos"
+          },
+          "404": {
+            description: "Habilidad no encontrada"
+          }
+        }
+      },
+      delete: {
+        tags: ["Habilidades"],
+        summary: "Eliminar una habilidad",
+        description: "Borra una habilidad del catálogo.",
+        parameters: [
+          {
+            name: "codigo",
+            in: "path",
+            required: true,
+            description: "Código único de la habilidad",
+            schema: {
+              type: "string",
+              example: "desarrollo_web_react"
+            }
+          }
+        ],
+        responses: {
+          "204": {
+            description: "Habilidad eliminada exitosamente"
           },
           "404": {
             description: "Habilidad no encontrada"

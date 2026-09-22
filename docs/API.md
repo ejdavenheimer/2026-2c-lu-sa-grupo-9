@@ -20,18 +20,26 @@ Esta es la especificación y guía de uso de la **API REST** de *Código a Volun
 | **Colectivos** | `GET` | `/api/colectivos` | Listar todos los colectivos registrados |
 | | `POST` | `/api/colectivos` | Crear un nuevo colectivo/organización |
 | | `GET` | `/api/colectivos/:id` | Obtener información de un colectivo por su ID |
+| | `PUT` | `/api/colectivos/:id` | Actualizar los datos de un colectivo |
+| | `DELETE` | `/api/colectivos/:id` | Eliminar un colectivo registrado |
 | **Proyectos** | `GET` | `/api/proyectos` | Listar todos los proyectos cargados |
 | | `POST` | `/api/proyectos` | Publicar un nuevo proyecto asociado a un colectivo |
 | | `GET` | `/api/proyectos/:id` | Obtener el detalle de un proyecto |
-| | `POST` | `/api/proyectos/:id/colaboraciones` | Anotar a una persona colaboradora en un proyecto |
+| | `PUT` | `/api/proyectos/:id` | Modificar los datos de un proyecto |
 | | `PATCH` | `/api/proyectos/:id` | Actualización parcial del proyecto (cierre manual) |
+| | `DELETE` | `/api/proyectos/:id` | Eliminar un proyecto registrado |
+| | `POST` | `/api/proyectos/:id/colaboraciones` | Anotar a una persona colaboradora en un proyecto |
 | **Personas Colaboradoras** | `GET` | `/api/personas-colaboradoras` | Listar todas las personas colaboradoras |
 | | `POST` | `/api/personas-colaboradoras` | Registrar una nueva persona colaboradora |
 | | `GET` | `/api/personas-colaboradoras/:id` | Obtener el perfil de un colaborador por ID |
+| | `PUT` | `/api/personas-colaboradoras/:id` | Actualizar los datos de un colaborador |
+| | `DELETE` | `/api/personas-colaboradoras/:id` | Eliminar una persona colaboradora |
 | | `POST` | `/api/personas-colaboradoras/:id/habilidades` | Asignar una habilidad al perfil de un colaborador |
 | **Habilidades** | `GET` | `/api/habilidades` | Listar catálogo de habilidades disponibles |
 | | `POST` | `/api/habilidades` | Registrar una nueva habilidad en el catálogo |
 | | `GET` | `/api/habilidades/:codigo` | Obtener información de una habilidad por su código |
+| | `PUT` | `/api/habilidades/:codigo` | Actualizar una habilidad existente |
+| | `DELETE` | `/api/habilidades/:codigo` | Eliminar una habilidad del catálogo |
 | **Ubicaciones** | `GET` | `/api/ubicaciones/provincias` | Listar provincias y CABA (vía API Georef) |
 | | `GET` | `/api/ubicaciones/paises` | Listar catálogo de países disponibles |
 
@@ -135,6 +143,34 @@ Obtiene un colectivo por su ID.
 }
 ```
 * **Respuesta de Error (`404 Not Found`):** Si no existe el colectivo con el ID solicitado.
+
+---
+
+### `PUT /api/colectivos/:id`
+Actualiza los datos de un colectivo existente.
+
+* **Parámetros de Ruta:** `id` (string, ej. `col-1`).
+* **Cuerpo de la Petición:**
+```json
+{
+  "descripcion": "Nueva descripción de la organización.",
+  "tipo": "FUNDACION"
+}
+```
+* **Respuesta Exitosa (`200 OK`):** Objeto `Colectivo` actualizado.
+* **Respuestas de Error:**
+  * `400 Bad Request`: Si los datos son inválidos.
+  * `404 Not Found`: Si el colectivo no existe.
+  * `409 Conflict`: Si el nuevo nombre ya está en uso por otro colectivo.
+
+---
+
+### `DELETE /api/colectivos/:id`
+Elimina un colectivo del sistema.
+
+* **Parámetros de Ruta:** `id` (string, ej. `col-1`).
+* **Respuesta Exitosa (`204 No Content`):** Sin cuerpo.
+* **Respuesta de Error (`404 Not Found`):** Si el colectivo no existe.
 
 ---
 
@@ -306,6 +342,33 @@ Actualización parcial de un proyecto. Permite realizar el cierre manual del pro
 
 ---
 
+### `PUT /api/proyectos/:id`
+Modifica los datos generales de un proyecto publicado.
+
+* **Parámetros de Ruta:** `id` (string, ej. `proy-1`).
+* **Cuerpo de la Petición:**
+```json
+{
+  "titulo": "Portal Web Comunitario V2",
+  "cantidadHoras": 15
+}
+```
+* **Respuesta Exitosa (`200 OK`):** Objeto `Proyecto` actualizado.
+* **Respuestas de Error:**
+  * `400 Bad Request`: Datos de actualización inválidos.
+  * `404 Not Found`: Si el proyecto no existe.
+
+---
+
+### `DELETE /api/proyectos/:id`
+Elimina un proyecto del sistema.
+
+* **Parámetros de Ruta:** `id` (string, ej. `proy-1`).
+* **Respuesta Exitosa (`204 No Content`):** Sin cuerpo.
+* **Respuesta de Error (`404 Not Found`):** Si el proyecto no existe.
+
+---
+
 ## 👩‍💻 4. Personas Colaboradoras
 
 ### `GET /api/personas-colaboradoras`
@@ -402,6 +465,33 @@ Asocia una habilidad al perfil de la persona colaboradora.
 
 ---
 
+### `PUT /api/personas-colaboradoras/:id`
+Actualiza la información de perfil de una persona colaboradora.
+
+* **Parámetros de Ruta:** `id` (string, ej. `colab-1`).
+* **Cuerpo de la Petición:**
+```json
+{
+  "presentacion": "Perfil actualizado con experiencia en Node y React.",
+  "nombreFantasia": "DevSenior"
+}
+```
+* **Respuesta Exitosa (`200 OK`):** Objeto `PersonaColaboradora` actualizado.
+* **Respuestas de Error:**
+  * `400 Bad Request`: Datos inválidos.
+  * `404 Not Found`: Si la persona colaboradora no existe.
+
+---
+
+### `DELETE /api/personas-colaboradoras/:id`
+Elimina el registro de una persona colaboradora.
+
+* **Parámetros de Ruta:** `id` (string, ej. `colab-1`).
+* **Respuesta Exitosa (`204 No Content`):** Sin cuerpo.
+* **Respuesta de Error (`404 Not Found`):** Si no existe.
+
+---
+
 ## 🛠️ 5. Habilidades
 
 ### `GET /api/habilidades`
@@ -456,6 +546,33 @@ Obtiene una habilidad específica por su código.
 * **Parámetros de Ruta:** `codigo` (string, ej. `desarrollo_web_react`).
 * **Respuesta Exitosa (`200 OK`):** Objeto `Habilidad`.
 * **Respuesta de Error (`404 Not Found`):** Si el código no existe en el catálogo.
+
+---
+
+### `PUT /api/habilidades/:codigo`
+Actualiza el título o descripción de una habilidad existente.
+
+* **Parámetros de Ruta:** `codigo` (string, ej. `desarrollo_web_react`).
+* **Cuerpo de la Petición:**
+```json
+{
+  "titulo": "Desarrollo Web React Avanzado",
+  "descripcion": "Interfaces web con React, Redux y Next."
+}
+```
+* **Respuesta Exitosa (`200 OK`):** Objeto `Habilidad` actualizado.
+* **Respuestas de Error:**
+  * `400 Bad Request`: Datos inválidos.
+  * `404 Not Found`: Si la habilidad no existe.
+
+---
+
+### `DELETE /api/habilidades/:codigo`
+Elimina una habilidad del catálogo general.
+
+* **Parámetros de Ruta:** `codigo` (string, ej. `desarrollo_web_react`).
+* **Respuesta Exitosa (`204 No Content`):** Sin cuerpo.
+* **Respuesta de Error (`404 Not Found`):** Si la habilidad no existe.
 
 ---
 

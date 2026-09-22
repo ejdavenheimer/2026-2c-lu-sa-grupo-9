@@ -7,6 +7,11 @@ const habilidadEsquema = z.object({
     descripcion: z.string().optional()
 }).strict();
 
+const actualizacionHabilidadEsquema = z.object({
+    titulo: z.string().min(1, "El título no puede estar vacío").optional(),
+    descripcion: z.string().optional()
+}).strict();
+
 export class HabilidadController {
     static crear(req, res) {
         const parseResult = habilidadEsquema.safeParse(req.body);
@@ -40,6 +45,35 @@ export class HabilidadController {
             const { codigo } = req.params;
             const habilidad = HabilidadService.obtenerHabilidadPorCodigo(codigo);
             return res.status(200).json(habilidad);
+        } catch (error) {
+            return res.status(404).json({
+                error: error.message
+            });
+        }
+    }
+
+    static actualizar(req, res) {
+        const { codigo } = req.params;
+        const parseResult = actualizacionHabilidadEsquema.safeParse(req.body);
+        if (!parseResult.success) {
+            return res.status(400).json(parseResult.error.issues);
+        }
+
+        try {
+            const habilidadActualizada = HabilidadService.actualizarHabilidad(codigo, parseResult.data);
+            return res.status(200).json(habilidadActualizada);
+        } catch (error) {
+            return res.status(404).json({
+                error: error.message
+            });
+        }
+    }
+
+    static eliminar(req, res) {
+        const { codigo } = req.params;
+        try {
+            HabilidadService.eliminarHabilidad(codigo);
+            return res.status(204).send();
         } catch (error) {
             return res.status(404).json({
                 error: error.message

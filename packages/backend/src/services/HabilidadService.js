@@ -33,4 +33,20 @@ export class HabilidadService {
         }
         return habilidad;
     }
+
+    static actualizarHabilidad(codigo, { titulo, descripcion }) {
+        const habilidad = this.obtenerHabilidadPorCodigo(codigo);
+        if (titulo) {
+            habilidad.titulo = titulo.trim();
+        }
+        if (descripcion !== undefined) {
+            habilidad.descripcion = descripcion.trim();
+        }
+        return HabilidadRepository.actualizar(codigo, habilidad);
+    }
+
+    static eliminarHabilidad(codigo) {
+        this.obtenerHabilidadPorCodigo(codigo);
+        return HabilidadRepository.eliminarPorCodigo(codigo);
+    }
 }

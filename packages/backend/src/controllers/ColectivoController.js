@@ -56,4 +56,29 @@ export class ColectivoController {
             return res.status(409).json({ error: error.message });
         }
     }
+
+    actualizar = (req, res) => {
+        const id = req.params.id;
+        const esquemaValido = colectivoEsquema.partial().safeParse(req.body);
+        if (esquemaValido.error) {
+            return res.status(400).json(esquemaValido.error.issues);
+        }
+        try {
+            const colectivoActualizado = this.colectivoService.actualizarColectivo(id, esquemaValido.data);
+            return res.status(200).json(colectivoActualizado);
+        } catch (error) {
+            const status = error.message.includes("No se encontro") ? 404 : 409;
+            return res.status(status).json({ error: error.message });
+        }
+    }
+
+    eliminar = (req, res) => {
+        const id = req.params.id;
+        try {
+            this.colectivoService.eliminarColectivo(id);
+            return res.status(204).send();
+        } catch (error) {
+            return res.status(404).json({ error: error.message });
+        }
+    }
 }
