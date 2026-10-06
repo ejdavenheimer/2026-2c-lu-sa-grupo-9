@@ -1,10 +1,11 @@
 import { Habilidad } from "../domain/Habilidad.js";
 import { HabilidadRepository } from "../repositories/HabilidadRepository.js";
+import { NotFoundError, UnprocessableEntityError } from "../errors/AppError.js";
 
 export class HabilidadService {
     static crearHabilidad({ titulo, codigo, descripcion }) {
         if (!titulo) {
-            throw new Error("El título de la habilidad es requerido");
+            throw new UnprocessableEntityError("El título de la habilidad es requerido");
         }
 
         const codigoNormalizado = (codigo || titulo)
@@ -29,7 +30,7 @@ export class HabilidadService {
     static obtenerHabilidadPorCodigo(codigo) {
         const habilidad = HabilidadRepository.buscarPorCodigo(codigo);
         if (!habilidad) {
-            throw new Error(`No se encontró la habilidad con el código '${codigo}'`);
+            throw new NotFoundError(`No se encontró la habilidad con el código '${codigo}'`);
         }
         return habilidad;
     }

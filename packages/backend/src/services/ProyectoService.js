@@ -3,6 +3,7 @@ import { ProyectoRepository } from "../repositories/ProyectoRepository.js";
 import { ColectivoRepository } from "../repositories/ColectivoRepository.js";
 import { PersonaColaboradoraRepository } from "../repositories/PersonaColaboradoraRepository.js";
 import { HabilidadRepository } from "../repositories/HabilidadRepository.js";
+import { NotFoundError, UnprocessableEntityError } from "../errors/AppError.js";
 
 export class ProyectoService {
     crearProyecto = ({
@@ -20,18 +21,18 @@ export class ProyectoService {
         if (!colectivoAsociado && colectivoId) {
             colectivoAsociado = ColectivoRepository.buscarPorId(colectivoId);
             if (!colectivoAsociado) {
-                throw new Error(`No se encontró el colectivo con ID '${colectivoId}'`);
+                throw new NotFoundError(`No se encontró el colectivo con ID '${colectivoId}'`);
             }
         }
         if (!colectivoAsociado) {
-            throw new Error("El proyecto requiere un colectivo asociado");
+            throw new UnprocessableEntityError("El proyecto requiere un colectivo asociado");
         }
         let habilidadesFinales = [...habilidadesRequeridas];
         if (habilidadesRequeridasCodigos.length > 0) {
             for (const codigo of habilidadesRequeridasCodigos) {
                 const hab = HabilidadRepository.buscarPorCodigo(codigo);
                 if (!hab) {
-                    throw new Error(`No se encontró la habilidad requerida con código '${codigo}'`);
+                    throw new NotFoundError(`No se encontró la habilidad requerida con código '${codigo}'`);
                 }
                 if (!habilidadesFinales.some((h) => h.codigo === hab.codigo)) {
                     habilidadesFinales.push(hab);
@@ -40,7 +41,7 @@ export class ProyectoService {
         }
 
         if (habilidadesFinales.length === 0) {
-            throw new Error("El proyecto requiere al menos una habilidad requerida");
+            throw new UnprocessableEntityError("El proyecto requiere al menos una habilidad requerida");
         }
         const nuevoProyecto = new Proyecto({
             titulo,
@@ -65,7 +66,7 @@ export class ProyectoService {
     obtenerProyectoPorId = (id) => {
         const proyecto = ProyectoRepository.buscarPorId(id);
         if (!proyecto) {
-            throw new Error(`No se encontró el proyecto con ID '${id}'`);
+            throw new NotFoundError(`No se encontró el proyecto con ID '${id}'`);
         }
         return proyecto;
     }
@@ -77,11 +78,11 @@ export class ProyectoService {
         if (!colaborador && personaColaboradoraId) {
             colaborador = PersonaColaboradoraRepository.buscarPorId(personaColaboradoraId);
             if (!colaborador) {
-                throw new Error(`No se encontró la persona colaboradora con ID '${personaColaboradoraId}'`);
+                throw new NotFoundError(`No se encontró la persona colaboradora con ID '${personaColaboradoraId}'`);
             }
         }
         if (!colaborador) {
-            throw new Error("Debe indicar una persona colaboradora para anotar en el proyecto");
+            throw new UnprocessableEntityError("Debe indicar una persona colaboradora para anotar en el proyecto");
         }
 
         const nuevaColaboracion = proyecto.agregarColaboracion(colaborador);

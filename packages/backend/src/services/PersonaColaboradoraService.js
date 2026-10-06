@@ -1,5 +1,6 @@
 import { PersonaColaboradoraRepository } from "../repositories/PersonaColaboradoraRepository.js";
 import { PersonaColaboradora } from "../domain/PersonaColaboradora.js";
+import { NotFoundError } from "../errors/AppError.js";
 
 export class PersonaColaboradoraService{
     
@@ -10,7 +11,7 @@ export class PersonaColaboradoraService{
     obtenerPersonaColaboradoraPorId = (id) => {
         const persona = PersonaColaboradoraRepository.buscarPorId(id)
         if(!persona){
-            throw new Error("Persona colaboradora no encontrada")
+            throw new NotFoundError("Persona colaboradora no encontrada")
         }
         return persona
     }
@@ -23,7 +24,7 @@ export class PersonaColaboradoraService{
     agregarHabilidad = (id, habilidad) => {
         const personaColaboradora = this.obtenerPersonaColaboradoraPorId(id)
         if(!personaColaboradora){
-            throw new Error("Persona colaboradora no encontrada")
+            throw new NotFoundError("Persona colaboradora no encontrada")
         }
         personaColaboradora.agregarHabilidad(habilidad)
         return PersonaColaboradoraRepository.guardar(personaColaboradora)
