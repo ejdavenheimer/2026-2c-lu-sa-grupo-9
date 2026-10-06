@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { ColectivoService } from '../services/ColectivoService.js';
+import { BadRequestError, UnprocessableEntityError } from '../errors/AppError.js';
 
 const ubicacionEsquema = z.object({
     pais: z.string(),
@@ -20,31 +21,55 @@ export class ColectivoController {
         this.colectivoService = colectivoService
     }
 
-    listar = (req, res) => {
-        res.status(200).json(this.colectivoService.obtenerColectivos());
+    listar = async (req, res, next) => {
+        try {
+            const colectivos = this.colectivoService.obtenerColectivos()
+
+            return res.status(200).json(colectivos)
+        } catch (error) {
+            return next(error)
+        }
     }
 
-    obtenerPorCodigo = (req, res) => {
-        const id = req.params.id;
-        try{
-            const colectivo = this.colectivoService.obtenerColectivoPorId(id);
-            res.status(200).json(colectivo)
-        } catch(error){
-            res.status(404).json(error.message)
+    obtenerPorCodigo = async (req, res, next) => {
+        try {
+            const colectivo = this.colectivoService.obtenerColectivoPorId(req.params.id)
+
+            return res.status(200).json(colectivo)
+        } catch (error) {
+            return next(error)
         }
     }
-    
-    crear = (req, res) => {
-        const esquemaValido = colectivoEsquema.safeParse(req.body)
-        if(esquemaValido.error){
-            return res.status(400).json(esquemaValido.error.issues)
-        }
-        try{
-            const nuevoColectivo = this.colectivoService.crearColectivo(esquemaValido.data)
+
+    crear = async (req, res, next) => {
+        try {
+            const datosColectivo = this.validarBody(colectivoEsquema, req.body)
+            const nuevoColectivo = this.colectivoService.crearColectivo(datosColectivo)
+
             return res.status(201).json(nuevoColectivo)
-        } catch(error){
-            return res.status(409).json(error.message)
+        } catch (error) {
+            return next(error)
         }
-        
+    }
+
+    // 400 si la request está malformada (falta un campo, tipo incorrecto, campo de más);
+    // 422 si los valores llegaron bien pero violan una regla, igual que el dominio.
+    validarBody(esquema, body) {
+        const resultado = esquema.safeParse(body)
+        if (resultado.success) {
+            return resultado.data
+        }
+
+        const esEstructural = resultado.error.issues.some(
+            (issue) => issue.code === "invalid_type" || issue.code === "unrecognized_keys"
+        )
+        const detalle = resultado.error.issues
+            .map((issue) => {
+                const campo = issue.path.join(".")
+                return campo ? `${campo}: ${issue.message}` : issue.message
+            })
+            .join("; ")
+
+        throw esEstructural ? new BadRequestError(detalle) : new UnprocessableEntityError(detalle)
     }
 }
