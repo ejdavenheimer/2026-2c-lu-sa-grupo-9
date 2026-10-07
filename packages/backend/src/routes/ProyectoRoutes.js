@@ -6,13 +6,13 @@ const proyectoController = new ProyectoController();
 const router = Router();
 
 router.route("/")
-    .get((req, res) => proyectoController.listar(req, res))
-    .post((req, res) => proyectoController.crear(req, res));
+    .get((req, res, next) => proyectoController.listar(req, res, next))
+    .post((req, res, next) => proyectoController.crear(req, res, next));
 
 router.route("/:id")
-    .get((req, res) => proyectoController.obtenerPorId(req, res));
+    .get((req, res, next) => proyectoController.obtenerPorId(req, res, next));
 
-router.post("/:id/colaboraciones", (req, res) => proyectoController.anotarColaboracion(req, res));
-router.patch("/:id/cerrar", (req, res) => proyectoController.cerrar(req, res));
+router.post("/:id/colaboraciones", (req, res, next) => proyectoController.anotarColaboracion(req, res, next));
+router.patch("/:id/cerrar", (req, res, next) => proyectoController.cerrar(req, res, next));
 
 export default router;

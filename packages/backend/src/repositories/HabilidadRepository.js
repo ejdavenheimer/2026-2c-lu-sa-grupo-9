@@ -1,10 +1,12 @@
+import { ConflictError } from "../errors/AppError.js";
+
 export class HabilidadRepository {
     static #habilidades = [];
 
     static guardar(habilidad) {
         const existe = this.#habilidades.some((h) => h.codigo === habilidad.codigo);
         if (existe) {
-            throw new Error(`Ya existe una habilidad con el código '${habilidad.codigo}'`);
+            throw new ConflictError(`Ya existe una habilidad con el código '${habilidad.codigo}'`);
         }
         this.#habilidades.push(habilidad);
         return habilidad;

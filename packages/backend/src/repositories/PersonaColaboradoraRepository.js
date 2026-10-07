@@ -1,3 +1,5 @@
+import { ConflictError } from "../errors/AppError.js";
+
 export class PersonaColaboradoraRepository {
     static #colaboradores = [];
     static #nextId = 1;
@@ -16,7 +18,7 @@ export class PersonaColaboradoraRepository {
                 (c) => c.nombreFantasia && c.nombreFantasia === colaborador.nombreFantasia
             );
             if (existePorNombre) {
-                throw new Error(`Ya existe una persona colaboradora con el nombre de fantasía '${colaborador.nombreFantasia}'`);
+                throw new ConflictError(`Ya existe una persona colaboradora con el nombre de fantasía '${colaborador.nombreFantasia}'`);
             }
         }
 

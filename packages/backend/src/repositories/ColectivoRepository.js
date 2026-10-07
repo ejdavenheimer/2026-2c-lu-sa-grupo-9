@@ -1,3 +1,5 @@
+import { ConflictError } from "../errors/AppError.js";
+
 export class ColectivoRepository {
     static #colectivos = [];
     static #nextId = 1;
@@ -13,7 +15,7 @@ export class ColectivoRepository {
 
         const existePorNombre = this.#colectivos.some((c) => c.nombre === colectivo.nombre);
         if (existePorNombre) {
-            throw new Error(`Ya existe un colectivo con el nombre '${colectivo.nombre}'`);
+            throw new ConflictError(`Ya existe un colectivo con el nombre '${colectivo.nombre}'`);
         }
 
         if (!colectivo.id) {
