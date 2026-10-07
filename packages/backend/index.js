@@ -7,6 +7,7 @@ import route from "./src/routes/router.js";
 import { notFoundHandler } from "./src/middlewares/notFoundHandler.js"
 import { errorLogger } from "./src/middlewares/errorLogger.js"
 import { errorHandler } from "./src/middlewares/errorHandler.js"
+import { MongoDBClient } from "./src/config/database.js";
 
 const app = express();
 app.use(express.json());
@@ -26,7 +27,14 @@ app.use(notFoundHandler)
 app.use(errorLogger)
 app.use(errorHandler)
 
-app.listen(process.env.SERVER_PORT, () => {
-  console.log(`Backend escuchando en puerto ${process.env.SERVER_PORT}`);
-  console.log(`Documentación Swagger disponible en http://localhost:${process.env.SERVER_PORT}/api-docs`);
-});
+const start = async () => {
+  await MongoDBClient.connect();
+
+  app.listen(process.env.SERVER_PORT, () => {
+    console.log(`Backend escuchando en puerto ${process.env.SERVER_PORT}`);
+    console.log(`Documentación Swagger disponible en http://localhost:${process.env.SERVER_PORT}/api-docs`);
+  });
+};
+
+start();
+
