@@ -2,18 +2,28 @@ import { randomUUID } from "crypto";
 import { UnprocessableEntityError } from "../errors/AppError.js";
 
 export class Hito {
+    #porcentajeConcrecion;
+
     constructor({ id, fecha, porcentajeConcrecion, descripcion, proyecto } = {}) {
         if (!descripcion || !proyecto) {
             throw new UnprocessableEntityError('El hito debe tener una descripcion y un proyecto');
-        }
-        if (!Number.isFinite(porcentajeConcrecion) || porcentajeConcrecion < 0 || porcentajeConcrecion > 100) {
-            throw new UnprocessableEntityError('El porcentaje de concreción debe ser un número entre 0 y 100 (inclusive)');
         }
         this.id = id || randomUUID();
         this.fecha = fecha || new Date();
         this.porcentajeConcrecion = porcentajeConcrecion;
         this.descripcion = descripcion;
         this.proyecto = proyecto;
+    }
+
+    get porcentajeConcrecion() {
+        return this.#porcentajeConcrecion;
+    }
+
+    set porcentajeConcrecion(valor) {
+        if (!Number.isFinite(valor) || valor < 0 || valor > 100) {
+            throw new UnprocessableEntityError('El porcentaje de concreción debe ser un número entre 0 y 100 (inclusive)');
+        }
+        this.#porcentajeConcrecion = valor;
     }
 
     toJSON() {

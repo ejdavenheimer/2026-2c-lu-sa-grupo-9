@@ -1,7 +1,7 @@
 import { EstadoProyecto } from "./enums.js";
 import { Colaboracion } from "./Colaboracion.js";
 import { Hito } from "./Hito.js";
-import { ConflictError, UnprocessableEntityError } from "../errors/AppError.js";
+import { ConflictError, NotFoundError, UnprocessableEntityError } from "../errors/AppError.js";
 
 export class Proyecto {
     constructor({
@@ -70,6 +70,20 @@ export class Proyecto {
         );
     }
 
+    cerrarProyecto() {
+        this.fechaCierre = new Date();
+        this.estado = EstadoProyecto.CERRADO;
+    }
+
+    actualizarEnlaces({ enlaceSistemaEnFuncionamiento, enlaceCodigoFuente } = {}) {
+        if (enlaceSistemaEnFuncionamiento !== undefined) {
+            this.enlaceSistemaEnFuncionamiento = enlaceSistemaEnFuncionamiento;
+        }
+        if (enlaceCodigoFuente !== undefined) {
+            this.enlaceCodigoFuente = enlaceCodigoFuente;
+        }
+    }
+
     agregarHito({ fecha, porcentajeConcrecion, descripcion } = {}) {
         if (this.estado !== EstadoProyecto.PUBLICADO || this.fechaCierre !== undefined) {
             throw new ConflictError("No se pueden agregar hitos a un proyecto cerrado");
@@ -94,9 +108,39 @@ export class Proyecto {
         return !ultimoHito || porcentajeConcrecion > ultimoHito.porcentajeConcrecion;
     }
 
-    cerrarProyecto() {
-        this.fechaCierre = new Date();
-        this.estado = EstadoProyecto.CERRADO;
+    getHito(hitoId) {
+        const hito = this.hitos.find((h) => h.id === hitoId);
+        if (!hito) {
+            throw new NotFoundError(`Hito con id ${hitoId} no encontrado`);
+        }
+        return hito;
+    }
+
+    eliminarHito(hitoId) {
+        const hito = this.getHito(hitoId);
+        this.hitos = this.hitos.filter((h) => h.id !== hito.id);
+    }
+
+    actualizarHito(hitoId, { porcentajeConcrecion, descripcion } = {}) {
+        const hito = this.getHito(hitoId);
+
+        if (descripcion !== undefined) {
+            hito.descripcion = descripcion;
+        }
+
+        if (porcentajeConcrecion !== undefined) {
+            const posicion = this.hitos.findIndex((h) => h.id === hito.id);
+            const hitoAnterior = this.hitos[posicion - 1];
+            const hitoSiguiente = this.hitos[posicion + 1];
+
+            if (hitoAnterior && porcentajeConcrecion <= hitoAnterior.porcentajeConcrecion) {
+                throw new UnprocessableEntityError("El porcentaje de concreción debe ser mayor al del hito anterior");
+            }
+            if (hitoSiguiente && porcentajeConcrecion >= hitoSiguiente.porcentajeConcrecion) {
+                throw new UnprocessableEntityError("El porcentaje de concreción debe ser menor al del hito siguiente");
+            }
+            hito.porcentajeConcrecion = porcentajeConcrecion;
+        }
     }
 
     toJSON() {
