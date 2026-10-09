@@ -144,6 +144,18 @@ describe("Proyecto", () => {
         expect(proyecto.hitos.length).toBe(0);
     });
 
+    test("obtenerPorcentajeAvance devuelve 0 si no hay hitos", () => {
+        const proyecto = crearProyectoDePrueba(crearColectivoDePrueba());
+        expect(proyecto.obtenerPorcentajeAvance()).toBe(0);
+    });
+
+    test("obtenerPorcentajeAvance devuelve el porcentaje del último hito", () => {
+        const proyecto = crearProyectoDePrueba(crearColectivoDePrueba());
+        proyecto.agregarHito({ porcentajeConcrecion: 30, descripcion: "Primer hito" });
+        proyecto.agregarHito({ porcentajeConcrecion: 70, descripcion: "Segundo hito" });
+        expect(proyecto.obtenerPorcentajeAvance()).toBe(70);
+    });
+
     test("actualizarEnlaces actualiza solo enlaceSistemaEnFuncionamiento si es lo único que se pasa", () => {
         const proyecto = crearProyectoDePrueba(crearColectivoDePrueba());
         proyecto.actualizarEnlaces({ enlaceSistemaEnFuncionamiento: "http://sistema.com" });
