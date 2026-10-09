@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { ColectivoService } from '../services/ColectivoService.js';
+import { BadRequestError, UnprocessableEntityError } from '../errors/AppError.js';
 
 const entidadGeograficaEsquema = z.union([
     z.string(),
@@ -28,57 +29,55 @@ export class ColectivoController {
         this.colectivoService = colectivoService;
     }
 
-    listar = (req, res) => {
-        res.status(200).json(this.colectivoService.obtenerColectivos());
-    }
-
-    obtenerPorId = (req, res) => {
-        const id = req.params.id;
+    listar = async (req, res, next) => {
         try {
-            const colectivo = this.colectivoService.obtenerColectivoPorId(id);
-            res.status(200).json(colectivo);
-        } catch(error) {
-            res.status(404).json({ error: error.message });
-        }
-    }
+            const colectivos = this.colectivoService.obtenerColectivos()
 
-    obtenerPorCodigo = (req, res) => this.obtenerPorId(req, res);
-    
-    crear = (req, res) => {
-        const esquemaValido = colectivoEsquema.safeParse(req.body);
-        if(esquemaValido.error){
-            return res.status(400).json(esquemaValido.error.issues);
-        }
-        try{
-            const nuevoColectivo = this.colectivoService.crearColectivo(esquemaValido.data);
-            return res.status(201).json(nuevoColectivo);
-        } catch(error){
-            return res.status(409).json({ error: error.message });
-        }
-    }
-
-    actualizar = (req, res) => {
-        const id = req.params.id;
-        const esquemaValido = colectivoEsquema.partial().safeParse(req.body);
-        if (esquemaValido.error) {
-            return res.status(400).json(esquemaValido.error.issues);
-        }
-        try {
-            const colectivoActualizado = this.colectivoService.actualizarColectivo(id, esquemaValido.data);
-            return res.status(200).json(colectivoActualizado);
+            return res.status(200).json(colectivos)
         } catch (error) {
-            const status = error.message.includes("No se encontro") ? 404 : 409;
-            return res.status(status).json({ error: error.message });
+            return next(error)
         }
     }
 
-    eliminar = (req, res) => {
-        const id = req.params.id;
+    obtenerPorCodigo = async (req, res, next) => {
         try {
-            this.colectivoService.eliminarColectivo(id);
-            return res.status(204).send();
+            const colectivo = this.colectivoService.obtenerColectivoPorId(req.params.id)
+
+            return res.status(200).json(colectivo)
         } catch (error) {
-            return res.status(404).json({ error: error.message });
+            return next(error)
         }
+    }
+
+    crear = async (req, res, next) => {
+        try {
+            const datosColectivo = this.validarBody(colectivoEsquema, req.body)
+            const nuevoColectivo = this.colectivoService.crearColectivo(datosColectivo)
+
+            return res.status(201).json(nuevoColectivo)
+        } catch (error) {
+            return next(error)
+        }
+    }
+
+    // 400 si la request está malformada (falta un campo, tipo incorrecto, campo de más);
+    // 422 si los valores llegaron bien pero violan una regla, igual que el dominio.
+    validarBody(esquema, body) {
+        const resultado = esquema.safeParse(body)
+        if (resultado.success) {
+            return resultado.data
+        }
+
+        const esEstructural = resultado.error.issues.some(
+            (issue) => issue.code === "invalid_type" || issue.code === "unrecognized_keys"
+        )
+        const detalle = resultado.error.issues
+            .map((issue) => {
+                const campo = issue.path.join(".")
+                return campo ? `${campo}: ${issue.message}` : issue.message
+            })
+            .join("; ")
+
+        throw esEstructural ? new BadRequestError(detalle) : new UnprocessableEntityError(detalle)
     }
 }

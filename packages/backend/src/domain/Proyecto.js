@@ -1,5 +1,6 @@
 import { EstadoProyecto } from "./enums.js";
 import { Colaboracion } from "./Colaboracion.js";
+import { ConflictError, UnprocessableEntityError } from "../errors/AppError.js";
 
 export class Proyecto {
     constructor({
@@ -15,7 +16,7 @@ export class Proyecto {
         colaboraciones = []
     } = {}) {
         if (!titulo || !descripcion || !unidadCompromiso || !cantidadHoras || !modalidadesColaboracion || !colectivo || !habilidadesRequeridas) {
-            throw new Error("El proyecto requiere: titulo, descripcion, unidadCompromiso, cantidadHoras, modalidadesColaboracion, colectivo y habilidadesRequeridas");
+            throw new UnprocessableEntityError("El proyecto requiere: titulo, descripcion, unidadCompromiso, cantidadHoras, modalidadesColaboracion, colectivo y habilidadesRequeridas");
         }
         this.id = id;
         this.titulo = titulo;
@@ -33,10 +34,10 @@ export class Proyecto {
 
     agregarColaboracion(personaColaboradora) {
         if (this.estado !== EstadoProyecto.PUBLICADO || this.fechaCierre !== undefined) {
-            throw new Error("No se pueden agregar colaboraciones a un proyecto cerrado");
+            throw new ConflictError("No se pueden agregar colaboraciones a un proyecto cerrado");
         }
         if (!this.validarColaborador(personaColaboradora)) {
-            throw new Error("El colaborador no cuenta con las habilidades requeridas para este proyecto");
+            throw new UnprocessableEntityError("El colaborador no cuenta con las habilidades requeridas para este proyecto");
         }
 
         const nuevaColaboracion = new Colaboracion({

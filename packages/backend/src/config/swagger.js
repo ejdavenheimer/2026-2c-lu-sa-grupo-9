@@ -1,3 +1,16 @@
+// Todos los errores de la API los emite el middleware errorHandler con la misma
+// forma, así que alcanza con describir el schema una vez y reusarlo en cada respuesta.
+const respuestaDeError = (description) => ({
+  description,
+  content: {
+    "application/json": {
+      schema: {
+        $ref: "#/components/schemas/ErrorResponse"
+      }
+    }
+  }
+});
+
 export const swaggerDocument = {
   openapi: "3.0.0",
   info: {
@@ -114,12 +127,9 @@ export const swaggerDocument = {
               }
             }
           },
-          "400": {
-            description: "Datos de entrada inválidos o faltantes"
-          },
-          "409": {
-            description: "Ya existe un colectivo con ese nombre"
-          }
+          "400": respuestaDeError("Falta un campo obligatorio, tiene el tipo incorrecto o se envió un campo no permitido"),
+          "409": respuestaDeError("Ya existe un colectivo con ese nombre"),
+          "422": respuestaDeError("El colectivo debe poseer un nombre y un tipo")
         }
       }
     },
@@ -151,9 +161,7 @@ export const swaggerDocument = {
               }
             }
           },
-          "404": {
-            description: "Colectivo no encontrado"
-          }
+          "404": respuestaDeError("Colectivo no encontrado")
         }
       },
       put: {
@@ -273,15 +281,10 @@ export const swaggerDocument = {
               }
             }
           },
-          "400": {
-            description: "Parámetros inválidos o faltan habilidades requeridas"
-          },
-          "404": {
-            description: "Colectivo asociado o código de habilidad no encontrado"
-          },
-          "409": {
-            description: "Conflicto o título de proyecto duplicado en el colectivo"
-          }
+          "400": respuestaDeError("Falta un campo obligatorio, tiene el tipo incorrecto o se envió un campo no permitido"),
+          "404": respuestaDeError("Colectivo asociado o código de habilidad no encontrado"),
+          "409": respuestaDeError("El colectivo ya tiene un proyecto con ese título"),
+          "422": respuestaDeError("No se indicó ninguna habilidad requerida, o algún valor incumple las reglas del proyecto")
         }
       }
     },
@@ -313,9 +316,7 @@ export const swaggerDocument = {
               }
             }
           },
-          "404": {
-            description: "Proyecto no encontrado"
-          }
+          "404": respuestaDeError("Proyecto no encontrado")
         }
       },
       patch: {
@@ -364,12 +365,10 @@ export const swaggerDocument = {
               }
             }
           },
-          "400": {
-            description: "Petición inválida o error al actualizar el proyecto"
-          },
-          "404": {
-            description: "Proyecto no encontrado"
-          }
+          "400": respuestaDeError("Falta el ID de la persona colaboradora, tiene el tipo incorrecto o se envió un campo no permitido"),
+          "404": respuestaDeError("Proyecto o persona colaboradora no encontrada"),
+          "409": respuestaDeError("El proyecto está cerrado: ya no admite nuevas colaboraciones"),
+          "422": respuestaDeError("La persona colaboradora no cuenta con ninguna de las habilidades requeridas por el proyecto")
         }
       },
       put: {
@@ -414,12 +413,7 @@ export const swaggerDocument = {
               }
             }
           },
-          "400": {
-            description: "Datos inválidos"
-          },
-          "404": {
-            description: "Proyecto no encontrado"
-          }
+          "404": respuestaDeError("Proyecto no encontrado")
         }
       },
       delete: {
@@ -550,12 +544,9 @@ export const swaggerDocument = {
               }
             }
           },
-          "400": {
-            description: "Datos de entrada inválidos"
-          },
-          "409": {
-            description: "Conflicto o nombre de fantasía duplicado"
-          }
+          "400": respuestaDeError("Algún campo tiene el tipo incorrecto o se envió un campo no permitido"),
+          "409": respuestaDeError("Ya existe una persona colaboradora con ese nombre de fantasía"),
+          "422": respuestaDeError("La persona colaboradora debe poseer al menos un nombre de fantasía, o bien nombre y apellido")
         }
       }
     },
@@ -587,9 +578,7 @@ export const swaggerDocument = {
               }
             }
           },
-          "404": {
-            description: "Persona colaboradora no encontrada"
-          }
+          "404": respuestaDeError("Persona colaboradora no encontrada")
         }
       },
       put: {
@@ -701,12 +690,10 @@ export const swaggerDocument = {
               }
             }
           },
-          "400": {
-            description: "Estructura de habilidad inválida"
-          },
-          "404": {
-            description: "Persona colaboradora no encontrada o error de negocio"
-          }
+          "400": respuestaDeError("Algún campo de la habilidad tiene el tipo incorrecto o se envió un campo no permitido"),
+          "404": respuestaDeError("Persona colaboradora no encontrada"),
+          "409": respuestaDeError("Esa habilidad ya había sido agregada a la persona colaboradora"),
+          "422": respuestaDeError("No se indicó una habilidad válida")
         }
       }
     },
@@ -756,12 +743,9 @@ export const swaggerDocument = {
               }
             }
           },
-          "400": {
-            description: "Datos de entrada inválidos"
-          },
-          "409": {
-            description: "Ya existe una habilidad con el mismo código"
-          }
+          "400": respuestaDeError("Falta el título, tiene el tipo incorrecto o se envió un campo no permitido"),
+          "409": respuestaDeError("Ya existe una habilidad con el mismo código"),
+          "422": respuestaDeError("El título de la habilidad no puede estar vacío")
         }
       }
     },
@@ -793,9 +777,7 @@ export const swaggerDocument = {
               }
             }
           },
-          "404": {
-            description: "Habilidad no encontrada"
-          }
+          "404": respuestaDeError("Habilidad no encontrada")
         }
       },
       put: {
@@ -931,6 +913,30 @@ export const swaggerDocument = {
   },
   components: {
     schemas: {
+      ErrorResponse: {
+        type: "object",
+        description:
+          "Forma única de todas las respuestas de error de la API, generada por el middleware errorHandler.",
+        properties: {
+          status: {
+            type: "string",
+            enum: ["fail", "error"],
+            description: "'fail' para errores del cliente (4xx), 'error' para errores del servidor (5xx)",
+            example: "fail"
+          },
+          message: {
+            type: "string",
+            description: "Descripción del problema, apta para mostrarle a la persona usuaria",
+            example: "No se encontró el proyecto con ID 'proy-9'"
+          },
+          timestamp: {
+            type: "string",
+            format: "date-time",
+            description: "Momento en que se produjo el error",
+            example: "2026-10-06T21:31:53.613Z"
+          }
+        }
+      },
       ColectivoInput: {
         type: "object",
         required: ["nombre", "tipo"],

@@ -1,4 +1,4 @@
-
+import { ConflictError, UnprocessableEntityError } from "../errors/AppError.js";
 
 export class PersonaColaboradora {
     constructor({
@@ -12,7 +12,7 @@ export class PersonaColaboradora {
         colaboraciones = []
     } = {}) {
         if (!nombreFantasia && (!nombre || !apellido) && cuentas.length === 0)  {
-            throw new Error("La persona colaboradora debe poseer al menos un nombre de fantasia o nombre y apellido");
+            throw new UnprocessableEntityError("La persona colaboradora debe poseer al menos un nombre de fantasia o nombre y apellido");
         }
         this.nombreFantasia = nombreFantasia;
         this.nombre = nombre;
@@ -28,11 +28,11 @@ export class PersonaColaboradora {
 
     agregarHabilidad(habilidad) {
         if (!habilidad) {
-            throw new Error("Debe proporcionar una habilidad para agregar");
+            throw new UnprocessableEntityError("Debe proporcionar una habilidad para agregar");
         }
 
         if (this.habilidades.some((h) => h.codigo === habilidad.codigo)) {
-            throw new Error(`La habilidad '${habilidad.titulo || habilidad.codigo}' ya fue agregada a esta persona colaboradora`);
+            throw new ConflictError(`La habilidad '${habilidad.titulo || habilidad.codigo}' ya fue agregada a esta persona colaboradora`);
         }
 
         this.habilidades.push(habilidad);
@@ -41,7 +41,7 @@ export class PersonaColaboradora {
 
     agregarColaboracion(colaboracion) {
         if (!colaboracion) {
-            throw new Error("Debe proporcionar una colaboracion para agregar");
+            throw new UnprocessableEntityError("Debe proporcionar una colaboracion para agregar");
         }
         this.colaboraciones.push(colaboracion);
     }

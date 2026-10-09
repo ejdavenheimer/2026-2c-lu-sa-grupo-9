@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { ProyectoService } from "../services/ProyectoService.js";
 import { UnidadCompromiso, ModalidadColaboracion, EstadoProyecto } from "../domain/enums.js";
+import { BadRequestError, UnprocessableEntityError } from "../errors/AppError.js";
 
 const proyectoEsquema = z.object({
     titulo: z.string().min(1, "El título es requerido"),
@@ -40,61 +41,45 @@ export class ProyectoController {
         this.proyectoService = proyectoService;
     }
 
-    crear = (req, res) => {
-        const parseResult = proyectoEsquema.safeParse(req.body);
-        if (!parseResult.success) {
-            return res.status(400).json(parseResult.error.issues);
-        }
-
+    crear = async (req, res, next) => {
         try {
-            const nuevoProyecto = this.proyectoService.crearProyecto(parseResult.data);
+            const datosProyecto = this.validarBody(proyectoEsquema, req.body);
+            const nuevoProyecto = this.proyectoService.crearProyecto(datosProyecto);
+
             return res.status(201).json(nuevoProyecto);
         } catch (error) {
-            return res.status(400).json({
-                error: error.message
-            });
+            return next(error);
         }
     }
 
-    listar = (req, res) => {
+    listar = async (req, res, next) => {
         try {
             const proyectos = this.proyectoService.obtenerProyectos();
+
             return res.status(200).json(proyectos);
         } catch (error) {
-            return res.status(500).json({
-                error: error.message
-            });
+            return next(error);
         }
     }
 
-    obtenerPorId = (req, res) => {
+    obtenerPorId = async (req, res, next) => {
         try {
-            const { id } = req.params;
-            const proyecto = this.proyectoService.obtenerProyectoPorId(id);
+            const proyecto = this.proyectoService.obtenerProyectoPorId(req.params.id);
+
             return res.status(200).json(proyecto);
         } catch (error) {
-            return res.status(404).json({
-                error: error.message
-            });
+            return next(error);
         }
     }
 
-    anotarColaboracion = (req, res) => {
-        const parseResult = anotacionEsquema.safeParse(req.body);
-        if (!parseResult.success) {
-            return res.status(400).json(parseResult.error.issues);
-        }
-
+    anotarColaboracion = async (req, res, next) => {
         try {
-            const { id } = req.params;
-            const { personaColaboradoraId } = parseResult.data;
-            const colaboracion = this.proyectoService.anotarColaborador(id, { personaColaboradoraId });
+            const { personaColaboradoraId } = this.validarBody(anotacionEsquema, req.body);
+            const colaboracion = this.proyectoService.anotarColaborador(req.params.id, { personaColaboradoraId });
+
             return res.status(201).json(colaboracion);
         } catch (error) {
-            const status = error.message.includes("No se encontró") ? 404 : 400;
-            return res.status(status).json({
-                error: error.message
-            });
+            return next(error);
         }
     }
 
@@ -149,17 +134,38 @@ export class ProyectoController {
             });
         }
     }
-
-    cerrar = (req, res) => {
+  
+    cerrar = async (req, res, next) => {
         try {
-            const { id } = req.params;
-            const proyectoCerrado = this.proyectoService.cerrarProyecto(id);
-            return res.status(200).json(proyectoCerrado);
-        } catch (error) {
-            const status = error.message.includes("No se encontró") ? 404 : 400;
-            return res.status(status).json({
-                error: error.message
+            const proyectoCerrado = this.proyectoService.cerrarProyecto(req.params.id);
+
+            return res.status(200).json({
+                message: "Proyecto cerrado exitosamente",
+                proyecto: proyectoCerrado
             });
+        } catch (error) {
+            return next(error);
         }
+    }
+
+    // 400 si la request está malformada (falta un campo, tipo incorrecto, campo de más);
+    // 422 si los valores llegaron bien pero violan una regla, igual que el dominio.
+    validarBody(esquema, body) {
+        const resultado = esquema.safeParse(body);
+        if (resultado.success) {
+            return resultado.data;
+        }
+
+        const esEstructural = resultado.error.issues.some(
+            (issue) => issue.code === "invalid_type" || issue.code === "unrecognized_keys"
+        );
+        const detalle = resultado.error.issues
+            .map((issue) => {
+                const campo = issue.path.join(".")
+                return campo ? `${campo}: ${issue.message}` : issue.message
+            })
+            .join("; ");
+
+        throw esEstructural ? new BadRequestError(detalle) : new UnprocessableEntityError(detalle);
     }
 }

@@ -1,5 +1,6 @@
 import { ColectivoRepository } from "../repositories/ColectivoRepository.js"
 import { Colectivo } from "../domain/Colectivo.js"
+import { NotFoundError } from "../errors/AppError.js"
 
 export class ColectivoService{
 
@@ -15,7 +16,7 @@ export class ColectivoService{
     obtenerColectivoPorId = (id) => {
         const colectivo = ColectivoRepository.buscarPorId(id)
         if(!colectivo){
-            throw new Error(`No se encontro el colectivo con id ${id}`)
+            throw new NotFoundError(`No se encontro el colectivo con id ${id}`)
         }
         return colectivo
     }
