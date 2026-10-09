@@ -1,5 +1,6 @@
 import { EstadoProyecto } from "./enums.js";
 import { Colaboracion } from "./Colaboracion.js";
+import { Hito } from "./Hito.js";
 import { ConflictError, UnprocessableEntityError } from "../errors/AppError.js";
 
 export class Proyecto {
@@ -11,8 +12,11 @@ export class Proyecto {
         cantidadHoras,
         modalidadesColaboracion,
         fechaAlta,
+        enlaceSistemaEnFuncionamiento,
+        enlaceCodigoFuente,
         colectivo,
         habilidadesRequeridas,
+        hitos = [],
         colaboraciones = []
     } = {}) {
         if (!titulo || !descripcion || !unidadCompromiso || !cantidadHoras || !modalidadesColaboracion || !colectivo || !habilidadesRequeridas) {
@@ -27,8 +31,11 @@ export class Proyecto {
         this.estado = EstadoProyecto.PUBLICADO;
         this.fechaAlta = fechaAlta || new Date();
         this.fechaCierre = undefined;
+        this.enlaceSistemaEnFuncionamiento = enlaceSistemaEnFuncionamiento;
+        this.enlaceCodigoFuente = enlaceCodigoFuente;
         this.colectivo = colectivo;
         this.habilidadesRequeridas = habilidadesRequeridas;
+        this.hitos = hitos;
         this.colaboraciones = colaboraciones;
     }
 
@@ -63,6 +70,30 @@ export class Proyecto {
         );
     }
 
+    agregarHito({ fecha, porcentajeConcrecion, descripcion } = {}) {
+        if (this.estado !== EstadoProyecto.PUBLICADO || this.fechaCierre !== undefined) {
+            throw new ConflictError("No se pueden agregar hitos a un proyecto cerrado");
+        }
+        if (!this.validarHito(porcentajeConcrecion)) {
+            throw new UnprocessableEntityError("El porcentaje de concreción debe ser mayor al del último hito registrado");
+        }
+
+        const nuevoHito = new Hito({
+            fecha,
+            porcentajeConcrecion,
+            descripcion,
+            proyecto: this
+        });
+
+        this.hitos.push(nuevoHito);
+        return nuevoHito;
+    }
+
+    validarHito(porcentajeConcrecion) {
+        const ultimoHito = this.hitos[this.hitos.length - 1];
+        return !ultimoHito || porcentajeConcrecion > ultimoHito.porcentajeConcrecion;
+    }
+
     cerrarProyecto() {
         this.fechaCierre = new Date();
         this.estado = EstadoProyecto.CERRADO;
@@ -79,6 +110,8 @@ export class Proyecto {
             estado: this.estado,
             fechaAlta: this.fechaAlta,
             fechaCierre: this.fechaCierre,
+            enlaceSistemaEnFuncionamiento: this.enlaceSistemaEnFuncionamiento,
+            enlaceCodigoFuente: this.enlaceCodigoFuente,
             colectivo: this.colectivo ? {
                 id: this.colectivo.id,
                 nombre: this.colectivo.nombre,
@@ -87,6 +120,12 @@ export class Proyecto {
                 ubicacion: this.colectivo.ubicacion
             } : null,
             habilidadesRequeridas: this.habilidadesRequeridas,
+            hitos: this.hitos.map((h) => ({
+                id: h.id,
+                fecha: h.fecha,
+                porcentajeConcrecion: h.porcentajeConcrecion,
+                descripcion: h.descripcion
+            })),
             colaboraciones: this.colaboraciones.map((c) => ({
                 id: c.id,
                 fechaInscripcion: c.fechaInscripcion,
