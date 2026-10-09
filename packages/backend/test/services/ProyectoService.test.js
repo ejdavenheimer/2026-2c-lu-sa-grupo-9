@@ -334,4 +334,179 @@ describe("ProyectoService", () => {
             expect(() => proyectoService.cerrarProyecto("id-inexistente")).toThrow("No se encontró el proyecto con ID 'id-inexistente'");
         });
     });
+
+    describe("registrarHito", () => {
+        test("registra un hito, lo persiste y lo devuelve", () => {
+            const colectivo = crearColectivoDePrueba();
+            const habilidad = crearHabilidadDePrueba();
+            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+                colectivo,
+                habilidadesRequeridas: [habilidad]
+            }));
+            const hito = proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 50, descripcion: "Primer hito" });
+            expect(hito.porcentajeConcrecion).toBe(50);
+            expect(hito.descripcion).toBe("Primer hito");
+            expect(proyecto.hitos).toContain(hito);
+            const proyectoGuardado = ProyectoRepository.buscarPorId(proyecto.id);
+            expect(proyectoGuardado.hitos).toContainEqual(expect.objectContaining({ id: hito.id }));
+        });
+
+        test("lanza un error si el proyecto no existe", () => {
+            expect(() => proyectoService.registrarHito("id-inexistente", { porcentajeConcrecion: 50, descripcion: "Hito" })).toThrow("No se encontró el proyecto con ID 'id-inexistente'");
+        });
+
+        test("lanza un error si el porcentaje no es mayor al del último hito", () => {
+            const colectivo = crearColectivoDePrueba();
+            const habilidad = crearHabilidadDePrueba();
+            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+                colectivo,
+                habilidadesRequeridas: [habilidad]
+            }));
+            proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 50, descripcion: "Primer hito" });
+            expect(() => proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 40, descripcion: "Segundo hito" })).toThrow("El porcentaje de concreción debe ser mayor al del último hito registrado");
+        });
+    });
+
+    describe("obtenerHitos", () => {
+        test("devuelve un array vacío si el proyecto no tiene hitos", () => {
+            const colectivo = crearColectivoDePrueba();
+            const habilidad = crearHabilidadDePrueba();
+            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+                colectivo,
+                habilidadesRequeridas: [habilidad]
+            }));
+            const hitos = proyectoService.obtenerHitos(proyecto.id);
+            expect(hitos).toEqual([]);
+        });
+
+        test("devuelve todos los hitos del proyecto", () => {
+            const colectivo = crearColectivoDePrueba();
+            const habilidad = crearHabilidadDePrueba();
+            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+                colectivo,
+                habilidadesRequeridas: [habilidad]
+            }));
+            const hito1 = proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 50, descripcion: "Primer hito" });
+            const hito2 = proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 70, descripcion: "Segundo hito" });
+            const hitos = proyectoService.obtenerHitos(proyecto.id);
+            expect(hitos).toEqual([hito1, hito2]);
+        });
+
+        test("lanza un error si el proyecto no existe", () => {
+            expect(() => proyectoService.obtenerHitos("id-inexistente")).toThrow("No se encontró el proyecto con ID 'id-inexistente'");
+        });
+    });
+
+    describe("obtenerHitoPorId", () => {
+        test("devuelve el hito si existe", () => {
+            const colectivo = crearColectivoDePrueba();
+            const habilidad = crearHabilidadDePrueba();
+            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+                colectivo,
+                habilidadesRequeridas: [habilidad]
+            }));
+            const hito = proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 50, descripcion: "Primer hito" });
+            const obtenido = proyectoService.obtenerHitoPorId(proyecto.id, hito.id);
+            expect(obtenido).toEqual(hito);
+        });
+
+        test("lanza un error si el hito no existe", () => {
+            const colectivo = crearColectivoDePrueba();
+            const habilidad = crearHabilidadDePrueba();
+            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+                colectivo,
+                habilidadesRequeridas: [habilidad]
+            }));
+            expect(() => proyectoService.obtenerHitoPorId(proyecto.id, "hito-inexistente")).toThrow("Hito con id hito-inexistente no encontrado");
+        });
+
+        test("lanza un error si el proyecto no existe", () => {
+            expect(() => proyectoService.obtenerHitoPorId("proyecto-inexistente", "hito-inexistente")).toThrow("No se encontró el proyecto con ID 'proyecto-inexistente'");
+        });
+    });
+
+    describe("actualizarHito", () => {
+        test("actualiza el hito y lo persiste", () => {
+            const colectivo = crearColectivoDePrueba();
+            const habilidad = crearHabilidadDePrueba();
+            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+                colectivo,
+                habilidadesRequeridas: [habilidad]
+            }));
+            const hito = proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 50, descripcion: "Primer hito" });
+            const hitoActualizado = proyectoService.actualizarHito(proyecto.id, hito.id, { porcentajeConcrecion: 60, descripcion: "Hito actualizado" });
+            const proyectoGuardado = ProyectoRepository.buscarPorId(proyecto.id);
+            const hitoGuardado = proyectoGuardado.hitos.find(h => h.id === hito.id);
+            expect(hitoActualizado.porcentajeConcrecion).toBe(60);
+            expect(hitoActualizado.descripcion).toBe("Hito actualizado");
+            expect(hitoGuardado.porcentajeConcrecion).toBe(60);
+            expect(hitoGuardado.descripcion).toBe("Hito actualizado");
+        });
+
+        test("lanza un error si el proyecto no existe", () => {
+            expect(() => proyectoService.actualizarHito("proyecto-inexistente", "hito-inexistente", { porcentajeConcrecion: 60, descripcion: "Hito actualizado" })).toThrow("No se encontró el proyecto con ID 'proyecto-inexistente'");
+        });
+
+        test("lanza un error si el hito no existe", () => {
+            const colectivo = crearColectivoDePrueba();
+            const habilidad = crearHabilidadDePrueba();
+            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+                colectivo,
+                habilidadesRequeridas: [habilidad]
+            }));
+            expect(() => proyectoService.actualizarHito(proyecto.id, "hito-inexistente", { porcentajeConcrecion: 60, descripcion: "Hito actualizado" })).toThrow("Hito con id hito-inexistente no encontrado");
+        });
+    });
+
+    describe("eliminarHito", () => {
+        test("elimina el hito y lo persiste", () => {
+            const colectivo = crearColectivoDePrueba();
+            const habilidad = crearHabilidadDePrueba();
+            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+                colectivo,
+                habilidadesRequeridas: [habilidad]
+            }));
+            const hito = proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 50, descripcion: "Primer hito" });
+            proyectoService.eliminarHito(proyecto.id, hito.id);
+            const proyectoGuardado = ProyectoRepository.buscarPorId(proyecto.id);
+            expect(proyectoGuardado.hitos).not.toContainEqual(expect.objectContaining({ id: hito.id }));
+        });
+
+        test("lanza un error si el proyecto no existe", () => {
+            expect(() => proyectoService.eliminarHito("proyecto-inexistente", "hito-inexistente")).toThrow("No se encontró el proyecto con ID 'proyecto-inexistente'");
+        });
+
+        test("lanza un error si el hito no existe", () => {
+            const colectivo = crearColectivoDePrueba();
+            const habilidad = crearHabilidadDePrueba();
+            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+                colectivo,
+                habilidadesRequeridas: [habilidad]
+            }));
+            expect(() => proyectoService.eliminarHito(proyecto.id, "hito-inexistente")).toThrow("Hito con id hito-inexistente no encontrado");
+        });
+    });
+
+    describe("actualizarEnlaces", () => {
+        test("actualiza los enlaces y los persiste", () => {
+            const colectivo = crearColectivoDePrueba();
+            const habilidad = crearHabilidadDePrueba();
+            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+                colectivo,
+                habilidadesRequeridas: [habilidad]
+            }));
+            const enlacesActualizados = {
+                enlaceSistemaEnFuncionamiento: "https://nuevo-enlace.com",
+                enlaceCodigoFuente: "https://nuevo-enlace-codigo.com"
+            };
+            proyectoService.actualizarEnlaces(proyecto.id, enlacesActualizados);
+            const proyectoGuardado = ProyectoRepository.buscarPorId(proyecto.id);
+            expect(proyectoGuardado.enlaceSistemaEnFuncionamiento).toBe(enlacesActualizados.enlaceSistemaEnFuncionamiento);
+            expect(proyectoGuardado.enlaceCodigoFuente).toBe(enlacesActualizados.enlaceCodigoFuente);
+        });
+
+        test("lanza un error si el proyecto no existe", () => {
+            expect(() => proyectoService.actualizarEnlaces("proyecto-inexistente", { enlaceSistemaEnFuncionamiento: "https://nuevo-enlace.com" })).toThrow("No se encontró el proyecto con ID 'proyecto-inexistente'");
+        });
+    });
 });
