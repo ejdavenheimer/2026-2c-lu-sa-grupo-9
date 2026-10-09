@@ -104,6 +104,17 @@ describe("Perfil (Dominio)", () => {
         })).toThrow("Debe indicar al menos una modalidad de colaboración válida");
     });
 
+    test("lanza error si una habilidad es obligatoria y opcional simultáneamente", () => {
+        expect(() => new Perfil({
+            descripcion: "Fullstack",
+            habilidadesObligatorias: [habReact],
+            habilidadesOpcionales: [habReact],
+            unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
+            cantidadHoras: 10,
+            modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
+        })).toThrow("Una habilidad no puede ser obligatoria y opcional simultáneamente");
+    });
+
     test("validarColaborador devuelve true si el colaborador tiene al menos una habilidad obligatoria", () => {
         const perfil = new Perfil({
             descripcion: "Frontend",

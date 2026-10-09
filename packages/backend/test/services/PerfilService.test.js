@@ -124,6 +124,17 @@ describe("PerfilService", () => {
                 modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
             })).toThrow(NotFoundError);
         });
+
+        test("lanza UnprocessableEntityError si una habilidad se repite en obligatoria y opcional", () => {
+            expect(() => service.crearPerfil(proyectoPrueba.id, {
+                descripcion: "Frontend",
+                habilidadesObligatoriasCodigos: ["react"],
+                habilidadesOpcionalesCodigos: ["react"],
+                unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
+                cantidadHoras: 10,
+                modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
+            })).toThrow(UnprocessableEntityError);
+        });
     });
 
     describe("obtenerPerfiles", () => {

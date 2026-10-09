@@ -37,6 +37,11 @@ export class Perfil {
         this.descripcion = descripcion.trim();
         this.habilidadesObligatorias = habilidadesObligatorias;
         this.habilidadesOpcionales = Array.isArray(habilidadesOpcionales) ? habilidadesOpcionales : [];
+
+        if (this.habilidadesOpcionales.some((opc) => this.habilidadesObligatorias.some((ob) => ob.codigo === opc.codigo))) {
+            throw new UnprocessableEntityError("Una habilidad no puede ser obligatoria y opcional simultáneamente");
+        }
+
         this.unidadCompromiso = unidadCompromiso;
         this.cantidadHoras = cantidadHoras;
         this.modalidadesColaboracion = modalidadesColaboracion;

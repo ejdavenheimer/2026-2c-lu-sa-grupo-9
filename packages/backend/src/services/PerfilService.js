@@ -50,6 +50,9 @@ export class PerfilService {
         const habilidadesOpcionales = [];
         if (Array.isArray(habilidadesOpcionalesCodigos) && habilidadesOpcionalesCodigos.length > 0) {
             for (const codigo of habilidadesOpcionalesCodigos) {
+                if (habilidadesObligatorias.some((h) => h.codigo === codigo)) {
+                    throw new UnprocessableEntityError(`La habilidad '${codigo}' no puede ser obligatoria y opcional simultáneamente`);
+                }
                 const habilidad = this.habilidadRepository.buscarPorCodigo(codigo);
                 if (!habilidad) {
                     throw new NotFoundError(`No se encontró la habilidad opcional con código '${codigo}'`);
