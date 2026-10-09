@@ -64,6 +64,11 @@ La diferencia entre **400 y 422** es la clave: `400` significa *"no entiendo tu 
 | | `PATCH` | `/api/proyectos/:id` | Actualización parcial del proyecto (cierre manual) |
 | | `DELETE` | `/api/proyectos/:id` | Eliminar un proyecto registrado |
 | | `POST` | `/api/proyectos/:id/colaboraciones` | Anotar a una persona colaboradora en un proyecto |
+| **Perfiles (Segunda Entrega)** | `POST` | `/api/proyectos/:id/perfiles` | Agregar un perfil a un proyecto (HU01) |
+| | `GET` | `/api/proyectos/:id/perfiles` | Listar perfiles requeridos de un proyecto (HU02) |
+| | `GET` | `/api/proyectos/:id/perfiles/:perfilId` | Obtener un perfil específico de un proyecto (HU02) |
+| | `PUT` | `/api/proyectos/:id/perfiles/:perfilId` | Modificar los datos de un perfil (HU02) |
+| | `DELETE` | `/api/proyectos/:id/perfiles/:perfilId` | Eliminar un perfil de un proyecto (HU02) |
 | **Personas Colaboradoras** | `GET` | `/api/personas-colaboradoras` | Listar todas las personas colaboradoras |
 | | `POST` | `/api/personas-colaboradoras` | Registrar una nueva persona colaboradora |
 | | `GET` | `/api/personas-colaboradoras/:id` | Obtener el perfil de un colaborador por ID |
@@ -408,7 +413,127 @@ Elimina un proyecto del sistema.
 
 ---
 
-## 👩‍💻 4. Personas Colaboradoras
+## 🎯 4. Perfiles de Proyecto (Segunda Entrega — Integrante 1)
+
+Los proyectos en la Segunda Entrega definen sus necesidades a través de **perfiles**, con granularidad en habilidades obligatorias y opcionales, compromiso esperado y modalidad de colaboración (**HU01** y **HU02**).
+
+### `POST /api/proyectos/:id/perfiles`
+Agrega un nuevo perfil a un proyecto existente (**HU01**).
+
+* **Parámetros de Ruta:** `id` (string, ID del proyecto).
+* **Cuerpo de la Petición:**
+```json
+{
+  "descripcion": "Desarrollador Frontend React",
+  "habilidadesObligatoriasCodigos": ["desarrollo_web_react"],
+  "habilidadesOpcionalesCodigos": ["typescript"],
+  "unidadCompromiso": "HORAS_SEMANALES",
+  "cantidadHoras": 10,
+  "modalidadesColaboracion": ["GRATUITA"]
+}
+```
+* **Reglas de Validación:**
+  * El proyecto debe existir y estar en estado `PUBLICADO` (no cerrado).
+  * `descripcion` es obligatoria y no vacía.
+  * `habilidadesObligatoriasCodigos` debe contener al menos un código válido existente.
+  * Si se indican `habilidadesOpcionalesCodigos`, deben existir en el sistema.
+  * `unidadCompromiso` debe ser `"HORAS_TOTALES"`, `"HORAS_SEMANALES"` o `"HORAS_MENSUALES"`.
+  * `cantidadHoras` debe ser un número positivo (> 0).
+  * `modalidadesColaboracion` debe ser un array no vacío con valores válidos (`"GRATUITA"`, `"CON_INCENTIVO_ECONOMICO"`, `"CON_POSIBILIDAD_CONTRATACION"`).
+* **Respuesta Exitosa (`201 Created`):**
+```json
+{
+  "id": "perf-a1b2c3d4-...",
+  "descripcion": "Desarrollador Frontend React",
+  "habilidadesObligatorias": [
+    {
+      "id": "hab-1",
+      "titulo": "Desarrollo Web React",
+      "codigo": "desarrollo_web_react",
+      "descripcion": "Frontend React"
+    }
+  ],
+  "habilidadesOpcionales": [
+    {
+      "id": "hab-2",
+      "titulo": "TypeScript",
+      "codigo": "typescript",
+      "descripcion": "Tipado estático"
+    }
+  ],
+  "unidadCompromiso": "HORAS_SEMANALES",
+  "cantidadHoras": 10,
+  "modalidadesColaboracion": ["GRATUITA"],
+  "proyectoId": "proy-1"
+}
+```
+* **Respuestas de Error:**
+  * `400 Bad Request`: Formato de request inválido o tipos incorrectos.
+  * `404 Not Found`: Si el proyecto o alguna habilidad no existe.
+  * `409 Conflict`: Si el proyecto está cerrado.
+  * `422 Unprocessable Entity`: Reglas de negocio incumplidas (ej. sin habilidades obligatorias).
+
+---
+
+### `GET /api/proyectos/:id/perfiles`
+Lista todos los perfiles asociados a un proyecto (**HU02**).
+
+* **Parámetros de Ruta:** `id` (string, ID del proyecto).
+* **Respuesta Exitosa (`200 OK`):** Array con los objetos `Perfil` del proyecto.
+* **Respuesta de Error:**
+  * `404 Not Found`: Si el proyecto no existe.
+
+---
+
+### `GET /api/proyectos/:id/perfiles/:perfilId`
+Obtiene el detalle de un perfil específico de un proyecto (**HU02**).
+
+* **Parámetros de Ruta:**
+  * `id`: ID del proyecto.
+  * `perfilId`: ID del perfil.
+* **Respuesta Exitosa (`200 OK`):** Objeto `Perfil`.
+* **Respuesta de Error:**
+  * `404 Not Found`: Si el proyecto o el perfil no existen.
+
+---
+
+### `PUT /api/proyectos/:id/perfiles/:perfilId`
+Modifica los datos de un perfil existente (**HU02**).
+
+* **Parámetros de Ruta:**
+  * `id`: ID del proyecto.
+  * `perfilId`: ID del perfil.
+* **Cuerpo de la Petición:** (campos opcionales a modificar)
+```json
+{
+  "descripcion": "Desarrollador Senior Frontend React",
+  "cantidadHoras": 15,
+  "habilidadesObligatoriasCodigos": ["desarrollo_web_react", "node"],
+  "modalidadesColaboracion": ["CON_INCENTIVO_ECONOMICO"]
+}
+```
+* **Respuesta Exitosa (`200 OK`):** Objeto `Perfil` actualizado.
+* **Respuestas de Error:**
+  * `400 Bad Request`: Si el payload contiene datos inválidos o desconocidos.
+  * `404 Not Found`: Si el proyecto, el perfil o alguna habilidad no existe.
+  * `409 Conflict`: Si el proyecto está cerrado.
+
+---
+
+### `DELETE /api/proyectos/:id/perfiles/:perfilId`
+Elimina un perfil de un proyecto (**HU02**).
+
+* **Parámetros de Ruta:**
+  * `id`: ID del proyecto.
+  * `perfilId`: ID del perfil.
+* **Respuesta Exitosa (`204 No Content`):** Sin cuerpo.
+* **Respuestas de Error:**
+  * `404 Not Found`: Si el proyecto o el perfil no existen.
+  * `409 Conflict`: Si el proyecto está cerrado.
+
+---
+
+## 👩‍💻 5. Personas Colaboradoras
 
 ### `GET /api/personas-colaboradoras`
 Lista todas las personas colaboradoras registradas.

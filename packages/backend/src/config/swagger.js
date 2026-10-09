@@ -49,6 +49,10 @@ export const swaggerDocument = {
     {
       name: "Ubicaciones",
       description: "Servicio geográfico para consulta de provincias y países (API Georef)"
+    },
+    {
+      name: "Perfiles",
+      description: "Gestión de perfiles requeridos por proyecto (HU01 - HU02)"
     }
   ],
   paths: {
@@ -494,6 +498,213 @@ export const swaggerDocument = {
           "404": {
             description: "Proyecto o persona colaboradora no encontrada"
           }
+        }
+      }
+    },
+    "/proyectos/{id}/perfiles": {
+      get: {
+        tags: ["Perfiles"],
+        summary: "Listar perfiles de un proyecto (HU02)",
+        description: "Obtiene la lista de perfiles requeridos definidos para el proyecto.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID del proyecto",
+            schema: {
+              type: "string",
+              example: "proy-1"
+            }
+          }
+        ],
+        responses: {
+          "200": {
+            description: "Lista de perfiles del proyecto",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "array",
+                  items: {
+                    $ref: "#/components/schemas/Perfil"
+                  }
+                }
+              }
+            }
+          },
+          "404": respuestaDeError("Proyecto no encontrado")
+        }
+      },
+      post: {
+        tags: ["Perfiles"],
+        summary: "Crear un perfil en un proyecto (HU01)",
+        description: "Agrega un nuevo perfil requerido al proyecto especificando habilidades obligatorias, opcionales, compromiso y modalidad.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID del proyecto",
+            schema: {
+              type: "string",
+              example: "proy-1"
+            }
+          }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/PerfilInput"
+              }
+            }
+          }
+        },
+        responses: {
+          "201": {
+            description: "Perfil creado exitosamente",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Perfil"
+                }
+              }
+            }
+          },
+          "400": respuestaDeError("Datos inválidos o malformados"),
+          "404": respuestaDeError("Proyecto o habilidad no encontrada"),
+          "409": respuestaDeError("No se pueden agregar perfiles a un proyecto cerrado"),
+          "422": respuestaDeError("Violación de reglas de negocio")
+        }
+      }
+    },
+    "/proyectos/{id}/perfiles/{perfilId}": {
+      get: {
+        tags: ["Perfiles"],
+        summary: "Obtener un perfil por ID (HU02)",
+        description: "Obtiene los detalles de un perfil específico de un proyecto.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID del proyecto",
+            schema: {
+              type: "string",
+              example: "proy-1"
+            }
+          },
+          {
+            name: "perfilId",
+            in: "path",
+            required: true,
+            description: "ID del perfil",
+            schema: {
+              type: "string",
+              example: "perf-1"
+            }
+          }
+        ],
+        responses: {
+          "200": {
+            description: "Detalle del perfil",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Perfil"
+                }
+              }
+            }
+          },
+          "404": respuestaDeError("Proyecto o perfil no encontrado")
+        }
+      },
+      put: {
+        tags: ["Perfiles"],
+        summary: "Modificar un perfil (HU02)",
+        description: "Modifica los datos de un perfil de un proyecto.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID del proyecto",
+            schema: {
+              type: "string",
+              example: "proy-1"
+            }
+          },
+          {
+            name: "perfilId",
+            in: "path",
+            required: true,
+            description: "ID del perfil",
+            schema: {
+              type: "string",
+              example: "perf-1"
+            }
+          }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/PerfilModificarInput"
+              }
+            }
+          }
+        },
+        responses: {
+          "200": {
+            description: "Perfil modificado exitosamente",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Perfil"
+                }
+              }
+            }
+          },
+          "400": respuestaDeError("Datos inválidos o malformados"),
+          "404": respuestaDeError("Proyecto, perfil o habilidad no encontrada"),
+          "409": respuestaDeError("No se pueden modificar perfiles de un proyecto cerrado"),
+          "422": respuestaDeError("Violación de reglas de negocio")
+        }
+      },
+      delete: {
+        tags: ["Perfiles"],
+        summary: "Eliminar un perfil (HU02)",
+        description: "Elimina un perfil del proyecto.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID del proyecto",
+            schema: {
+              type: "string",
+              example: "proy-1"
+            }
+          },
+          {
+            name: "perfilId",
+            in: "path",
+            required: true,
+            description: "ID del perfil",
+            schema: {
+              type: "string",
+              example: "perf-1"
+            }
+          }
+        ],
+        responses: {
+          "204": {
+            description: "Perfil eliminado exitosamente"
+          },
+          "404": respuestaDeError("Proyecto o perfil no encontrado"),
+          "409": respuestaDeError("No se pueden eliminar perfiles de un proyecto cerrado")
         }
       }
     },
@@ -1092,11 +1303,148 @@ export const swaggerDocument = {
               $ref: "#/components/schemas/Habilidad"
             }
           },
+          perfiles: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/Perfil"
+            }
+          },
           colaboraciones: {
             type: "array",
             items: {
               $ref: "#/components/schemas/Colaboracion"
             }
+          }
+        }
+      },
+      PerfilInput: {
+        type: "object",
+        required: [
+          "descripcion",
+          "habilidadesObligatoriasCodigos",
+          "unidadCompromiso",
+          "cantidadHoras",
+          "modalidadesColaboracion"
+        ],
+        properties: {
+          descripcion: {
+            type: "string",
+            example: "Desarrollador Frontend React"
+          },
+          habilidadesObligatoriasCodigos: {
+            type: "array",
+            items: {
+              type: "string"
+            },
+            example: ["react"]
+          },
+          habilidadesOpcionalesCodigos: {
+            type: "array",
+            items: {
+              type: "string"
+            },
+            example: ["typescript"]
+          },
+          unidadCompromiso: {
+            type: "string",
+            enum: ["HORAS_TOTALES", "HORAS_SEMANALES", "HORAS_MENSUALES"],
+            example: "HORAS_SEMANALES"
+          },
+          cantidadHoras: {
+            type: "number",
+            example: 10
+          },
+          modalidadesColaboracion: {
+            type: "array",
+            items: {
+              type: "string",
+              enum: ["GRATUITA", "CON_INCENTIVO_ECONOMICO", "CON_POSIBILIDAD_CONTRATACION"]
+            },
+            example: ["GRATUITA"]
+          }
+        }
+      },
+      PerfilModificarInput: {
+        type: "object",
+        properties: {
+          descripcion: {
+            type: "string",
+            example: "Desarrollador Senior Frontend"
+          },
+          habilidadesObligatoriasCodigos: {
+            type: "array",
+            items: {
+              type: "string"
+            },
+            example: ["react", "node"]
+          },
+          habilidadesOpcionalesCodigos: {
+            type: "array",
+            items: {
+              type: "string"
+            },
+            example: ["docker"]
+          },
+          unidadCompromiso: {
+            type: "string",
+            enum: ["HORAS_TOTALES", "HORAS_SEMANALES", "HORAS_MENSUALES"],
+            example: "HORAS_SEMANALES"
+          },
+          cantidadHoras: {
+            type: "number",
+            example: 15
+          },
+          modalidadesColaboracion: {
+            type: "array",
+            items: {
+              type: "string",
+              enum: ["GRATUITA", "CON_INCENTIVO_ECONOMICO", "CON_POSIBILIDAD_CONTRATACION"]
+            },
+            example: ["CON_INCENTIVO_ECONOMICO"]
+          }
+        }
+      },
+      Perfil: {
+        type: "object",
+        properties: {
+          id: {
+            type: "string",
+            example: "perf-1"
+          },
+          descripcion: {
+            type: "string",
+            example: "Desarrollador Frontend React"
+          },
+          habilidadesObligatorias: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/Habilidad"
+            }
+          },
+          habilidadesOpcionales: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/Habilidad"
+            }
+          },
+          unidadCompromiso: {
+            type: "string",
+            example: "HORAS_SEMANALES"
+          },
+          cantidadHoras: {
+            type: "number",
+            example: 10
+          },
+          modalidadesColaboracion: {
+            type: "array",
+            items: {
+              type: "string"
+            },
+            example: ["GRATUITA"]
+          },
+          proyectoId: {
+            type: "string",
+            example: "proy-1"
           }
         }
       },
