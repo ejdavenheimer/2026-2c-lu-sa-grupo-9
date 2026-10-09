@@ -17,8 +17,9 @@ export class PerfilService {
     }
 
     crearPerfil = (proyectoId, {
+        nombre,
         descripcion,
-        habilidadesObligatoriasCodigos = [],
+        habilidadesRequeridasCodigos = [],
         habilidadesOpcionalesCodigos = [],
         unidadCompromiso,
         cantidadHoras,
@@ -32,26 +33,26 @@ export class PerfilService {
             throw new ConflictError("No se pueden agregar perfiles a un proyecto cerrado");
         }
 
-        if (!Array.isArray(habilidadesObligatoriasCodigos) || habilidadesObligatoriasCodigos.length === 0) {
-            throw new UnprocessableEntityError("Debe indicar al menos una habilidad obligatoria");
+        if (!Array.isArray(habilidadesRequeridasCodigos) || habilidadesRequeridasCodigos.length === 0) {
+            throw new UnprocessableEntityError("Debe indicar al menos una habilidad requerida");
         }
 
-        const habilidadesObligatorias = [];
-        for (const codigo of habilidadesObligatoriasCodigos) {
+        const habilidadesRequeridas = [];
+        for (const codigo of habilidadesRequeridasCodigos) {
             const habilidad = this.habilidadRepository.buscarPorCodigo(codigo);
             if (!habilidad) {
-                throw new NotFoundError(`No se encontró la habilidad obligatoria con código '${codigo}'`);
+                throw new NotFoundError(`No se encontró la habilidad requerida con código '${codigo}'`);
             }
-            if (!habilidadesObligatorias.some((h) => h.codigo === habilidad.codigo)) {
-                habilidadesObligatorias.push(habilidad);
+            if (!habilidadesRequeridas.some((h) => h.codigo === habilidad.codigo)) {
+                habilidadesRequeridas.push(habilidad);
             }
         }
 
         const habilidadesOpcionales = [];
         if (Array.isArray(habilidadesOpcionalesCodigos) && habilidadesOpcionalesCodigos.length > 0) {
             for (const codigo of habilidadesOpcionalesCodigos) {
-                if (habilidadesObligatorias.some((h) => h.codigo === codigo)) {
-                    throw new UnprocessableEntityError(`La habilidad '${codigo}' no puede ser obligatoria y opcional simultáneamente`);
+                if (habilidadesRequeridas.some((h) => h.codigo === codigo)) {
+                    throw new UnprocessableEntityError(`La habilidad '${codigo}' no puede ser requerida y opcional simultáneamente`);
                 }
                 const habilidad = this.habilidadRepository.buscarPorCodigo(codigo);
                 if (!habilidad) {
@@ -64,8 +65,9 @@ export class PerfilService {
         }
 
         const nuevoPerfil = new Perfil({
+            nombre,
             descripcion,
-            habilidadesObligatorias,
+            habilidadesRequeridas,
             habilidadesOpcionales,
             unidadCompromiso,
             cantidadHoras: Number(cantidadHoras),
@@ -117,25 +119,29 @@ export class PerfilService {
 
         const datosActualizados = {};
 
+        if (datos.nombre !== undefined) {
+            datosActualizados.nombre = datos.nombre;
+        }
+
         if (datos.descripcion !== undefined) {
             datosActualizados.descripcion = datos.descripcion;
         }
 
-        if (datos.habilidadesObligatoriasCodigos !== undefined) {
-            if (!Array.isArray(datos.habilidadesObligatoriasCodigos) || datos.habilidadesObligatoriasCodigos.length === 0) {
-                throw new UnprocessableEntityError("Debe indicar al menos una habilidad obligatoria");
+        if (datos.habilidadesRequeridasCodigos !== undefined) {
+            if (!Array.isArray(datos.habilidadesRequeridasCodigos) || datos.habilidadesRequeridasCodigos.length === 0) {
+                throw new UnprocessableEntityError("Debe indicar al menos una habilidad requerida");
             }
-            const nuevasObligatorias = [];
-            for (const codigo of datos.habilidadesObligatoriasCodigos) {
+            const nuevasRequeridas = [];
+            for (const codigo of datos.habilidadesRequeridasCodigos) {
                 const hab = this.habilidadRepository.buscarPorCodigo(codigo);
                 if (!hab) {
-                    throw new NotFoundError(`No se encontró la habilidad obligatoria con código '${codigo}'`);
+                    throw new NotFoundError(`No se encontró la habilidad requerida con código '${codigo}'`);
                 }
-                if (!nuevasObligatorias.some((h) => h.codigo === hab.codigo)) {
-                    nuevasObligatorias.push(hab);
+                if (!nuevasRequeridas.some((h) => h.codigo === hab.codigo)) {
+                    nuevasRequeridas.push(hab);
                 }
             }
-            datosActualizados.habilidadesObligatorias = nuevasObligatorias;
+            datosActualizados.habilidadesRequeridas = nuevasRequeridas;
         }
 
         if (datos.habilidadesOpcionalesCodigos !== undefined) {

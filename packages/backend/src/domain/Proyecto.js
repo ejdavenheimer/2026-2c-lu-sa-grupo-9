@@ -95,11 +95,17 @@ export class Proyecto {
             }
             perfil.descripcion = datos.descripcion.trim();
         }
-        if (datos.habilidadesObligatorias !== undefined) {
-            if (!Array.isArray(datos.habilidadesObligatorias) || datos.habilidadesObligatorias.length === 0) {
-                throw new UnprocessableEntityError("El perfil requiere al menos una habilidad obligatoria");
+        if (datos.nombre !== undefined) {
+            if (!datos.nombre || typeof datos.nombre !== "string" || !datos.nombre.trim()) {
+                throw new UnprocessableEntityError("El nombre no puede estar vacío");
             }
-            perfil.habilidadesObligatorias = datos.habilidadesObligatorias;
+            perfil.nombre = datos.nombre.trim();
+        }
+        if (datos.habilidadesRequeridas !== undefined) {
+            if (!Array.isArray(datos.habilidadesRequeridas) || datos.habilidadesRequeridas.length === 0) {
+                throw new UnprocessableEntityError("El perfil requiere al menos una habilidad requerida");
+            }
+            perfil.habilidadesRequeridas = datos.habilidadesRequeridas;
         }
         if (datos.habilidadesOpcionales !== undefined) {
             perfil.habilidadesOpcionales = Array.isArray(datos.habilidadesOpcionales) ? datos.habilidadesOpcionales : [];

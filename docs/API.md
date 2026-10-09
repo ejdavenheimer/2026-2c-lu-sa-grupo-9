@@ -415,7 +415,7 @@ Elimina un proyecto del sistema.
 
 ## 🎯 4. Perfiles de Proyecto (Segunda Entrega — Integrante 1)
 
-Los proyectos en la Segunda Entrega definen sus necesidades a través de **perfiles**, con granularidad en habilidades obligatorias y opcionales, compromiso esperado y modalidad de colaboración (**HU01** y **HU02**).
+Los proyectos en la Segunda Entrega definen sus necesidades a través de **perfiles**, con granularidad en habilidades requeridas y opcionales, compromiso esperado y modalidad de colaboración (**HU01** y **HU02**).
 
 ### `POST /api/proyectos/:id/perfiles`
 Agrega un nuevo perfil a un proyecto existente (**HU01**).
@@ -424,8 +424,9 @@ Agrega un nuevo perfil a un proyecto existente (**HU01**).
 * **Cuerpo de la Petición:**
 ```json
 {
+  "nombre": "Desarrollador Frontend",
   "descripcion": "Desarrollador Frontend React",
-  "habilidadesObligatoriasCodigos": ["desarrollo_web_react"],
+  "habilidadesRequeridasCodigos": ["desarrollo_web_react"],
   "habilidadesOpcionalesCodigos": ["typescript"],
   "unidadCompromiso": "HORAS_SEMANALES",
   "cantidadHoras": 10,
@@ -435,8 +436,8 @@ Agrega un nuevo perfil a un proyecto existente (**HU01**).
 * **Reglas de Validación:**
   * El proyecto debe existir y estar en estado `PUBLICADO` (no cerrado).
   * `descripcion` es obligatoria y no vacía.
-  * `habilidadesObligatoriasCodigos` debe contener al menos un código válido existente.
-  * Si se indican `habilidadesOpcionalesCodigos`, deben existir en el sistema.
+  * `habilidadesRequeridasCodigos` debe contener al menos un código válido existente.
+  * Si se indican `habilidadesOpcionalesCodigos`, deben existir en el sistema y no solaparse con las requeridas.
   * `unidadCompromiso` debe ser `"HORAS_TOTALES"`, `"HORAS_SEMANALES"` o `"HORAS_MENSUALES"`.
   * `cantidadHoras` debe ser un número positivo (> 0).
   * `modalidadesColaboracion` debe ser un array no vacío con valores válidos (`"GRATUITA"`, `"CON_INCENTIVO_ECONOMICO"`, `"CON_POSIBILIDAD_CONTRATACION"`).
@@ -444,8 +445,9 @@ Agrega un nuevo perfil a un proyecto existente (**HU01**).
 ```json
 {
   "id": "perf-a1b2c3d4-...",
+  "nombre": "Desarrollador Frontend",
   "descripcion": "Desarrollador Frontend React",
-  "habilidadesObligatorias": [
+  "habilidadesRequeridas": [
     {
       "id": "hab-1",
       "titulo": "Desarrollo Web React",
@@ -471,7 +473,7 @@ Agrega un nuevo perfil a un proyecto existente (**HU01**).
   * `400 Bad Request`: Formato de request inválido o tipos incorrectos.
   * `404 Not Found`: Si el proyecto o alguna habilidad no existe.
   * `409 Conflict`: Si el proyecto está cerrado.
-  * `422 Unprocessable Entity`: Reglas de negocio incumplidas (ej. sin habilidades obligatorias).
+  * `422 Unprocessable Entity`: Reglas de negocio incumplidas (ej. sin habilidades requeridas).
 
 ---
 
@@ -506,9 +508,10 @@ Modifica los datos de un perfil existente (**HU02**).
 * **Cuerpo de la Petición:** (campos opcionales a modificar)
 ```json
 {
+  "nombre": "Desarrollador Senior Frontend",
   "descripcion": "Desarrollador Senior Frontend React",
   "cantidadHoras": 15,
-  "habilidadesObligatoriasCodigos": ["desarrollo_web_react", "node"],
+  "habilidadesRequeridasCodigos": ["desarrollo_web_react", "node"],
   "modalidadesColaboracion": ["CON_INCENTIVO_ECONOMICO"]
 }
 ```

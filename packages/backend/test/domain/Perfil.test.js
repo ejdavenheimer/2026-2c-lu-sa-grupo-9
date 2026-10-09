@@ -13,8 +13,9 @@ describe("Perfil (Dominio)", () => {
 
     test("se crea exitosamente con campos válidos", () => {
         const perfil = new Perfil({
-            descripcion: "Desarrollador Fullstack",
-            habilidadesObligatorias: [habReact, habNode],
+            nombre: "Desarrollador Fullstack",
+            descripcion: "Desarrollador Fullstack Senior",
+            habilidadesRequeridas: [habReact, habNode],
             habilidadesOpcionales: [habDocker],
             unidadCompromiso: UnidadCompromiso.HORAS_SEMANALES,
             cantidadHoras: 10,
@@ -22,8 +23,9 @@ describe("Perfil (Dominio)", () => {
         });
 
         expect(perfil.id).toBeDefined();
-        expect(perfil.descripcion).toBe("Desarrollador Fullstack");
-        expect(perfil.habilidadesObligatorias.length).toBe(2);
+        expect(perfil.nombre).toBe("Desarrollador Fullstack");
+        expect(perfil.descripcion).toBe("Desarrollador Fullstack Senior");
+        expect(perfil.habilidadesRequeridas.length).toBe(2);
         expect(perfil.habilidadesOpcionales.length).toBe(1);
         expect(perfil.unidadCompromiso).toBe(UnidadCompromiso.HORAS_SEMANALES);
         expect(perfil.cantidadHoras).toBe(10);
@@ -33,7 +35,7 @@ describe("Perfil (Dominio)", () => {
     test("lanza error si falta la descripción o está vacía", () => {
         expect(() => new Perfil({
             descripcion: "",
-            habilidadesObligatorias: [habReact],
+            habilidadesRequeridas: [habReact],
             unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
             cantidadHoras: 5,
             modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
@@ -41,27 +43,27 @@ describe("Perfil (Dominio)", () => {
 
         expect(() => new Perfil({
             descripcion: "   ",
-            habilidadesObligatorias: [habReact],
+            habilidadesRequeridas: [habReact],
             unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
             cantidadHoras: 5,
             modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
         })).toThrow("El perfil requiere una descripción no vacía");
     });
 
-    test("lanza error si no tiene habilidades obligatorias", () => {
+    test("lanza error si no tiene habilidades requeridas", () => {
         expect(() => new Perfil({
             descripcion: "Frontend",
-            habilidadesObligatorias: [],
+            habilidadesRequeridas: [],
             unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
             cantidadHoras: 5,
             modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
-        })).toThrow("El perfil requiere al menos una habilidad obligatoria");
+        })).toThrow("El perfil requiere al menos una habilidad requerida");
     });
 
     test("lanza error si unidad de compromiso no es válida", () => {
         expect(() => new Perfil({
             descripcion: "Frontend",
-            habilidadesObligatorias: [habReact],
+            habilidadesRequeridas: [habReact],
             unidadCompromiso: "INVALIDO",
             cantidadHoras: 5,
             modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
@@ -71,7 +73,7 @@ describe("Perfil (Dominio)", () => {
     test("lanza error si cantidad de horas no es un número positivo", () => {
         expect(() => new Perfil({
             descripcion: "Frontend",
-            habilidadesObligatorias: [habReact],
+            habilidadesRequeridas: [habReact],
             unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
             cantidadHoras: 0,
             modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
@@ -79,7 +81,7 @@ describe("Perfil (Dominio)", () => {
 
         expect(() => new Perfil({
             descripcion: "Frontend",
-            habilidadesObligatorias: [habReact],
+            habilidadesRequeridas: [habReact],
             unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
             cantidadHoras: -5,
             modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
@@ -89,7 +91,7 @@ describe("Perfil (Dominio)", () => {
     test("lanza error si modalidades de colaboración está vacía o es inválida", () => {
         expect(() => new Perfil({
             descripcion: "Frontend",
-            habilidadesObligatorias: [habReact],
+            habilidadesRequeridas: [habReact],
             unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
             cantidadHoras: 10,
             modalidadesColaboracion: []
@@ -97,28 +99,28 @@ describe("Perfil (Dominio)", () => {
 
         expect(() => new Perfil({
             descripcion: "Frontend",
-            habilidadesObligatorias: [habReact],
+            habilidadesRequeridas: [habReact],
             unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
             cantidadHoras: 10,
             modalidadesColaboracion: ["MODALIDAD_INEXISTENTE"]
         })).toThrow("Debe indicar al menos una modalidad de colaboración válida");
     });
 
-    test("lanza error si una habilidad es obligatoria y opcional simultáneamente", () => {
+    test("lanza error si una habilidad es requerida y opcional simultáneamente", () => {
         expect(() => new Perfil({
             descripcion: "Fullstack",
-            habilidadesObligatorias: [habReact],
+            habilidadesRequeridas: [habReact],
             habilidadesOpcionales: [habReact],
             unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
             cantidadHoras: 10,
             modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
-        })).toThrow("Una habilidad no puede ser obligatoria y opcional simultáneamente");
+        })).toThrow("Una habilidad no puede ser requerida y opcional simultáneamente");
     });
 
-    test("validarColaborador devuelve true si el colaborador tiene al menos una habilidad obligatoria", () => {
+    test("validarColaborador devuelve true si el colaborador tiene al menos una habilidad requerida", () => {
         const perfil = new Perfil({
             descripcion: "Frontend",
-            habilidadesObligatorias: [habReact, habNode],
+            habilidadesRequeridas: [habReact, habNode],
             unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
             cantidadHoras: 10,
             modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
@@ -128,10 +130,10 @@ describe("Perfil (Dominio)", () => {
         expect(perfil.validarColaborador(colaboradorConUna)).toBe(true);
     });
 
-    test("validarColaborador devuelve false si el colaborador no tiene habilidades obligatorias o es null", () => {
+    test("validarColaborador devuelve false si el colaborador no tiene habilidades requeridas o es null", () => {
         const perfil = new Perfil({
             descripcion: "Frontend",
-            habilidadesObligatorias: [habReact],
+            habilidadesRequeridas: [habReact],
             unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
             cantidadHoras: 10,
             modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
@@ -142,23 +144,23 @@ describe("Perfil (Dominio)", () => {
         expect(perfil.validarColaborador({ habilidades: [{ codigo: "python" }] })).toBe(false);
     });
 
-    test("cumpleTodasObligatorias valida que tenga todas las obligatorias", () => {
+    test("cumpleTodasRequeridas valida que tenga todas las requeridas", () => {
         const perfil = new Perfil({
             descripcion: "Fullstack",
-            habilidadesObligatorias: [habReact, habNode],
+            habilidadesRequeridas: [habReact, habNode],
             unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
             cantidadHoras: 10,
             modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
         });
 
-        expect(perfil.cumpleTodasObligatorias({ habilidades: [{ codigo: "react" }] })).toBe(false);
-        expect(perfil.cumpleTodasObligatorias({ habilidades: [{ codigo: "react" }, { codigo: "node" }] })).toBe(true);
+        expect(perfil.cumpleTodasRequeridas({ habilidades: [{ codigo: "react" }] })).toBe(false);
+        expect(perfil.cumpleTodasRequeridas({ habilidades: [{ codigo: "react" }, { codigo: "node" }] })).toBe(true);
     });
 
     test("calcularAfinidadOpcionales cuenta las coincidencias opcionales", () => {
         const perfil = new Perfil({
             descripcion: "Fullstack",
-            habilidadesObligatorias: [habReact],
+            habilidadesRequeridas: [habReact],
             habilidadesOpcionales: [habNode, habDocker],
             unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
             cantidadHoras: 10,
@@ -172,8 +174,9 @@ describe("Perfil (Dominio)", () => {
 
     test("toJSON retorna objeto serializable", () => {
         const perfil = new Perfil({
-            descripcion: "Fullstack",
-            habilidadesObligatorias: [habReact],
+            nombre: "Fullstack",
+            descripcion: "Fullstack Developer",
+            habilidadesRequeridas: [habReact],
             habilidadesOpcionales: [habDocker],
             unidadCompromiso: UnidadCompromiso.HORAS_SEMANALES,
             cantidadHoras: 15,
@@ -182,11 +185,12 @@ describe("Perfil (Dominio)", () => {
 
         const json = perfil.toJSON();
         expect(json.id).toBe(perfil.id);
-        expect(json.descripcion).toBe("Fullstack");
+        expect(json.nombre).toBe("Fullstack");
+        expect(json.descripcion).toBe("Fullstack Developer");
         expect(json.unidadCompromiso).toBe(UnidadCompromiso.HORAS_SEMANALES);
         expect(json.cantidadHoras).toBe(15);
         expect(json.modalidadesColaboracion).toEqual([ModalidadColaboracion.CON_INCENTIVO_ECONOMICO]);
-        expect(json.habilidadesObligatorias[0].codigo).toBe("react");
+        expect(json.habilidadesRequeridas[0].codigo).toBe("react");
         expect(json.habilidadesOpcionales[0].codigo).toBe("docker");
     });
 });

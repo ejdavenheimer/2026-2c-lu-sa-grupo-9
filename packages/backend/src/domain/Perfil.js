@@ -5,20 +5,29 @@ import { UnprocessableEntityError } from "../errors/AppError.js";
 export class Perfil {
     constructor({
         id,
+        nombre,
         descripcion,
-        habilidadesObligatorias = [],
+        habilidadesRequeridas = [],
         habilidadesOpcionales = [],
         unidadCompromiso,
         cantidadHoras,
         modalidadesColaboracion = [],
         proyecto
     } = {}) {
-        if (!descripcion || typeof descripcion !== "string" || !descripcion.trim()) {
+        const descTexto = descripcion && typeof descripcion === "string" ? descripcion.trim() : "";
+        const nomTexto = nombre && typeof nombre === "string" ? nombre.trim() : "";
+
+        if (!nomTexto && !descTexto) {
             throw new UnprocessableEntityError("El perfil requiere una descripción no vacía");
         }
-        if (!Array.isArray(habilidadesObligatorias) || habilidadesObligatorias.length === 0) {
-            throw new UnprocessableEntityError("El perfil requiere al menos una habilidad obligatoria");
+
+        this.nombre = nomTexto || descTexto;
+        this.descripcion = descTexto || nomTexto;
+
+        if (!Array.isArray(habilidadesRequeridas) || habilidadesRequeridas.length === 0) {
+            throw new UnprocessableEntityError("El perfil requiere al menos una habilidad requerida");
         }
+
         if (!unidadCompromiso || !Object.values(UnidadCompromiso).includes(unidadCompromiso)) {
             throw new UnprocessableEntityError("El perfil requiere una unidad de compromiso válida");
         }
@@ -34,12 +43,11 @@ export class Perfil {
         }
 
         this.id = id || `perf-${randomUUID()}`;
-        this.descripcion = descripcion.trim();
-        this.habilidadesObligatorias = habilidadesObligatorias;
+        this.habilidadesRequeridas = habilidadesRequeridas;
         this.habilidadesOpcionales = Array.isArray(habilidadesOpcionales) ? habilidadesOpcionales : [];
 
-        if (this.habilidadesOpcionales.some((opc) => this.habilidadesObligatorias.some((ob) => ob.codigo === opc.codigo))) {
-            throw new UnprocessableEntityError("Una habilidad no puede ser obligatoria y opcional simultáneamente");
+        if (this.habilidadesOpcionales.some((opc) => this.habilidadesRequeridas.some((ob) => ob.codigo === opc.codigo))) {
+            throw new UnprocessableEntityError("Una habilidad no puede ser requerida y opcional simultáneamente");
         }
 
         this.unidadCompromiso = unidadCompromiso;
@@ -48,25 +56,21 @@ export class Perfil {
         this.proyecto = proyecto || null;
     }
 
-    get habilidadesRequeridas() {
-        return this.habilidadesObligatorias;
-    }
-
     validarColaborador(personaColaboradora) {
         if (!personaColaboradora || !Array.isArray(personaColaboradora.habilidades)) {
             return false;
         }
-        return this.habilidadesObligatorias.some((habOblig) =>
-            personaColaboradora.habilidades.some((h) => h.codigo === habOblig.codigo)
+        return this.habilidadesRequeridas.some((habReq) =>
+            personaColaboradora.habilidades.some((h) => h.codigo === habReq.codigo)
         );
     }
 
-    cumpleTodasObligatorias(personaColaboradora) {
+    cumpleTodasRequeridas(personaColaboradora) {
         if (!personaColaboradora || !Array.isArray(personaColaboradora.habilidades)) {
             return false;
         }
-        return this.habilidadesObligatorias.every((habOblig) =>
-            personaColaboradora.habilidades.some((h) => h.codigo === habOblig.codigo)
+        return this.habilidadesRequeridas.every((habReq) =>
+            personaColaboradora.habilidades.some((h) => h.codigo === habReq.codigo)
         );
     }
 
@@ -83,8 +87,9 @@ export class Perfil {
     toJSON() {
         return {
             id: this.id,
+            nombre: this.nombre,
             descripcion: this.descripcion,
-            habilidadesObligatorias: this.habilidadesObligatorias.map((h) => ({
+            habilidadesRequeridas: this.habilidadesRequeridas.map((h) => ({
                 id: h.id,
                 titulo: h.titulo,
                 codigo: h.codigo,

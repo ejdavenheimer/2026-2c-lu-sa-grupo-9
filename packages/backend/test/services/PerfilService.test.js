@@ -50,8 +50,9 @@ describe("PerfilService", () => {
     describe("crearPerfil", () => {
         test("crea un perfil exitosamente y lo asocia al proyecto", () => {
             const perfil = service.crearPerfil(proyectoPrueba.id, {
+                nombre: "Backend Dev",
                 descripcion: "Desarrollador Backend",
-                habilidadesObligatoriasCodigos: ["node"],
+                habilidadesRequeridasCodigos: ["node"],
                 habilidadesOpcionalesCodigos: ["docker"],
                 unidadCompromiso: UnidadCompromiso.HORAS_SEMANALES,
                 cantidadHoras: 10,
@@ -60,9 +61,10 @@ describe("PerfilService", () => {
 
             expect(perfil).toBeDefined();
             expect(perfil.id).toBeDefined();
+            expect(perfil.nombre).toBe("Backend Dev");
             expect(perfil.descripcion).toBe("Desarrollador Backend");
-            expect(perfil.habilidadesObligatorias.length).toBe(1);
-            expect(perfil.habilidadesObligatorias[0].codigo).toBe("node");
+            expect(perfil.habilidadesRequeridas.length).toBe(1);
+            expect(perfil.habilidadesRequeridas[0].codigo).toBe("node");
             expect(perfil.habilidadesOpcionales.length).toBe(1);
             expect(perfil.habilidadesOpcionales[0].codigo).toBe("docker");
 
@@ -74,7 +76,7 @@ describe("PerfilService", () => {
         test("lanza NotFoundError si el proyecto no existe", () => {
             expect(() => service.crearPerfil("id-inexistente", {
                 descripcion: "Frontend",
-                habilidadesObligatoriasCodigos: ["react"],
+                habilidadesRequeridasCodigos: ["react"],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
                 cantidadHoras: 10,
                 modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
@@ -87,27 +89,27 @@ describe("PerfilService", () => {
 
             expect(() => service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "Frontend",
-                habilidadesObligatoriasCodigos: ["react"],
+                habilidadesRequeridasCodigos: ["react"],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
                 cantidadHoras: 10,
                 modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
             })).toThrow(ConflictError);
         });
 
-        test("lanza UnprocessableEntityError si no se indican habilidades obligatorias", () => {
+        test("lanza UnprocessableEntityError si no se indican habilidades requeridas", () => {
             expect(() => service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "Frontend",
-                habilidadesObligatoriasCodigos: [],
+                habilidadesRequeridasCodigos: [],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
                 cantidadHoras: 10,
                 modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
             })).toThrow(UnprocessableEntityError);
         });
 
-        test("lanza NotFoundError si alguna habilidad obligatoria no existe", () => {
+        test("lanza NotFoundError si alguna habilidad requerida no existe", () => {
             expect(() => service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "Frontend",
-                habilidadesObligatoriasCodigos: ["habilidad_inexistente"],
+                habilidadesRequeridasCodigos: ["habilidad_inexistente"],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
                 cantidadHoras: 10,
                 modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
@@ -117,7 +119,7 @@ describe("PerfilService", () => {
         test("lanza NotFoundError si alguna habilidad opcional no existe", () => {
             expect(() => service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "Frontend",
-                habilidadesObligatoriasCodigos: ["react"],
+                habilidadesRequeridasCodigos: ["react"],
                 habilidadesOpcionalesCodigos: ["opcional_inexistente"],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
                 cantidadHoras: 10,
@@ -125,10 +127,10 @@ describe("PerfilService", () => {
             })).toThrow(NotFoundError);
         });
 
-        test("lanza UnprocessableEntityError si una habilidad se repite en obligatoria y opcional", () => {
+        test("lanza UnprocessableEntityError si una habilidad se repite en requerida y opcional", () => {
             expect(() => service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "Frontend",
-                habilidadesObligatoriasCodigos: ["react"],
+                habilidadesRequeridasCodigos: ["react"],
                 habilidadesOpcionalesCodigos: ["react"],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
                 cantidadHoras: 10,
@@ -141,7 +143,7 @@ describe("PerfilService", () => {
         test("devuelve los perfiles asociados al proyecto", () => {
             service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "Frontend",
-                habilidadesObligatoriasCodigos: ["react"],
+                habilidadesRequeridasCodigos: ["react"],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
                 cantidadHoras: 5,
                 modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
@@ -149,7 +151,7 @@ describe("PerfilService", () => {
 
             service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "Backend",
-                habilidadesObligatoriasCodigos: ["node"],
+                habilidadesRequeridasCodigos: ["node"],
                 unidadCompromiso: UnidadCompromiso.HORAS_SEMANALES,
                 cantidadHoras: 8,
                 modalidadesColaboracion: [ModalidadColaboracion.CON_INCENTIVO_ECONOMICO]
@@ -168,7 +170,7 @@ describe("PerfilService", () => {
         test("devuelve el perfil solicitado", () => {
             const creado = service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "Frontend",
-                habilidadesObligatoriasCodigos: ["react"],
+                habilidadesRequeridasCodigos: ["react"],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
                 cantidadHoras: 5,
                 modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
@@ -187,30 +189,33 @@ describe("PerfilService", () => {
     describe("modificarPerfil", () => {
         test("modifica exitosamente los datos del perfil", () => {
             const creado = service.crearPerfil(proyectoPrueba.id, {
+                nombre: "Junior Dev",
                 descripcion: "Junior Dev",
-                habilidadesObligatoriasCodigos: ["react"],
+                habilidadesRequeridasCodigos: ["react"],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
                 cantidadHoras: 5,
                 modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
             });
 
             const modificado = service.modificarPerfil(proyectoPrueba.id, creado.id, {
+                nombre: "Semi-Senior Dev",
                 descripcion: "Semi-Senior Dev",
                 cantidadHoras: 15,
-                habilidadesObligatoriasCodigos: ["react", "node"],
+                habilidadesRequeridasCodigos: ["react", "node"],
                 habilidadesOpcionalesCodigos: ["docker"]
             });
 
+            expect(modificado.nombre).toBe("Semi-Senior Dev");
             expect(modificado.descripcion).toBe("Semi-Senior Dev");
             expect(modificado.cantidadHoras).toBe(15);
-            expect(modificado.habilidadesObligatorias.length).toBe(2);
+            expect(modificado.habilidadesRequeridas.length).toBe(2);
             expect(modificado.habilidadesOpcionales.length).toBe(1);
         });
 
         test("lanza ConflictError si el proyecto está cerrado", () => {
             const creado = service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "Junior Dev",
-                habilidadesObligatoriasCodigos: ["react"],
+                habilidadesRequeridasCodigos: ["react"],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
                 cantidadHoras: 5,
                 modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
@@ -227,14 +232,14 @@ describe("PerfilService", () => {
         test("lanza NotFoundError si la habilidad a actualizar no existe", () => {
             const creado = service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "Junior Dev",
-                habilidadesObligatoriasCodigos: ["react"],
+                habilidadesRequeridasCodigos: ["react"],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
                 cantidadHoras: 5,
                 modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
             });
 
             expect(() => service.modificarPerfil(proyectoPrueba.id, creado.id, {
-                habilidadesObligatoriasCodigos: ["hab_no_existe"]
+                habilidadesRequeridasCodigos: ["hab_no_existe"]
             })).toThrow(NotFoundError);
         });
     });
@@ -243,7 +248,7 @@ describe("PerfilService", () => {
         test("elimina el perfil del proyecto y del repositorio", () => {
             const creado = service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "A eliminar",
-                habilidadesObligatoriasCodigos: ["react"],
+                habilidadesRequeridasCodigos: ["react"],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
                 cantidadHoras: 5,
                 modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
@@ -263,7 +268,7 @@ describe("PerfilService", () => {
         test("lanza ConflictError si el proyecto está cerrado", () => {
             const creado = service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "Para eliminar",
-                habilidadesObligatoriasCodigos: ["react"],
+                habilidadesRequeridasCodigos: ["react"],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
                 cantidadHoras: 5,
                 modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]

@@ -15,12 +15,17 @@ try {
                     unique: true,
                     index: true
                 },
+                nombre: {
+                    type: String,
+                    required: true,
+                    trim: true
+                },
                 descripcion: {
                     type: String,
                     required: true,
                     trim: true
                 },
-                habilidadesObligatorias: [
+                habilidadesRequeridas: [
                     {
                         codigo: { type: String, required: true },
                         titulo: { type: String },

@@ -87,7 +87,7 @@ describe("Proyecto", () => {
         const proyecto = crearProyectoDePrueba(crearColectivoDePrueba());
         const perfil = proyecto.agregarPerfil({
             descripcion: "Backend Dev",
-            habilidadesObligatorias: [{ codigo: "node", titulo: "NodeJS" }],
+            habilidadesRequeridas: [{ codigo: "node", titulo: "NodeJS" }],
             unidadCompromiso: "HORAS_SEMANALES",
             cantidadHoras: 10,
             modalidadesColaboracion: ["GRATUITA"]
@@ -103,7 +103,7 @@ describe("Proyecto", () => {
         proyecto.cerrarProyecto();
         expect(() => proyecto.agregarPerfil({
             descripcion: "Backend Dev",
-            habilidadesObligatorias: [{ codigo: "node", titulo: "NodeJS" }],
+            habilidadesRequeridas: [{ codigo: "node", titulo: "NodeJS" }],
             unidadCompromiso: "HORAS_SEMANALES",
             cantidadHoras: 10,
             modalidadesColaboracion: ["GRATUITA"]
@@ -114,7 +114,7 @@ describe("Proyecto", () => {
         const proyecto = crearProyectoDePrueba(crearColectivoDePrueba());
         const perfil = proyecto.agregarPerfil({
             descripcion: "Backend Dev",
-            habilidadesObligatorias: [{ codigo: "node", titulo: "NodeJS" }],
+            habilidadesRequeridas: [{ codigo: "node", titulo: "NodeJS" }],
             unidadCompromiso: "HORAS_SEMANALES",
             cantidadHoras: 10,
             modalidadesColaboracion: ["GRATUITA"]
@@ -133,7 +133,7 @@ describe("Proyecto", () => {
         const proyecto = crearProyectoDePrueba(crearColectivoDePrueba());
         const perfil = proyecto.agregarPerfil({
             descripcion: "Backend Dev",
-            habilidadesObligatorias: [{ codigo: "node", titulo: "NodeJS" }],
+            habilidadesRequeridas: [{ codigo: "node", titulo: "NodeJS" }],
             unidadCompromiso: "HORAS_SEMANALES",
             cantidadHoras: 10,
             modalidadesColaboracion: ["GRATUITA"]
@@ -151,7 +151,7 @@ describe("Proyecto", () => {
             colectivo: crearColectivoDePrueba(),
             perfiles: [{
                 descripcion: "Frontend Dev",
-                habilidadesObligatorias: [{ codigo: "vue", titulo: "VueJS" }],
+                habilidadesRequeridas: [{ codigo: "vue", titulo: "VueJS" }],
                 unidadCompromiso: "HORAS_TOTALES",
                 cantidadHoras: 15,
                 modalidadesColaboracion: ["GRATUITA"]

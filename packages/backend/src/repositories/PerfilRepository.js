@@ -14,8 +14,9 @@ export class PerfilRepository {
                     { id: perfil.id },
                     {
                         id: perfil.id,
-                        descripcion: json.descripcion,
-                        habilidadesObligatorias: json.habilidadesObligatorias,
+                        nombre: json.nombre || json.descripcion,
+                        descripcion: json.descripcion || json.nombre,
+                        habilidadesRequeridas: json.habilidadesRequeridas,
                         habilidadesOpcionales: json.habilidadesOpcionales,
                         unidadCompromiso: json.unidadCompromiso,
                         cantidadHoras: json.cantidadHoras,

@@ -1321,17 +1321,21 @@ export const swaggerDocument = {
         type: "object",
         required: [
           "descripcion",
-          "habilidadesObligatoriasCodigos",
+          "habilidadesRequeridasCodigos",
           "unidadCompromiso",
           "cantidadHoras",
           "modalidadesColaboracion"
         ],
         properties: {
+          nombre: {
+            type: "string",
+            example: "Desarrollador Frontend"
+          },
           descripcion: {
             type: "string",
             example: "Desarrollador Frontend React"
           },
-          habilidadesObligatoriasCodigos: {
+          habilidadesRequeridasCodigos: {
             type: "array",
             items: {
               type: "string"
@@ -1367,11 +1371,15 @@ export const swaggerDocument = {
       PerfilModificarInput: {
         type: "object",
         properties: {
+          nombre: {
+            type: "string",
+            example: "Desarrollador Frontend Senior"
+          },
           descripcion: {
             type: "string",
             example: "Desarrollador Senior Frontend"
           },
-          habilidadesObligatoriasCodigos: {
+          habilidadesRequeridasCodigos: {
             type: "array",
             items: {
               type: "string"
@@ -1411,11 +1419,15 @@ export const swaggerDocument = {
             type: "string",
             example: "perf-1"
           },
+          nombre: {
+            type: "string",
+            example: "Desarrollador Frontend"
+          },
           descripcion: {
             type: "string",
             example: "Desarrollador Frontend React"
           },
-          habilidadesObligatorias: {
+          habilidadesRequeridas: {
             type: "array",
             items: {
               $ref: "#/components/schemas/Habilidad"

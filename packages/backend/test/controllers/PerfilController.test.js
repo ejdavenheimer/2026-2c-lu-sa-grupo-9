@@ -35,7 +35,7 @@ describe("PerfilController", () => {
                 params: { id: "proy-1" },
                 body: {
                     descripcion: "Frontend",
-                    habilidadesObligatoriasCodigos: ["react"],
+                    habilidadesRequeridasCodigos: ["react"],
                     habilidadesOpcionalesCodigos: ["redux"],
                     unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
                     cantidadHoras: 10,
@@ -70,7 +70,7 @@ describe("PerfilController", () => {
                 params: { id: "proy-1" },
                 body: {
                     descripcion: "Frontend",
-                    habilidadesObligatoriasCodigos: ["react"],
+                    habilidadesRequeridasCodigos: ["react"],
                     unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
                     cantidadHoras: 10,
                     modalidadesColaboracion: [ModalidadColaboracion.GRATUITA],

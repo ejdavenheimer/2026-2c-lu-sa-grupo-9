@@ -3,28 +3,34 @@ import { PerfilService } from "../services/PerfilService.js";
 import { UnidadCompromiso, ModalidadColaboracion } from "../domain/enums.js";
 import { BadRequestError, UnprocessableEntityError } from "../errors/AppError.js";
 
-const crearPerfilEsquema = z.object({
-    descripcion: z.string().min(1, "La descripción es requerida"),
-    habilidadesObligatoriasCodigos: z.array(z.string()).min(1, "Debe indicar al menos una habilidad obligatoria"),
-    habilidadesOpcionalesCodigos: z.array(z.string()).optional(),
-    unidadCompromiso: z.enum(Object.values(UnidadCompromiso)),
-    cantidadHoras: z.number().positive("La cantidad de horas debe ser un número positivo"),
-    modalidadesColaboracion: z
-        .array(z.enum(Object.values(ModalidadColaboracion)))
-        .min(1, "Debe indicar al menos una modalidad de colaboración")
-}).strict();
+const crearPerfilEsquema = z
+    .object({
+        nombre: z.string().min(1, "El nombre no puede estar vacío").optional(),
+        descripcion: z.string().min(1, "La descripción es requerida"),
+        habilidadesRequeridasCodigos: z.array(z.string()).min(1, "Debe indicar al menos una habilidad requerida"),
+        habilidadesOpcionalesCodigos: z.array(z.string()).optional(),
+        unidadCompromiso: z.enum(Object.values(UnidadCompromiso)),
+        cantidadHoras: z.number().positive("La cantidad de horas debe ser un número positivo"),
+        modalidadesColaboracion: z
+            .array(z.enum(Object.values(ModalidadColaboracion)))
+            .min(1, "Debe indicar al menos una modalidad de colaboración")
+    })
+    .strict();
 
-const modificarPerfilEsquema = z.object({
-    descripcion: z.string().min(1, "La descripción no puede estar vacía").optional(),
-    habilidadesObligatoriasCodigos: z.array(z.string()).min(1, "Debe indicar al menos una habilidad obligatoria").optional(),
-    habilidadesOpcionalesCodigos: z.array(z.string()).optional(),
-    unidadCompromiso: z.enum(Object.values(UnidadCompromiso)).optional(),
-    cantidadHoras: z.number().positive("La cantidad de horas debe ser un número positivo").optional(),
-    modalidadesColaboracion: z
-        .array(z.enum(Object.values(ModalidadColaboracion)))
-        .min(1, "Debe indicar al menos una modalidad de colaboración")
-        .optional()
-}).strict();
+const modificarPerfilEsquema = z
+    .object({
+        nombre: z.string().min(1, "El nombre no puede estar vacío").optional(),
+        descripcion: z.string().min(1, "La descripción no puede estar vacía").optional(),
+        habilidadesRequeridasCodigos: z.array(z.string()).min(1, "Debe indicar al menos una habilidad requerida").optional(),
+        habilidadesOpcionalesCodigos: z.array(z.string()).optional(),
+        unidadCompromiso: z.enum(Object.values(UnidadCompromiso)).optional(),
+        cantidadHoras: z.number().positive("La cantidad de horas debe ser un número positivo").optional(),
+        modalidadesColaboracion: z
+            .array(z.enum(Object.values(ModalidadColaboracion)))
+            .min(1, "Debe indicar al menos una modalidad de colaboración")
+            .optional()
+    })
+    .strict();
 
 export class PerfilController {
     constructor(perfilService = new PerfilService()) {
