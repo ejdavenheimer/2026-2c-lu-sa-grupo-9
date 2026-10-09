@@ -5,9 +5,13 @@ const colectivoController = new ColectivoController();
 
 const router = Router();
 
-router.get("/", colectivoController.listar)
-router.post("/", colectivoController.crear);
+router.route("/")
+    .get(colectivoController.listar)
+    .post(colectivoController.crear);
     
-router.get("/:id", colectivoController.obtenerPorCodigo);
+router.route("/:id")
+    .get(colectivoController.obtenerPorId)
+    .put(colectivoController.actualizar)
+    .delete(colectivoController.eliminar);
 
 export default router;

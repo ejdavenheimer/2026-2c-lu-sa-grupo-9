@@ -99,4 +99,34 @@ export class ProyectoService {
         ProyectoRepository.guardar(proyecto);
         return proyecto;
     }
+
+    actualizarProyecto = (id, datos) => {
+        const proyecto = this.obtenerProyectoPorId(id);
+        if (datos.titulo !== undefined) proyecto.titulo = datos.titulo;
+        if (datos.descripcion !== undefined) proyecto.descripcion = datos.descripcion;
+        if (datos.unidadCompromiso !== undefined) proyecto.unidadCompromiso = datos.unidadCompromiso;
+        if (datos.cantidadHoras !== undefined) proyecto.cantidadHoras = Number(datos.cantidadHoras);
+        if (datos.modalidadesColaboracion !== undefined) {
+            proyecto.modalidadesColaboracion = Array.isArray(datos.modalidadesColaboracion)
+                ? datos.modalidadesColaboracion
+                : [datos.modalidadesColaboracion];
+        }
+        if (datos.habilidadesRequeridasCodigos && datos.habilidadesRequeridasCodigos.length > 0) {
+            const nuevasHabilidades = [];
+            for (const codigo of datos.habilidadesRequeridasCodigos) {
+                const hab = HabilidadRepository.buscarPorCodigo(codigo);
+                if (!hab) {
+                    throw new Error(`No se encontró la habilidad requerida con código '${codigo}'`);
+                }
+                nuevasHabilidades.push(hab);
+            }
+            proyecto.habilidadesRequeridas = nuevasHabilidades;
+        }
+        return ProyectoRepository.guardar(proyecto);
+    }
+
+    eliminarProyecto = (id) => {
+        this.obtenerProyectoPorId(id);
+        return ProyectoRepository.eliminarPorId(id);
+    }
 }

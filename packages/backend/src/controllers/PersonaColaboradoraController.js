@@ -19,6 +19,15 @@ const habilidadEsquema = z.object({
     descripcion: z.string().default("")
 }).strict();
 
+const actualizacionPersonaColaboradoraEsquema = z.object({
+    nombreFantasia: z.string().optional().nullable(),
+    nombre: z.string().optional().nullable(),
+    apellido: z.string().optional().nullable(),
+    pronombres: z.array(z.string()).optional(),
+    presentacion: z.string().optional(),
+    cuentas: z.array(z.any()).optional()
+}).strict();
+
 export class PersonaColaboradoraController {
 
     constructor(personaColaboradoraService = new PersonaColaboradoraService()) {
@@ -86,5 +95,30 @@ export class PersonaColaboradoraController {
             .join("; ")
 
         throw esEstructural ? new BadRequestError(detalle) : new UnprocessableEntityError(detalle)
+    }
+
+    actualizarPersonaColaboradora = (req, res) => {
+        const { id } = req.params;
+        const parseResult = actualizacionPersonaColaboradoraEsquema.safeParse(req.body);
+        if (!parseResult.success) {
+            return res.status(400).json(parseResult.error.issues);
+        }
+
+        try {
+            const personaActualizada = this.personaColaboradoraService.actualizarPersonaColaboradora(id, parseResult.data);
+            return res.status(200).json(personaActualizada);
+        } catch (error) {
+            return res.status(404).json({ error: error.message });
+        }
+    }
+
+    eliminarPersonaColaboradora = (req, res) => {
+        const { id } = req.params;
+        try {
+            this.personaColaboradoraService.eliminarPersonaColaboradora(id);
+            return res.status(204).send();
+        } catch (error) {
+            return res.status(404).json({ error: error.message });
+        }
     }
 }
