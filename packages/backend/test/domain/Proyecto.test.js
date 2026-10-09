@@ -82,4 +82,65 @@ describe("Proyecto", () => {
         expect(() => proyecto.agregarColaboracion(colaboradorSinHabilidad)).toThrow("El colaborador no cuenta con las habilidades requeridas para este proyecto");
         expect(proyecto.colaboraciones.length).toBe(0);
     });
+
+    test("validarHito devuelve true si no hay hitos previos", () => {
+        const proyecto = crearProyectoDePrueba(crearColectivoDePrueba());
+        expect(proyecto.validarHito()).toBe(true);
+    });
+
+    test("validarHito devuelve true si el porcentaje es mayor al del último hito", () => {
+        const proyecto = crearProyectoDePrueba(crearColectivoDePrueba());
+        proyecto.agregarHito({ porcentajeConcrecion: 50, descripcion: "Primer hito" });
+        expect(proyecto.validarHito(60)).toBe(true);
+    });
+
+    test("validarHito devuelve false si el porcentaje es igual al del último hito", () => {
+        const proyecto = crearProyectoDePrueba(crearColectivoDePrueba());
+        proyecto.agregarHito({ porcentajeConcrecion: 50, descripcion: "Primer hito" });
+        expect(proyecto.validarHito(50)).toBe(false);
+    });
+
+    test("validarHito devuelve false si el porcentaje es menor al del último hito", () => {
+        const proyecto = crearProyectoDePrueba(crearColectivoDePrueba());
+        proyecto.agregarHito({ porcentajeConcrecion: 50, descripcion: "Primer hito" });
+        expect(proyecto.validarHito(40)).toBe(false);
+    });
+
+    test("agregarHito agrega el primer hito sin restricciones de porcentaje", () => {
+        const proyecto = crearProyectoDePrueba(crearColectivoDePrueba());
+        const hito = proyecto.agregarHito({ porcentajeConcrecion: 30, descripcion: "Primer hito" });
+        expect(proyecto.hitos).toContain(hito);
+        expect(hito.porcentajeConcrecion).toBe(30);
+        expect(hito.descripcion).toBe("Primer hito");
+    });
+
+    test("agregarHito agrega un segundo hito con porcentaje mayor al anterior", () => {
+        const proyecto = crearProyectoDePrueba(crearColectivoDePrueba());
+        proyecto.agregarHito({ porcentajeConcrecion: 50, descripcion: "Primer hito" });
+        const hito = proyecto.agregarHito({ porcentajeConcrecion: 60, descripcion: "Segundo hito" });
+        expect(proyecto.hitos).toContain(hito);
+        expect(hito.porcentajeConcrecion).toBe(60);
+        expect(hito.descripcion).toBe("Segundo hito");
+    });
+
+    test("agregarHito lanza un error si el porcentaje es igual al del último hito", () => {
+        const proyecto = crearProyectoDePrueba(crearColectivoDePrueba());
+        proyecto.agregarHito({ porcentajeConcrecion: 50, descripcion: "Primer hito" });
+        expect(() => proyecto.agregarHito({ porcentajeConcrecion: 50, descripcion: "Segundo hito" })).toThrow("El porcentaje de concreción debe ser mayor al del último hito registrado");
+        expect(proyecto.hitos.length).toBe(1);
+    });
+
+    test("agregarHito lanza un error si el porcentaje no es mayor al del último hito", () => {
+        const proyecto = crearProyectoDePrueba(crearColectivoDePrueba());
+        proyecto.agregarHito({ porcentajeConcrecion: 50, descripcion: "Primer hito" });
+        expect(() => proyecto.agregarHito({ porcentajeConcrecion: 40, descripcion: "Segundo hito" })).toThrow("El porcentaje de concreción debe ser mayor al del último hito registrado");
+        expect(proyecto.hitos.length).toBe(1);
+    });
+
+    test("agregarHito lanza un error si el proyecto está cerrado", () => {
+        const proyecto = crearProyectoDePrueba(crearColectivoDePrueba());
+        proyecto.cerrarProyecto();
+        expect(() => proyecto.agregarHito({ porcentajeConcrecion: 60, descripcion: "Hito en proyecto cerrado" })).toThrow("No se pueden agregar hitos a un proyecto cerrado");
+        expect(proyecto.hitos.length).toBe(0);
+    });
 });
