@@ -108,6 +108,11 @@ export class Proyecto {
         return !ultimoHito || porcentajeConcrecion > ultimoHito.porcentajeConcrecion;
     }
 
+    obtenerPorcentajeAvance() {
+        const ultimoHito = this.hitos[this.hitos.length - 1];
+        return ultimoHito ? ultimoHito.porcentajeConcrecion : 0;
+    }
+
     getHito(hitoId) {
         const hito = this.hitos.find((h) => h.id === hitoId);
         if (!hito) {
@@ -164,6 +169,7 @@ export class Proyecto {
                 ubicacion: this.colectivo.ubicacion
             } : null,
             habilidadesRequeridas: this.habilidadesRequeridas,
+            porcentajeAvance: this.obtenerPorcentajeAvance(),
             hitos: this.hitos.map((h) => ({
                 id: h.id,
                 fecha: h.fecha,
