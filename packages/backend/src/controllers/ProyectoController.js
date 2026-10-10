@@ -19,6 +19,23 @@ const anotacionEsquema = z.object({
     personaColaboradoraId: z.string().min(1, "El ID de la persona colaboradora es requerido")
 }).strict();
 
+const registrarHitoEsquema = z.object({
+    porcentajeConcrecion: z.number().min(0).max(100),
+    descripcion: z.string("La descripción es requerida o el tipo de dato es incorrecto").min(1, "La descripción tiene que tener como mínimo 1 carácter"),
+    fecha: z.coerce.date().optional()
+}).strict();
+
+const actualizarHitoEsquema = z.object({
+    porcentajeConcrecion: z.number("El porcentaje de concreción tiene que ser un numero").min(0).max(100).optional(),
+    descripcion: z.string("El tipo de dato de la descripción es incorrecto").min(1, "La descripción tiene que tener como mínimo 1 carácter").optional()
+}).strict();
+
+const actualizarEnlacesEsquema = z.object({
+    enlaceSistemaEnFuncionamiento: z.url("Debe ser un URL válido").optional(),
+    enlaceCodigoFuente: z.url("Debe ser un URL válido").optional()
+}).strict();
+
+
 export class ProyectoController {
 
     constructor(proyectoService = new ProyectoService()) {
@@ -75,6 +92,64 @@ export class ProyectoController {
                 message: "Proyecto cerrado exitosamente",
                 proyecto: proyectoCerrado
             });
+        } catch (error) {
+            return next(error);
+        }
+    }
+
+    registrarHito = async (req, res, next) => {
+        try {
+            const datosHito = this.validarBody(registrarHitoEsquema, req.body);
+            const nuevoHito = this.proyectoService.registrarHito(req.params.id, datosHito);
+
+            return res.status(201).json(nuevoHito);
+        } catch (error) {
+            return next(error);
+        }
+    }
+
+    listarHitos = async (req, res, next) => {
+        try {
+            const hitos = this.proyectoService.obtenerHitos(req.params.id);
+            return res.status(200).json(hitos);
+        } catch (error) {
+            return next(error);
+        }
+    }
+
+    obtenerHitoPorId = async (req, res, next) => {
+        try {
+            const hito = this.proyectoService.obtenerHitoPorId(req.params.id, req.params.hitoId);
+            return res.status(200).json(hito);
+        } catch (error) {
+            return next(error);
+        }
+    }
+
+    actualizarHito = async (req, res, next) => {
+        try {
+            const datosHito = this.validarBody(actualizarHitoEsquema, req.body);
+            const hitoActualizado = this.proyectoService.actualizarHito(req.params.id, req.params.hitoId, datosHito);
+            return res.status(200).json(hitoActualizado);
+        } catch (error) {
+            return next(error);
+        }
+    }
+
+    eliminarHito = async (req, res, next) => {
+        try {
+            this.proyectoService.eliminarHito(req.params.id, req.params.hitoId);
+            return res.status(204).send();
+        } catch (error) {
+            return next(error);
+        }
+    }
+
+    actualizarEnlaces = async (req, res, next) => {
+        try {
+            const datosEnlaces = this.validarBody(actualizarEnlacesEsquema, req.body);
+            const proyectoActualizado = this.proyectoService.actualizarEnlaces(req.params.id, datosEnlaces);
+            return res.status(200).json(proyectoActualizado);
         } catch (error) {
             return next(error);
         }
