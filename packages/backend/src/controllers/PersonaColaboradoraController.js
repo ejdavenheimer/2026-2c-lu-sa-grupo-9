@@ -19,6 +19,11 @@ const habilidadEsquema = z.object({
     descripcion: z.string().default("")
 }).strict();
 
+const medioContatoEsquema = z.object({
+    tipo: z.string(),
+    valor: z.string()
+}).strict();
+
 export class PersonaColaboradoraController {
 
     constructor(personaColaboradoraService = new PersonaColaboradoraService()) {
@@ -67,6 +72,40 @@ export class PersonaColaboradoraController {
         }
     }
 
+    agregarMedioContacto = async (req, res, next) => {
+        try{
+            const medioContacto = this.validarBody(medioContatoEsquema, req.body);
+            const id = req.params.id;
+            const personaModificada = await this.personaColaboradoraService.agregarMedioContacto(id, medioContacto)
+            return res.status(200).json(personaModificada)
+        } catch (error){
+            next(error)
+        }
+    }
+
+    modificarMedioContacto = async (req, res, next) => {
+        try{
+            const medioContacto = this.validarBody(medioContatoEsquema, req.body);
+            const id = req.params.id;
+            const personaModificada = await this.personaColaboradoraService.modificarMedioContacto(id, medioContacto)
+            return res.status(200).json(personaModificada)
+        } catch (error){
+            next(error)
+        }
+    }
+
+    eliminarMedioContacto = async (req, res, next) => {
+        try{
+            const medioContacto = this.validarBody(medioContatoEsquema, req.body);
+            const id = req.params.id;
+            const personaModificada = await this.personaColaboradoraService.eliminarMedioContacto(id, medioContacto)
+            return res.status(200).json(personaModificada)
+        } catch (error){
+            next(error)
+        }
+    }
+
+
     // 400 si la request está malformada (falta un campo, tipo incorrecto, campo de más);
     // 422 si los valores llegaron bien pero violan una regla, igual que el dominio.
     validarBody(esquema, body) {
@@ -87,4 +126,5 @@ export class PersonaColaboradoraController {
 
         throw esEstructural ? new BadRequestError(detalle) : new UnprocessableEntityError(detalle)
     }
+    
 }

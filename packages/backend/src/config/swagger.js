@@ -461,6 +461,137 @@ export const swaggerDocument = {
         }
       }
     },
+    "/personas-colaboradoras/{id}/medios-contacto" :{
+      post: {
+        tags: ["Personas Colaboradoras"],
+        summary: "Agregar un medio de contacto a una persona colaboradora",
+        description: "Asocia un nuevo medio de contacto al perfil de la persona colaboradora.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID de la persona colaboradora",
+            schema: {
+              type: "string",
+              example: "colab-1"
+            }
+          }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/MedioContactoInput"
+              }
+            }
+          }
+        },
+        responses: {
+          "200": {
+            description: "Medio de contacto agregado exitosamente",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/PersonaColaboradora"
+                }
+              }
+            }
+          },
+          "400": respuestaDeError("Algún campo del medio de contacto tiene el tipo incorrecto o se envió un campo no permitido"),
+          "404": respuestaDeError("Persona colaboradora no encontrada"),
+          "409": respuestaDeError("Ese medio de contacto ya había sido agregado a la persona colaboradora"),
+          "422": respuestaDeError("No se indicó un medio de contacto válido")
+        }
+      }, 
+      put: {
+        tags: ["Personas Colaboradoras"],
+        summary: "Modifica un medio de contacto de una persona colaboradora",
+        description: "Cambia el valor del medio de contacto antiguo de la persona colaboradora.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID de la persona colaboradora",
+            schema: {
+              type: "string",
+              example: "colab-1"
+            }
+          }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/MedioContactoInput"
+              }
+            }
+          }
+        },
+        responses: {
+          "200": {
+            description: "Medio de contacto modificado exitosamente",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/PersonaColaboradora"
+                }
+              }
+            }
+          },
+          "400": respuestaDeError("Algún campo del medio de contacto tiene el tipo incorrecto o se envió un campo no permitido"),
+          "404": respuestaDeError("Persona colaboradora no encontrada"),
+          "409": respuestaDeError("Ese medio de contacto nunca había sido agregado a la persona colaboradora"),
+          "422": respuestaDeError("No se indicó un medio de contacto válido")
+        }
+      },
+      delete: {
+        tags: ["Personas Colaboradoras"],
+        summary: "Elimina un medio de contacto de una persona colaboradora",
+        description: "Elimina el medio de contacto antiguo de la persona colaboradora.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID de la persona colaboradora",
+            schema: {
+              type: "string",
+              example: "colab-1"
+            }
+          }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/MedioContactoInput"
+              }
+            }
+          }
+        },
+        responses: {
+          "200": {
+            description: "Medio de contacto eliminado exitosamente",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/PersonaColaboradora"
+                }
+              }
+            }
+          },
+          "400": respuestaDeError("Algún campo del medio de contacto tiene el tipo incorrecto o se envió un campo no permitido"),
+          "404": respuestaDeError("Persona colaboradora no encontrada"),
+          "409": respuestaDeError("Ese medio de contacto nunca había sido agregado a la persona colaboradora"),
+          "422": respuestaDeError("No se indicó un medio de contacto válido")
+        }
+      },
+    },
     "/habilidades": {
       get: {
         tags: ["Habilidades"],
@@ -841,6 +972,20 @@ export const swaggerDocument = {
             type: "string",
             example: "Creación de interfaces de usuario modernas con React y Hooks."
           }
+        }
+      },
+      MedioContactoInput:{
+        type: "object",
+        required: ["tipo", "valor"],
+        properties: {
+          tipo: {
+            type: "string",
+            example: "Emial"
+          },
+          valor: {
+            type: "string",
+            example: "mail@mail.com"
+          },
         }
       },
       Habilidad: {

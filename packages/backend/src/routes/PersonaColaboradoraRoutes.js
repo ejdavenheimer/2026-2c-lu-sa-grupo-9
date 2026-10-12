@@ -10,5 +10,8 @@ router.post("/", personaColaboradoraController.crearPersonaColaboradora);
     
 router.get("/:id",personaColaboradoraController.obtenerPersonaColaboradoraPorId);
 router.post("/:id/habilidades", personaColaboradoraController.agregarHabilidad);
+router.post("/:id/medios-contacto", personaColaboradoraController.agregarMedioContacto);
+router.put("/:id/medios-contacto", personaColaboradoraController.modificarMedioContacto);
+router.delete("/:id/medios-contacto", personaColaboradoraController.eliminarMedioContacto);
     
 export default router;

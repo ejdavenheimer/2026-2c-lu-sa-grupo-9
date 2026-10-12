@@ -1,7 +1,7 @@
 import { PersonaColaboradoraRepository } from "../repositories/PersonaColaboradoraRepository.js";
 import { PersonaColaboradora } from "../domain/PersonaColaboradora.js";
 import { NotFoundError } from "../errors/AppError.js";
-
+import {MedioDeContacto} from "../domain/MedioDeContacto.js";
 export class PersonaColaboradoraService{
     
     listarPersonasColaboradoras = () => {
@@ -28,5 +28,32 @@ export class PersonaColaboradoraService{
         }
         personaColaboradora.agregarHabilidad(habilidad)
         return PersonaColaboradoraRepository.guardar(personaColaboradora)
+    }
+
+    agregarMedioContacto = async (id, medioContacto) => {
+        const persona = this.obtenerPersonaColaboradoraPorId(id)
+        if (!persona){
+            throw new NotFoundError("Persona colaboradora no encontrada")
+        }
+        persona.agregarMedioContacto(MedioDeContacto(medioContacto))
+        return PersonaColaboradoraRepository.guardar(persona)
+    }
+
+    modificarMedioContacto = async (id, medioContacto) => {
+        const persona = this.obtenerPersonaColaboradoraPorId(id)
+        if (!persona){
+            throw new NotFoundError("Persona colaboradora no encontrada")
+        }
+        persona.modificarMedioContacto(medioContacto)
+        return PersonaColaboradoraRepository.guardar(persona)
+    }
+
+    eliminarMedioContacto = async (id, medioContacto) => {
+        const persona = this.obtenerPersonaColaboradoraPorId(id)
+        if (!persona){
+            throw new NotFoundError("Persona colaboradora no encontrada")
+        }
+        persona.eliminarMedioContacto(medioContacto)
+        return PersonaColaboradoraRepository.guardar(persona)
     }
 }

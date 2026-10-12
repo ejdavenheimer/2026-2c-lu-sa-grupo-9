@@ -9,7 +9,9 @@ export class PersonaColaboradora {
         presentacion,
         cuentas = [],
         habilidades = [],
-        colaboraciones = []
+        colaboraciones = [],
+        mediosDeContacto = [],
+        mensajesInternos
     } = {}) {
         if (!nombreFantasia && (!nombre || !apellido) && cuentas.length === 0)  {
             throw new UnprocessableEntityError("La persona colaboradora debe poseer al menos un nombre de fantasia o nombre y apellido");
@@ -24,6 +26,8 @@ export class PersonaColaboradora {
         this.cuentas = cuentas;
         this.habilidades = habilidades;
         this.colaboraciones = colaboraciones;
+        this.mediosDeContacto = mediosDeContacto;
+        this.mensajesInternos = mensajesInternos;
     }
 
     agregarHabilidad(habilidad) {
@@ -46,6 +50,32 @@ export class PersonaColaboradora {
         this.colaboraciones.push(colaboracion);
     }
 
+    agregarMedioDeContacto(medioDeContacto){
+        if (!medioDeContacto.tipo || !medioDeContacto.valor){
+            throw new UnprocessableEntityError("Debe proporcionar un medio de contacto valido.")
+        }
+        if (this.mediosDeContacto.some((mc) => mc.valor === medioDeContacto.valor && mc.tipo === medioDeContacto.tipo)){
+            throw new ConflictError(`El medio de contacto '${medioDeContacto.tipo || medioDeContacto.valor}' ya fue agregado a esta persona colaboradora`)
+        }
+        this.mediosDeContacto.push(medioDeContacto)
+    }
+
+    modificarMedioContacto(medioContacto){
+        const medioContactoViejo = this.mediosDeContacto.find(mc => mc.tipo === medioContacto.tipo)
+        if (!medioContactoViejo) {
+            throw new ConflictError('El medio de contacto que desea modificar nunca se agrego a la persona colaboradoa')
+        }
+        medioContactoViejo.valor = medioContacto.valor; 
+    }
+
+    eliminarMedioContacto(medioContacto){
+        const index = this.mediosDeContacto.findIndex(mc => mc.tipo === medioContacto.tipo);
+        if (index === -1) {
+            throw new ConflictError('El medio de contacto que desea eliminar no existe');
+        }
+        this.mediosDeContacto.splice(index, 1);
+    }
+
     toJSON() {
         return {
             id: this.id,
@@ -65,7 +95,11 @@ export class PersonaColaboradora {
                     descripcion: c.proyecto.descripcion,
                     estado: c.proyecto.estado
                 } : null
-            }))
+            })),
+            mediosDeContacto: this.mediosDeContacto.length > 0 
+                ? this.mediosDeContacto.map(mc => mc.toJSON()) 
+                : this.mediosDeContacto,
+            mensajesInternos: this.mensajesInternos
         };
     }
 }
