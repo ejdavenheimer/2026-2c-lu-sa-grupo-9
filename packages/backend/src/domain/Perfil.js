@@ -1,6 +1,12 @@
 import { randomUUID } from "crypto";
 import { UnidadCompromiso, ModalidadColaboracion } from "./enums.js";
 import { UnprocessableEntityError } from "../errors/AppError.js";
+import { Compatibilidad } from "./Compatibilidad.js";
+
+// Cuando el perfil declara habilidades opcionales, las requeridas definen el 70% del puntaje
+// y las opcionales el 30% restante. Sin opcionales, las requeridas valen el 100%: de lo
+// contrario un perfil sin opcionales nunca podría alcanzar el puntaje máximo.
+const PESO_REQUERIDAS = 0.7;
 
 export class Perfil {
     constructor({
@@ -82,6 +88,56 @@ export class Perfil {
             personaColaboradora.habilidades.some((h) => h.codigo === habOpc.codigo)
         );
         return coinciden.length;
+    }
+
+    /**
+     * Las habilidades requeridas deciden si es compatible; las opcionales sólo afinan el puntaje.
+     */
+    evaluarCompatibilidad(personaColaboradora) {
+        if (typeof personaColaboradora?.tieneHabilidad !== "function") {
+            throw new UnprocessableEntityError(
+                "Se requiere una persona colaboradora para evaluar la compatibilidad"
+            );
+        }
+
+        const requeridasFaltantes = this.habilidadesRequeridas.filter(
+            (habilidad) => !personaColaboradora.tieneHabilidad(habilidad.codigo)
+        );
+
+        const opcionalesCumplidas = this.habilidadesOpcionales.filter((habilidad) =>
+            personaColaboradora.tieneHabilidad(habilidad.codigo)
+        );
+
+        const cantidadRequeridasCumplidas = this.habilidadesRequeridas.length - requeridasFaltantes.length;
+
+        return new Compatibilidad({
+            perfil: this,
+            personaColaboradora,
+            puntaje: this.#calcularPuntaje(cantidadRequeridasCumplidas, opcionalesCumplidas.length),
+            requeridasFaltantes,
+            opcionalesCumplidas
+        });
+    }
+
+    #calcularPuntaje(requeridasCumplidas, opcionalesCumplidas) {
+        const totalRequeridas = this.habilidadesRequeridas.length;
+        const totalOpcionales = this.habilidadesOpcionales.length;
+
+        if (totalRequeridas === 0) {
+            return 0;
+        }
+
+        const proporcionRequeridas = requeridasCumplidas / totalRequeridas;
+
+        if (totalOpcionales === 0) {
+            return Math.round(100 * proporcionRequeridas);
+        }
+
+        const proporcionOpcionales = opcionalesCumplidas / totalOpcionales;
+
+        return Math.round(
+            100 * (PESO_REQUERIDAS * proporcionRequeridas + (1 - PESO_REQUERIDAS) * proporcionOpcionales)
+        );
     }
 
     toJSON() {

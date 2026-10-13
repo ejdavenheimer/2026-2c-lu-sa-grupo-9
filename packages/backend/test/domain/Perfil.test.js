@@ -1,5 +1,6 @@
 import { Perfil } from "../../src/domain/Perfil.js";
 import { Habilidad } from "../../src/domain/Habilidad.js";
+import { PersonaColaboradora } from "../../src/domain/PersonaColaboradora.js";
 import { UnidadCompromiso, ModalidadColaboracion } from "../../src/domain/enums.js";
 
 function crearHabilidad(codigo, titulo = "Habilidad") {
@@ -10,6 +11,21 @@ describe("Perfil (Dominio)", () => {
     const habReact = crearHabilidad("react", "React");
     const habNode = crearHabilidad("node", "NodeJS");
     const habDocker = crearHabilidad("docker", "Docker");
+
+    const perfilDePrueba = (overrides = {}) => new Perfil({
+        descripcion: "Fullstack",
+        habilidadesRequeridas: [habReact, habNode],
+        habilidadesOpcionales: [habDocker],
+        unidadCompromiso: UnidadCompromiso.HORAS_SEMANALES,
+        cantidadHoras: 10,
+        modalidadesColaboracion: [ModalidadColaboracion.GRATUITA],
+        ...overrides
+    });
+
+    const personaCon = (...habilidades) => new PersonaColaboradora({
+        nombreFantasia: "Candidata Test",
+        habilidades
+    });
 
     test("se crea exitosamente con campos válidos", () => {
         const perfil = new Perfil({
@@ -192,5 +208,73 @@ describe("Perfil (Dominio)", () => {
         expect(json.modalidadesColaboracion).toEqual([ModalidadColaboracion.CON_INCENTIVO_ECONOMICO]);
         expect(json.habilidadesRequeridas[0].codigo).toBe("react");
         expect(json.habilidadesOpcionales[0].codigo).toBe("docker");
+    });
+
+    describe("evaluarCompatibilidad", () => {
+        test("cumple todas las requeridas y todas las opcionales: compatible con puntaje 100", () => {
+            const resultado = perfilDePrueba().evaluarCompatibilidad(personaCon(habReact, habNode, habDocker));
+            expect(resultado.esCompatible).toBe(true);
+            expect(resultado.puntaje).toBe(100);
+            expect(resultado.requeridasFaltantes).toEqual([]);
+            expect(resultado.opcionalesCumplidas).toEqual([habDocker]);
+        });
+
+        test("cumple todas las requeridas sin ninguna opcional: compatible con puntaje 70", () => {
+            const resultado = perfilDePrueba().evaluarCompatibilidad(personaCon(habReact, habNode));
+            expect(resultado.esCompatible).toBe(true);
+            expect(resultado.puntaje).toBe(70);
+        });
+
+        test("cumple una sola requerida: no es compatible aunque cumpla alguna", () => {
+            const resultado = perfilDePrueba().evaluarCompatibilidad(personaCon(habReact));
+            expect(resultado.esCompatible).toBe(false);
+            expect(resultado.cumpleAlgunaRequerida).toBe(true);
+            expect(resultado.puntaje).toBe(35);
+            expect(resultado.requeridasFaltantes).toEqual([habNode]);
+        });
+
+        test("las opcionales suben el puntaje pero no alcanzan para ser compatible", () => {
+            const resultado = perfilDePrueba().evaluarCompatibilidad(personaCon(habReact, habDocker));
+            expect(resultado.esCompatible).toBe(false);
+            expect(resultado.puntaje).toBe(65);
+        });
+
+        test("sin ninguna habilidad en común: puntaje 0 y todas las requeridas faltantes", () => {
+            const resultado = perfilDePrueba().evaluarCompatibilidad(personaCon());
+            expect(resultado.esCompatible).toBe(false);
+            expect(resultado.cumpleAlgunaRequerida).toBe(false);
+            expect(resultado.puntaje).toBe(0);
+            expect(resultado.requeridasFaltantes).toEqual([habReact, habNode]);
+        });
+
+        test("si el perfil no declara opcionales, las requeridas valen el 100%", () => {
+            const resultado = perfilDePrueba({ habilidadesOpcionales: [] })
+                .evaluarCompatibilidad(personaCon(habReact, habNode));
+            expect(resultado.puntaje).toBe(100);
+        });
+
+        test("las habilidades repetidas de la persona no inflan el puntaje", () => {
+            const resultado = perfilDePrueba().evaluarCompatibilidad(personaCon(habReact, habReact, habNode));
+            expect(resultado.puntaje).toBe(70);
+            expect(resultado.requeridasFaltantes).toEqual([]);
+        });
+
+        test("lanza error si no se le pasa una persona colaboradora", () => {
+            expect(() => perfilDePrueba().evaluarCompatibilidad())
+                .toThrow("Se requiere una persona colaboradora para evaluar la compatibilidad");
+        });
+
+        test("lanza error si recibe un objeto plano en lugar de una persona de dominio", () => {
+            expect(() => perfilDePrueba().evaluarCompatibilidad({ habilidades: [habReact, habNode] }))
+                .toThrow("Se requiere una persona colaboradora");
+        });
+
+        test("esCompatible coincide siempre con cumpleTodasRequeridas", () => {
+            const perfil = perfilDePrueba();
+            for (const persona of [personaCon(), personaCon(habReact), personaCon(habReact, habNode)]) {
+                expect(perfil.evaluarCompatibilidad(persona).esCompatible)
+                    .toBe(perfil.cumpleTodasRequeridas(persona));
+            }
+        });
     });
 });
