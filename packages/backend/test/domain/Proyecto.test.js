@@ -82,4 +82,83 @@ describe("Proyecto", () => {
         expect(() => proyecto.agregarColaboracion(colaboradorSinHabilidad)).toThrow("El colaborador no cuenta con las habilidades requeridas para este proyecto");
         expect(proyecto.colaboraciones.length).toBe(0);
     });
+
+    test("agregarPerfil agrega un perfil y lo asocia al proyecto", () => {
+        const proyecto = crearProyectoDePrueba(crearColectivoDePrueba());
+        const perfil = proyecto.agregarPerfil({
+            descripcion: "Backend Dev",
+            habilidadesRequeridas: [{ codigo: "node", titulo: "NodeJS" }],
+            unidadCompromiso: "HORAS_SEMANALES",
+            cantidadHoras: 10,
+            modalidadesColaboracion: ["GRATUITA"]
+        });
+
+        expect(proyecto.perfiles).toContain(perfil);
+        expect(perfil.proyecto).toBe(proyecto);
+        expect(proyecto.obtenerPerfil(perfil.id)).toBe(perfil);
+    });
+
+    test("agregarPerfil lanza error si el proyecto está cerrado", () => {
+        const proyecto = crearProyectoDePrueba(crearColectivoDePrueba());
+        proyecto.cerrarProyecto();
+        expect(() => proyecto.agregarPerfil({
+            descripcion: "Backend Dev",
+            habilidadesRequeridas: [{ codigo: "node", titulo: "NodeJS" }],
+            unidadCompromiso: "HORAS_SEMANALES",
+            cantidadHoras: 10,
+            modalidadesColaboracion: ["GRATUITA"]
+        })).toThrow("No se pueden agregar perfiles a un proyecto cerrado");
+    });
+
+    test("modificarPerfil actualiza datos del perfil", () => {
+        const proyecto = crearProyectoDePrueba(crearColectivoDePrueba());
+        const perfil = proyecto.agregarPerfil({
+            descripcion: "Backend Dev",
+            habilidadesRequeridas: [{ codigo: "node", titulo: "NodeJS" }],
+            unidadCompromiso: "HORAS_SEMANALES",
+            cantidadHoras: 10,
+            modalidadesColaboracion: ["GRATUITA"]
+        });
+
+        proyecto.modificarPerfil(perfil.id, {
+            descripcion: "Senior Backend Dev",
+            cantidadHoras: 20
+        });
+
+        expect(perfil.descripcion).toBe("Senior Backend Dev");
+        expect(perfil.cantidadHoras).toBe(20);
+    });
+
+    test("quitarPerfil elimina el perfil del proyecto", () => {
+        const proyecto = crearProyectoDePrueba(crearColectivoDePrueba());
+        const perfil = proyecto.agregarPerfil({
+            descripcion: "Backend Dev",
+            habilidadesRequeridas: [{ codigo: "node", titulo: "NodeJS" }],
+            unidadCompromiso: "HORAS_SEMANALES",
+            cantidadHoras: 10,
+            modalidadesColaboracion: ["GRATUITA"]
+        });
+
+        const eliminado = proyecto.quitarPerfil(perfil.id);
+        expect(eliminado).toBe(true);
+        expect(proyecto.obtenerPerfil(perfil.id)).toBeNull();
+    });
+
+    test("validarColaborador funciona con perfiles", () => {
+        const proyecto = new Proyecto({
+            titulo: "Proyecto Moderno",
+            descripcion: "desc",
+            colectivo: crearColectivoDePrueba(),
+            perfiles: [{
+                descripcion: "Frontend Dev",
+                habilidadesRequeridas: [{ codigo: "vue", titulo: "VueJS" }],
+                unidadCompromiso: "HORAS_TOTALES",
+                cantidadHoras: 15,
+                modalidadesColaboracion: ["GRATUITA"]
+            }]
+        });
+
+        expect(proyecto.validarColaborador({ habilidades: [{ codigo: "vue" }] })).toBe(true);
+        expect(proyecto.validarColaborador({ habilidades: [{ codigo: "angular" }] })).toBe(false);
+    });
 });
