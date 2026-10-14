@@ -1,6 +1,24 @@
 import { PersonaColaboradoraService } from "../services/PersonaColaboradoraService.js";
+import { CompatibilidadService } from "../services/CompatibilidadService.js";
 import { z } from 'zod';
 import { BadRequestError, UnprocessableEntityError } from "../errors/AppError.js";
+
+const LIMITE_MAXIMO = 100;
+
+const busquedaCompatibleEsquema = z
+    .object({
+        estricto: z
+            .enum(["true", "false"], { error: 'estricto tiene que ser "true" o "false"' })
+            .transform((valor) => valor === "true")
+            .optional(),
+        limite: z.coerce
+            .number({ error: "limite tiene que ser un número" })
+            .int("limite tiene que ser un número entero")
+            .positive("limite tiene que ser mayor a cero")
+            .max(LIMITE_MAXIMO, `limite no puede ser mayor a ${LIMITE_MAXIMO}`)
+            .optional()
+    })
+    .strict();
 
 const personaColaboradoraValida = z.object({
     nombreFantasia: z.string().default(null),
@@ -30,8 +48,12 @@ const actualizacionPersonaColaboradoraEsquema = z.object({
 
 export class PersonaColaboradoraController {
 
-    constructor(personaColaboradoraService = new PersonaColaboradoraService()) {
+    constructor(
+        personaColaboradoraService = new PersonaColaboradoraService(),
+        compatibilidadService = new CompatibilidadService()
+    ) {
         this.personaColaboradoraService = personaColaboradoraService
+        this.compatibilidadService = compatibilidadService
     }
 
     obtenerPersonasColaboradoras = async (req, res, next) => {
@@ -71,6 +93,21 @@ export class PersonaColaboradoraController {
             const persona = this.personaColaboradoraService.agregarHabilidad(req.params.id, habilidad)
 
             return res.status(200).json(persona)
+        } catch (error) {
+            return next(error)
+        }
+    }
+
+    buscarProyectosCompatibles = async (req, res, next) => {
+        try {
+            const opciones = this.validarBody(busquedaCompatibleEsquema, req.query)
+
+            const resultados = await this.compatibilidadService.buscarProyectosCompatibles(
+                req.params.id,
+                opciones
+            )
+
+            return res.status(200).json(resultados)
         } catch (error) {
             return next(error)
         }
