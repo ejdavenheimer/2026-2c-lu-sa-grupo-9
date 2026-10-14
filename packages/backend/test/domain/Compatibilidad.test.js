@@ -6,7 +6,6 @@ const habReact = habilidad("react");
 const habNode = habilidad("node");
 const habDocker = habilidad("docker");
 
-// Un perfil mínimo: Compatibilidad sólo necesita saber cuántas requeridas tenía el perfil.
 const perfilCon = (...habilidadesRequeridas) => ({ habilidadesRequeridas });
 
 const compatibilidad = (overrides = {}) => new Compatibilidad({

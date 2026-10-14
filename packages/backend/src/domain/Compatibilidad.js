@@ -28,14 +28,10 @@ export class Compatibilidad {
         return this.requeridasFaltantes.length < this.perfil.habilidadesRequeridas.length;
     }
 
-    /**
-     * Comparador para ordenar de mayor a menor puntaje. Ante igual puntaje desempata por
-     * cantidad de opcionales cumplidas, para que el orden no quede al azar.
-     *
-     * Ojo: ordenar por puntaje no implica ordenar por compatibilidad. Las opcionales suman sin
-     * ser requisito, así que alguien que no es compatible puede puntuar más alto que alguien
-     * que sí lo es. Hay que filtrar por esCompatible ANTES de ordenar, nunca después.
-     */
+    get proyecto() {
+        return this.perfil?.proyecto ?? null;
+    }
+
     static compararPorPuntaje(unaCompatibilidad, otraCompatibilidad) {
         if (otraCompatibilidad.puntaje !== unaCompatibilidad.puntaje) {
             return otraCompatibilidad.puntaje - unaCompatibilidad.puntaje;

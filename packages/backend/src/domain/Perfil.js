@@ -3,9 +3,6 @@ import { UnidadCompromiso, ModalidadColaboracion } from "./enums.js";
 import { UnprocessableEntityError } from "../errors/AppError.js";
 import { Compatibilidad } from "./Compatibilidad.js";
 
-// Cuando el perfil declara habilidades opcionales, las requeridas definen el 70% del puntaje
-// y las opcionales el 30% restante. Sin opcionales, las requeridas valen el 100%: de lo
-// contrario un perfil sin opcionales nunca podría alcanzar el puntaje máximo.
 const PESO_REQUERIDAS = 0.7;
 
 export class Perfil {
@@ -90,9 +87,10 @@ export class Perfil {
         return coinciden.length;
     }
 
-    /**
-     * Las habilidades requeridas deciden si es compatible; las opcionales sólo afinan el puntaje.
-     */
+    codigosRequeridos() {
+        return [...new Set(this.habilidadesRequeridas.map((h) => h?.codigo).filter(Boolean))];
+    }
+
     evaluarCompatibilidad(personaColaboradora) {
         if (typeof personaColaboradora?.tieneHabilidad !== "function") {
             throw new UnprocessableEntityError(

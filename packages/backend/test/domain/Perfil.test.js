@@ -210,6 +210,21 @@ describe("Perfil (Dominio)", () => {
         expect(json.habilidadesOpcionales[0].codigo).toBe("docker");
     });
 
+    describe("codigosRequeridos", () => {
+        test("devuelve los códigos de las habilidades requeridas", () => {
+            expect(perfilDePrueba().codigosRequeridos()).toEqual(["react", "node"]);
+        });
+
+        test("no incluye las opcionales: son para puntuar, no para buscar", () => {
+            expect(perfilDePrueba().codigosRequeridos()).not.toContain("docker");
+        });
+
+        test("no repite códigos", () => {
+            const perfil = perfilDePrueba({ habilidadesRequeridas: [habReact, habReact, habNode] });
+            expect(perfil.codigosRequeridos()).toEqual(["react", "node"]);
+        });
+    });
+
     describe("evaluarCompatibilidad", () => {
         test("cumple todas las requeridas y todas las opcionales: compatible con puntaje 100", () => {
             const resultado = perfilDePrueba().evaluarCompatibilidad(personaCon(habReact, habNode, habDocker));
