@@ -29,4 +29,9 @@ router.route("/:id/perfiles/:perfilId")
     .put((req, res, next) => perfilController.modificar(req, res, next))
     .delete((req, res, next) => perfilController.eliminar(req, res, next));
 
+router.get(
+    "/:id/perfiles/:perfilId/colaboradores-compatibles",
+    (req, res, next) => perfilController.buscarColaboradoresCompatibles(req, res, next)
+);
+
 export default router;

@@ -37,6 +37,15 @@ export class PersonaColaboradoraRepository {
         return this.#colaboradores.find((c) => c.id === id) || null;
     }
 
+    static async buscarPorHabilidades(codigos) {
+        if (!Array.isArray(codigos) || codigos.length === 0) {
+            return [];
+        }
+        return this.#colaboradores.filter((colaborador) =>
+            codigos.some((codigo) => colaborador.tieneHabilidad(codigo))
+        );
+    }
+
     static eliminarPorId(id) {
         const index = this.#colaboradores.findIndex((c) => c.id === id);
         if (index === -1) {

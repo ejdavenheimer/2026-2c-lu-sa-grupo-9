@@ -71,6 +71,21 @@ export class PersonaColaboradora {
         this.colaboraciones.push(colaboracion);
     }
 
+    tieneHabilidad(codigo) {
+        if(!codigo || !Array.isArray(this.habilidades)) {
+            return false;
+        }
+        return this.habilidades.some(h => h?.codigo === codigo)
+    }
+
+    codigosDeHabilidades() {
+        if(!Array.isArray(this.habilidades)) {
+            return [];
+        }
+        return [...new Set(this.habilidades.map(h => h?.codigo).filter(Boolean))];
+
+    }
+
     toJSON() {
         return {
             id: this.id,

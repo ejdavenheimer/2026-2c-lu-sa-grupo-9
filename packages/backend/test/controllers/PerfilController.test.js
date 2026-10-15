@@ -5,6 +5,7 @@ import { BadRequestError, UnprocessableEntityError } from "../../src/errors/AppE
 
 describe("PerfilController", () => {
     let mockPerfilService;
+    let mockCompatibilidadService;
     let controller;
     let mockRes;
     let mockNext;
@@ -17,7 +18,10 @@ describe("PerfilController", () => {
             modificarPerfil: jest.fn(),
             eliminarPerfil: jest.fn()
         };
-        controller = new PerfilController(mockPerfilService);
+        mockCompatibilidadService = {
+            buscarColaboradoresCompatibles: jest.fn().mockResolvedValue([])
+        };
+        controller = new PerfilController(mockPerfilService, mockCompatibilidadService);
         mockRes = {
             status: jest.fn().mockReturnThis(),
             json: jest.fn().mockReturnThis(),
@@ -145,6 +149,113 @@ describe("PerfilController", () => {
             expect(mockPerfilService.eliminarPerfil).toHaveBeenCalledWith("proy-1", "perf-1");
             expect(mockRes.status).toHaveBeenCalledWith(204);
             expect(mockRes.send).toHaveBeenCalled();
+        });
+    });
+
+    describe("buscarColaboradoresCompatibles (HU08)", () => {
+        test("retorna 200 y los candidatos que devolvió el service", async () => {
+            const candidatos = [{ personaColaboradora: { id: "colab-1" }, compatibilidad: { puntaje: 100 } }];
+            mockCompatibilidadService.buscarColaboradoresCompatibles.mockResolvedValue(candidatos);
+
+            const req = { params: { id: "proy-1", perfilId: "perf-1" }, query: {} };
+
+            await controller.buscarColaboradoresCompatibles(req, mockRes, mockNext);
+
+            expect(mockRes.status).toHaveBeenCalledWith(200);
+            expect(mockRes.json).toHaveBeenCalledWith(candidatos);
+        });
+
+        test("sin query params no manda ninguna opción: el default es del service", async () => {
+            const req = { params: { id: "proy-1", perfilId: "perf-1" }, query: {} };
+
+            await controller.buscarColaboradoresCompatibles(req, mockRes, mockNext);
+
+            expect(mockCompatibilidadService.buscarColaboradoresCompatibles)
+                .toHaveBeenCalledWith("proy-1", "perf-1", {});
+        });
+
+        test("estricto=false llega al service como booleano, no como el string 'false'", async () => {
+            const req = {
+                params: { id: "proy-1", perfilId: "perf-1" },
+                query: { estricto: "false" }
+            };
+
+            await controller.buscarColaboradoresCompatibles(req, mockRes, mockNext);
+
+            expect(mockCompatibilidadService.buscarColaboradoresCompatibles)
+                .toHaveBeenCalledWith("proy-1", "perf-1", { estricto: false });
+        });
+
+        test("limite llega al service como número", async () => {
+            const req = {
+                params: { id: "proy-1", perfilId: "perf-1" },
+                query: { limite: "5" }
+            };
+
+            await controller.buscarColaboradoresCompatibles(req, mockRes, mockNext);
+
+            expect(mockCompatibilidadService.buscarColaboradoresCompatibles)
+                .toHaveBeenCalledWith("proy-1", "perf-1", { limite: 5 });
+        });
+
+        test("devuelve 200 con lista vacía cuando no hay candidatos, no un 404", async () => {
+            mockCompatibilidadService.buscarColaboradoresCompatibles.mockResolvedValue([]);
+
+            const req = { params: { id: "proy-1", perfilId: "perf-1" }, query: {} };
+
+            await controller.buscarColaboradoresCompatibles(req, mockRes, mockNext);
+
+            expect(mockRes.status).toHaveBeenCalledWith(200);
+            expect(mockRes.json).toHaveBeenCalledWith([]);
+            expect(mockNext).not.toHaveBeenCalled();
+        });
+
+        test("delega error en next si el query trae un param desconocido", async () => {
+            const req = {
+                params: { id: "proy-1", perfilId: "perf-1" },
+                query: { ordenarPor: "puntaje" }
+            };
+
+            await controller.buscarColaboradoresCompatibles(req, mockRes, mockNext);
+
+            expect(mockNext.mock.calls[0][0]).toBeInstanceOf(BadRequestError);
+            expect(mockCompatibilidadService.buscarColaboradoresCompatibles).not.toHaveBeenCalled();
+        });
+
+        test("delega error en next si limite no es un número", async () => {
+            const req = {
+                params: { id: "proy-1", perfilId: "perf-1" },
+                query: { limite: "todos" }
+            };
+
+            await controller.buscarColaboradoresCompatibles(req, mockRes, mockNext);
+
+            expect(mockNext.mock.calls[0][0]).toBeInstanceOf(BadRequestError);
+            expect(mockCompatibilidadService.buscarColaboradoresCompatibles).not.toHaveBeenCalled();
+        });
+
+        test("delega error en next si limite supera el tope", async () => {
+            const req = {
+                params: { id: "proy-1", perfilId: "perf-1" },
+                query: { limite: "500" }
+            };
+
+            await controller.buscarColaboradoresCompatibles(req, mockRes, mockNext);
+
+            expect(mockNext).toHaveBeenCalled();
+            expect(mockCompatibilidadService.buscarColaboradoresCompatibles).not.toHaveBeenCalled();
+        });
+
+        test("delega en next el error que lanza el service", async () => {
+            const error = new Error("No se encontró el perfil");
+            mockCompatibilidadService.buscarColaboradoresCompatibles.mockRejectedValue(error);
+
+            const req = { params: { id: "proy-1", perfilId: "perf-9" }, query: {} };
+
+            await controller.buscarColaboradoresCompatibles(req, mockRes, mockNext);
+
+            expect(mockNext).toHaveBeenCalledWith(error);
+            expect(mockRes.json).not.toHaveBeenCalled();
         });
     });
 });

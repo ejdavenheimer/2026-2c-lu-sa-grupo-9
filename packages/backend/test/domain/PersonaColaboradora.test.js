@@ -71,7 +71,6 @@ describe("PersonaColaboradora", () => {
         const persona = crearPersonaColaboradoraDePrueba();
         expect(() => persona.agregarColaboracion()).toThrowError("Debe proporcionar una colaboracion para agregar");
     });
-
     test("por defecto no acepta mensajes internos y no tiene medios de contacto", () => {
         const persona = crearPersonaColaboradoraDePrueba();
         expect(persona.aceptaMensajesInternos()).toBe(false);
@@ -107,4 +106,38 @@ describe("PersonaColaboradora", () => {
         expect(json.mensajesInternos).toBe(true);
         expect(json.mediosDeContacto).toBeUndefined();
     });
+
+    test("tieneHabilidad devuelve true si la persona tiene esa habilidad", () => {
+        const persona = crearPersonaColaboradoraDePrueba({ habilidades: [{ codigo: "react" }] });
+        expect(persona.tieneHabilidad("react")).toBe(true);
+    });
+
+    test("tieneHabilidad devuelve false si no tiene esa habilidad", () => {
+        const persona = crearPersonaColaboradoraDePrueba({ habilidades: [{ codigo: "react" }] });
+        expect(persona.tieneHabilidad("node")).toBe(false);
+    });
+
+    test("tieneHabilidad devuelve false si no se le pasa un código", () => {
+        const persona = crearPersonaColaboradoraDePrueba({ habilidades: [{ codigo: undefined }] });
+        expect(persona.tieneHabilidad()).toBe(false);
+    });
+
+    test("tieneHabilidad devuelve false si la persona no tiene habilidades", () => {
+        const persona = crearPersonaColaboradoraDePrueba();
+        expect(persona.tieneHabilidad("react")).toBe(false);
+    });
+
+    test("codigosDeHabilidades devuelve los códigos sin repetir", () => {
+        const persona = crearPersonaColaboradoraDePrueba({
+            habilidades: [{ codigo: "react" }, { codigo: "node" }, { codigo: "react" }]
+        });
+        expect(persona.codigosDeHabilidades()).toEqual(["react", "node"]);
+    });
+
+    test("codigosDeHabilidades devuelve lista vacía si la persona no tiene habilidades", () => {
+        const persona = crearPersonaColaboradoraDePrueba();
+        expect(persona.codigosDeHabilidades()).toEqual([]);
+    });
+
 });
+

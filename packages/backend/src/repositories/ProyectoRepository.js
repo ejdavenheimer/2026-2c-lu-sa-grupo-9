@@ -23,6 +23,17 @@ export class ProyectoRepository {
         return this.#proyectos.find((p) => p.id === id) || null;
     }
 
+    static async buscarPorHabilidadesRequeridas(codigos) {
+        if (!Array.isArray(codigos) || codigos.length === 0) {
+            return [];
+        }
+        return this.#proyectos.filter((proyecto) =>
+            proyecto.perfiles.some((perfil) =>
+                perfil.codigosRequeridos().some((codigo) => codigos.includes(codigo))
+            )
+        );
+    }
+
     static eliminarPorId(id) {
         const index = this.#proyectos.findIndex((p) => p.id === id);
         if (index === -1) {
