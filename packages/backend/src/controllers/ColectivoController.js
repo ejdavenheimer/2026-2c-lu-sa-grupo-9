@@ -2,23 +2,31 @@ import { z } from 'zod';
 import { ColectivoService } from '../services/ColectivoService.js';
 import { BadRequestError, UnprocessableEntityError } from '../errors/AppError.js';
 
+const entidadGeograficaEsquema = z.union([
+    z.string(),
+    z.object({
+        id: z.string().optional().nullable(),
+        nombre: z.string()
+    }).strict()
+]);
+
 const ubicacionEsquema = z.object({
-    pais: z.string(),
-    provincia: z.string().optional(),
-    ciudad: z.string().optional()
-}).strict()
+    pais: entidadGeograficaEsquema,
+    provincia: entidadGeograficaEsquema.optional().nullable(),
+    ciudad: z.string().optional().nullable()
+}).strict();
 
 const colectivoEsquema = z.object({
     nombre: z.string(),
     descripcion: z.string(),
     tipo: z.string(),
     ubicacion: ubicacionEsquema.optional()
-}).strict()
+}).strict();
 
 export class ColectivoController {
 
     constructor(colectivoService = new ColectivoService()){
-        this.colectivoService = colectivoService
+        this.colectivoService = colectivoService;
     }
 
     listar = async (req, res, next) => {

@@ -83,4 +83,26 @@ describe("PersonaColaboradoraService", () => {
         const habilidad = { titulo: "Habilidad Test", codigo: "habilidad_test", descripcion: "Descripción de prueba" };
         expect(() => personaColaboradoraService.agregarHabilidad("id-inexistente", habilidad)).toThrow("Persona colaboradora no encontrada");
     });
+
+    test("actualizarPersonaColaboradora modifica los datos del colaborador", () => {
+        const persona = datosPersonaColaboradoraDePrueba();
+        const personaCreada = personaColaboradoraService.crearPersonaColaboradora(persona);
+
+        const actualizada = personaColaboradoraService.actualizarPersonaColaboradora(personaCreada.id, {
+            presentacion: "Nueva bio",
+            nombreFantasia: "NuevoAlias"
+        });
+
+        expect(actualizada.presentacion).toBe("Nueva bio");
+        expect(actualizada.nombreFantasia).toBe("NuevoAlias");
+    });
+
+    test("eliminarPersonaColaboradora borra la persona existente", () => {
+        const persona = datosPersonaColaboradoraDePrueba();
+        const personaCreada = personaColaboradoraService.crearPersonaColaboradora(persona);
+
+        const eliminado = personaColaboradoraService.eliminarPersonaColaboradora(personaCreada.id);
+        expect(eliminado).toBe(true);
+        expect(() => personaColaboradoraService.obtenerPersonaColaboradoraPorId(personaCreada.id)).toThrow();
+    });
 });

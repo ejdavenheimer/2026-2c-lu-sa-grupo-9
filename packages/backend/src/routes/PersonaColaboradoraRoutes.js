@@ -5,13 +5,20 @@ const personaColaboradoraController = new PersonaColaboradoraController();
 
 const router = Router();
 
-router.get("/", personaColaboradoraController.obtenerPersonasColaboradoras)
-router.post("/", personaColaboradoraController.crearPersonaColaboradora);
+router.route("/")
+    .get(personaColaboradoraController.obtenerPersonasColaboradoras)
+    .post(personaColaboradoraController.crearPersonaColaboradora);
     
-router.get("/:id",personaColaboradoraController.obtenerPersonaColaboradoraPorId);
+router.route("/:id")
+    .get(personaColaboradoraController.obtenerPersonaColaboradoraPorId)
+    .put(personaColaboradoraController.actualizarPersonaColaboradora)
+    .delete(personaColaboradoraController.eliminarPersonaColaboradora);
+
 router.post("/:id/habilidades", personaColaboradoraController.agregarHabilidad);
 router.post("/:id/medios-contacto", personaColaboradoraController.agregarMedioContacto);
 router.put("/:id/medios-contacto", personaColaboradoraController.modificarMedioContacto);
 router.delete("/:id/medios-contacto", personaColaboradoraController.eliminarMedioContacto);
+
+router.get("/:id/proyectos-compatibles", personaColaboradoraController.buscarProyectosCompatibles);
     
 export default router;
