@@ -11,6 +11,33 @@ const respuestaDeError = (description) => ({
   }
 });
 
+const parametrosDeBusqueda = (defaultEstricto) => [
+  {
+    name: "estricto",
+    in: "query",
+    required: false,
+    description:
+      `Si es true devuelve sólo resultados compatibles (que cumplen todas las habilidades requeridas). ` +
+      `Si es false incluye también los que cumplen al menos una. Default: ${defaultEstricto}.`,
+    schema: {
+      type: "boolean",
+      default: defaultEstricto
+    }
+  },
+  {
+    name: "limite",
+    in: "query",
+    required: false,
+    description: "Cantidad máxima de resultados a devolver.",
+    schema: {
+      type: "integer",
+      minimum: 1,
+      maximum: 100,
+      default: 20
+    }
+  }
+];
+
 export const swaggerDocument = {
   openapi: "3.0.0",
   info: {
@@ -52,7 +79,7 @@ export const swaggerDocument = {
     },
     {
       name: "Perfiles",
-      description: "Gestión de perfiles requeridos por proyecto (HU01 - HU02)"
+      description: "Gestión de perfiles requeridos por proyecto (HU01 - HU02) y búsqueda de colaboradores compatibles con un perfil (HU08)"
     }
   ],
   paths: {
@@ -708,6 +735,62 @@ export const swaggerDocument = {
         }
       }
     },
+    "/proyectos/{id}/perfiles/{perfilId}/colaboradores-compatibles": {
+      get: {
+        tags: ["Perfiles"],
+        summary: "Buscar colaboradores compatibles con un perfil (HU08)",
+        description:
+          "Devuelve las personas colaboradoras compatibles con el perfil, ordenadas de mayor a menor puntaje.\n\n" +
+          "Las habilidades **requeridas** filtran y las **opcionales** ordenan: se entra al resultado por cumplir " +
+          "todas las requeridas, y las opcionales deciden en qué posición.\n\n" +
+          "El puntaje **no sirve como umbral de compatibilidad**: como las opcionales suman sin ser requisito, " +
+          "alguien que no cumple todas las requeridas puede puntuar más alto que alguien que sí. Para saber si un " +
+          "resultado sirve hay que leer `esCompatible`, no el puntaje.\n\n" +
+          "Una búsqueda sin resultados devuelve 200 con lista vacía: el perfil existe y la respuesta es que no hay " +
+          "candidatos. Este endpoint no envía mensajes ni revela medios de contacto; contactar a una persona es HU10.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID del proyecto",
+            schema: {
+              type: "string",
+              example: "proy-1"
+            }
+          },
+          {
+            name: "perfilId",
+            in: "path",
+            required: true,
+            description: "ID del perfil del proyecto contra el cual se evalúa la compatibilidad",
+            schema: {
+              type: "string",
+              example: "perf-1"
+            }
+          },
+          ...parametrosDeBusqueda(true)
+        ],
+        responses: {
+          "200": {
+            description: "Candidatos ordenados por puntaje (puede ser una lista vacía)",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "array",
+                  items: {
+                    $ref: "#/components/schemas/ColaboradorCompatible"
+                  }
+                }
+              }
+            }
+          },
+          "400": respuestaDeError("Se envió un query param no reconocido o con el tipo incorrecto"),
+          "404": respuestaDeError("Proyecto o perfil no encontrado"),
+          "422": respuestaDeError("Un query param llegó bien pero con un valor inadmisible (por ejemplo limite=0)")
+        }
+      }
+    },
     "/personas-colaboradoras": {
       get: {
         tags: ["Personas Colaboradoras"],
@@ -905,6 +988,53 @@ export const swaggerDocument = {
           "404": respuestaDeError("Persona colaboradora no encontrada"),
           "409": respuestaDeError("Esa habilidad ya había sido agregada a la persona colaboradora"),
           "422": respuestaDeError("No se indicó una habilidad válida")
+        }
+      }
+    },
+    "/personas-colaboradoras/{id}/proyectos-compatibles": {
+      get: {
+        tags: ["Personas Colaboradoras"],
+        summary: "Buscar proyectos compatibles con las habilidades de una persona (HU09)",
+        description:
+          "Devuelve las oportunidades de colaboración relacionadas con las habilidades de la persona, ordenadas " +
+          "de mayor a menor puntaje. Sólo considera proyectos publicados.\n\n" +
+          "Devuelve un resultado **por cada par proyecto-perfil**, no uno por proyecto: como el compromiso " +
+          "esperado y la modalidad se declaran por perfil, dos perfiles del mismo proyecto son dos propuestas " +
+          "distintas.\n\n" +
+          "A diferencia de HU08, el default es laxo: el enunciado pide proyectos *relacionados* con las " +
+          "habilidades, y a la persona le sirve ver también aquellos donde le falta algo para saber qué le " +
+          "conviene aprender. `requeridasFaltantes` dice exactamente qué le falta. Con `estricto=true` ve sólo " +
+          "los perfiles que puede cubrir por completo.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID de la persona colaboradora",
+            schema: {
+              type: "string",
+              example: "colab-1"
+            }
+          },
+          ...parametrosDeBusqueda(false)
+        ],
+        responses: {
+          "200": {
+            description: "Pares proyecto-perfil ordenados por puntaje (puede ser una lista vacía)",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "array",
+                  items: {
+                    $ref: "#/components/schemas/ProyectoCompatible"
+                  }
+                }
+              }
+            }
+          },
+          "400": respuestaDeError("Se envió un query param no reconocido o con el tipo incorrecto"),
+          "404": respuestaDeError("Persona colaboradora no encontrada"),
+          "422": respuestaDeError("Un query param llegó bien pero con un valor inadmisible (por ejemplo limite=0)")
         }
       }
     },
@@ -1582,6 +1712,144 @@ export const swaggerDocument = {
           descripcion: {
             type: "string",
             example: "Creación de interfaces de usuario modernas con React y Hooks."
+          }
+        }
+      },
+      Compatibilidad: {
+        type: "object",
+        description:
+          "Resultado de evaluar una persona colaboradora contra un perfil. Es un valor derivado: se calcula en " +
+          "cada búsqueda a partir de las habilidades de ambos lados y no se persiste, porque quedaría viejo en " +
+          "cuanto cualquiera de los dos lados cambie.",
+        properties: {
+          esCompatible: {
+            type: "boolean",
+            description: "True si la persona cumple TODAS las habilidades requeridas del perfil. Es el único campo que define si el resultado sirve.",
+            example: true
+          },
+          cumpleAlgunaRequerida: {
+            type: "boolean",
+            description: "True si cumple al menos una de las requeridas. Es el criterio que se usa cuando estricto=false.",
+            example: true
+          },
+          puntaje: {
+            type: "number",
+            description:
+              "100 × (0.7 × requeridas cumplidas / total + 0.3 × opcionales cumplidas / total). Si el perfil no " +
+              "declara habilidades opcionales, las requeridas valen el 100%. Sirve para ordenar, NO para decidir " +
+              "compatibilidad: un resultado con esCompatible=false puede tener más puntaje que uno con true.",
+            example: 100
+          },
+          requeridasFaltantes: {
+            type: "array",
+            description: "Habilidades requeridas por el perfil que la persona no tiene. Vacío cuando esCompatible es true.",
+            items: {
+              $ref: "#/components/schemas/Habilidad"
+            }
+          },
+          opcionalesCumplidas: {
+            type: "array",
+            description: "Habilidades opcionales del perfil que la persona sí tiene. Son las que mejoran la posición en el orden.",
+            items: {
+              $ref: "#/components/schemas/Habilidad"
+            }
+          }
+        }
+      },
+      CandidatoBusqueda: {
+        type: "object",
+        description:
+          "Vista reducida de la persona colaboradora para un resultado de búsqueda. No incluye el historial de " +
+          "colaboraciones ni los medios de contacto: encontrar un candidato no habilita a contactarlo, eso es HU10 " +
+          "y requiere que la persona haya aceptado el contacto.",
+        properties: {
+          id: {
+            type: "string",
+            example: "colab-1"
+          },
+          nombreFantasia: {
+            type: "string",
+            example: "DevSolidario"
+          },
+          nombre: {
+            type: "string",
+            example: "Ana"
+          },
+          apellido: {
+            type: "string",
+            example: "García"
+          },
+          pronombres: {
+            type: "array",
+            items: {
+              type: "string"
+            },
+            example: ["ella"]
+          },
+          presentacion: {
+            type: "string",
+            example: "Desarrolladora Fullstack interesada en proyectos de impacto social."
+          },
+          habilidades: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/Habilidad"
+            }
+          }
+        }
+      },
+      ColaboradorCompatible: {
+        type: "object",
+        description: "Un candidato y el detalle de por qué puntuó lo que puntuó (HU08).",
+        properties: {
+          personaColaboradora: {
+            $ref: "#/components/schemas/CandidatoBusqueda"
+          },
+          compatibilidad: {
+            $ref: "#/components/schemas/Compatibilidad"
+          }
+        }
+      },
+      ProyectoCompatible: {
+        type: "object",
+        description:
+          "Una oportunidad de colaboración (HU09): el par proyecto-perfil que matcheó, más el detalle de la " +
+          "compatibilidad. El compromiso y la modalidad vienen en el perfil, no en el proyecto.",
+        properties: {
+          proyecto: {
+            type: "object",
+            properties: {
+              id: { type: "string", example: "proy-1" },
+              titulo: { type: "string", example: "Portal del Barrio" },
+              descripcion: { type: "string", example: "Portal vecinal de reclamos" },
+              estado: { type: "string", example: "PUBLICADO" },
+              colectivo: {
+                type: "object",
+                nullable: true,
+                properties: {
+                  id: { type: "string", example: "col-1" },
+                  nombre: { type: "string", example: "Colectivo Comunitario" }
+                }
+              }
+            }
+          },
+          perfil: {
+            type: "object",
+            properties: {
+              id: { type: "string", example: "perf-1" },
+              nombre: { type: "string", example: "Tester" },
+              descripcion: { type: "string", example: "QA del portal" },
+              unidadCompromiso: { type: "string", example: "HORAS_SEMANALES" },
+              cantidadHoras: { type: "number", example: 5 },
+              modalidadesColaboracion: {
+                type: "array",
+                items: { type: "string" },
+                example: ["GRATUITA"]
+              }
+            }
+          },
+          compatibilidad: {
+            $ref: "#/components/schemas/Compatibilidad"
           }
         }
       },

@@ -1,7 +1,25 @@
 import { z } from "zod";
 import { PerfilService } from "../services/PerfilService.js";
+import { CompatibilidadService } from "../services/CompatibilidadService.js";
 import { UnidadCompromiso, ModalidadColaboracion } from "../domain/enums.js";
 import { BadRequestError, UnprocessableEntityError } from "../errors/AppError.js";
+
+const LIMITE_MAXIMO = 100;
+
+const busquedaCompatibleEsquema = z
+    .object({
+        estricto: z
+            .enum(["true", "false"], { error: 'estricto tiene que ser "true" o "false"' })
+            .transform((valor) => valor === "true")
+            .optional(),
+        limite: z.coerce
+            .number({ error: "limite tiene que ser un número" })
+            .int("limite tiene que ser un número entero")
+            .positive("limite tiene que ser mayor a cero")
+            .max(LIMITE_MAXIMO, `limite no puede ser mayor a ${LIMITE_MAXIMO}`)
+            .optional()
+    })
+    .strict();
 
 const crearPerfilEsquema = z
     .object({
@@ -33,8 +51,10 @@ const modificarPerfilEsquema = z
     .strict();
 
 export class PerfilController {
-    constructor(perfilService = new PerfilService()) {
+
+    constructor(perfilService = new PerfilService(), compatibilidadService = new CompatibilidadService()) {
         this.perfilService = perfilService;
+        this.compatibilidadService = compatibilidadService;
     }
 
     crear = async (req, res, next) => {
@@ -89,6 +109,23 @@ export class PerfilController {
             this.perfilService.eliminarPerfil(proyectoId, perfilId);
 
             return res.status(204).send();
+        } catch (error) {
+            return next(error);
+        }
+    };
+
+    buscarColaboradoresCompatibles = async (req, res, next) => {
+        try {
+            const { id: proyectoId, perfilId } = req.params;
+            const opciones = this.validarBody(busquedaCompatibleEsquema, req.query);
+
+            const resultados = await this.compatibilidadService.buscarColaboradoresCompatibles(
+                proyectoId,
+                perfilId,
+                opciones
+            );
+
+            return res.status(200).json(resultados);
         } catch (error) {
             return next(error);
         }

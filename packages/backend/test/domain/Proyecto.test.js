@@ -1,6 +1,7 @@
 import { jest } from "@jest/globals";
 import { Proyecto } from "../../src/domain/Proyecto.js";
 import { Colectivo } from "../../src/domain/Colectivo.js";
+import { PersonaColaboradora } from "../../src/domain/PersonaColaboradora.js";
 import { EstadoProyecto } from "../../src/domain/enums.js";
 
 function crearColectivoDePrueba() {
@@ -160,5 +161,71 @@ describe("Proyecto", () => {
 
         expect(proyecto.validarColaborador({ habilidades: [{ codigo: "vue" }] })).toBe(true);
         expect(proyecto.validarColaborador({ habilidades: [{ codigo: "angular" }] })).toBe(false);
+    });
+
+    describe("evaluarPerfilesPara", () => {
+        const proyectoConDosPerfiles = () => new Proyecto({
+            titulo: "Proyecto Moderno",
+            descripcion: "desc",
+            colectivo: crearColectivoDePrueba(),
+            perfiles: [
+                {
+                    nombre: "Frontend",
+                    descripcion: "Frontend Dev",
+                    habilidadesRequeridas: [{ codigo: "vue", titulo: "VueJS" }],
+                    habilidadesOpcionales: [{ codigo: "docker", titulo: "Docker" }],
+                    unidadCompromiso: "HORAS_TOTALES",
+                    cantidadHoras: 15,
+                    modalidadesColaboracion: ["GRATUITA"]
+                },
+                {
+                    nombre: "Backend",
+                    descripcion: "Backend Dev",
+                    habilidadesRequeridas: [{ codigo: "node", titulo: "NodeJS" }],
+                    unidadCompromiso: "HORAS_TOTALES",
+                    cantidadHoras: 20,
+                    modalidadesColaboracion: ["GRATUITA"]
+                }
+            ]
+        });
+
+        const personaCon = (...codigos) => new PersonaColaboradora({
+            nombreFantasia: "Candidata Test",
+            habilidades: codigos.map((codigo) => ({ codigo }))
+        });
+
+        test("devuelve una evaluación por cada perfil del proyecto", () => {
+            const evaluaciones = proyectoConDosPerfiles().evaluarPerfilesPara(personaCon("vue"));
+            expect(evaluaciones.length).toBe(2);
+        });
+
+        test("ordena las evaluaciones de mayor a menor puntaje", () => {
+            const evaluaciones = proyectoConDosPerfiles().evaluarPerfilesPara(personaCon("node"));
+
+            expect(evaluaciones[0].perfil.nombre).toBe("Backend");
+            expect(evaluaciones[0].puntaje).toBe(100);
+            expect(evaluaciones[1].perfil.nombre).toBe("Frontend");
+            expect(evaluaciones[1].puntaje).toBe(0);
+        });
+
+        test("no filtra: también devuelve los perfiles incompatibles, marcados como tales", () => {
+            const evaluaciones = proyectoConDosPerfiles().evaluarPerfilesPara(personaCon("vue"));
+            const compatibles = evaluaciones.filter((evaluacion) => evaluacion.esCompatible);
+
+            expect(compatibles.length).toBe(1);
+            expect(compatibles[0].perfil.nombre).toBe("Frontend");
+        });
+
+        test("cada evaluación se trae la persona, para no perder el apareamiento al ordenar", () => {
+            const persona = personaCon("node");
+            const evaluaciones = proyectoConDosPerfiles().evaluarPerfilesPara(persona);
+
+            expect(evaluaciones.every((evaluacion) => evaluacion.personaColaboradora === persona)).toBe(true);
+        });
+
+        test("un proyecto sin perfiles devuelve una lista vacía", () => {
+            const proyecto = crearProyectoDePrueba(crearColectivoDePrueba());
+            expect(proyecto.evaluarPerfilesPara(personaCon("react"))).toEqual([]);
+        });
     });
 });

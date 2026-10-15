@@ -15,5 +15,7 @@ router.route("/:id")
     .delete(personaColaboradoraController.eliminarPersonaColaboradora);
 
 router.post("/:id/habilidades", personaColaboradoraController.agregarHabilidad);
+
+router.get("/:id/proyectos-compatibles", personaColaboradoraController.buscarProyectosCompatibles);
     
 export default router;

@@ -1,6 +1,7 @@
 import { EstadoProyecto } from "./enums.js";
 import { Colaboracion } from "./Colaboracion.js";
 import { Perfil } from "./Perfil.js";
+import { Compatibilidad } from "./Compatibilidad.js";
 import { ConflictError, NotFoundError, UnprocessableEntityError } from "../errors/AppError.js";
 
 export class Proyecto {
@@ -162,6 +163,12 @@ export class Proyecto {
             );
         }
         return false;
+    }
+
+    evaluarPerfilesPara(personaColaboradora) {
+        return this.perfiles
+            .map((perfil) => perfil.evaluarCompatibilidad(personaColaboradora))
+            .sort(Compatibilidad.compararPorPuntaje);
     }
 
     cerrarProyecto() {
