@@ -53,6 +53,10 @@ export const swaggerDocument = {
     {
       name: "Perfiles",
       description: "Gestión de perfiles requeridos por proyecto (HU01 - HU02)"
+    },
+    {
+      name: "Notificaciones",
+      description: "Gestión y envío de notificaciones internas y replicación externa (HU10 - HU11)"
     }
   ],
   paths: {
@@ -1120,6 +1124,147 @@ export const swaggerDocument = {
           }
         }
       }
+    },
+    "/notificaciones": {
+      post: {
+        tags: ["Notificaciones"],
+        summary: "Enviar una notificación interna y replicar en medios externos",
+        description: "Envía un mensaje interno a una persona colaboradora que haya aceptado ser contactada, asociado a un colectivo y un perfil de proyecto. Si la persona colaboradora tiene medios externos registrados, se replica el mensaje.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/CrearNotificacionInput"
+              }
+            }
+          }
+        },
+        responses: {
+          201: {
+            description: "Notificación creada y enviada exitosamente",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Notificacion"
+                }
+              }
+            }
+          },
+          400: respuestaDeError("Datos de entrada inválidos"),
+          404: respuestaDeError("Colectivo, persona colaboradora o perfil no encontrado"),
+          422: respuestaDeError("La persona colaboradora no ha aceptado ser contactada")
+        }
+      },
+      get: {
+        tags: ["Notificaciones"],
+        summary: "Listar notificaciones",
+        description: "Obtiene las notificaciones registradas, con filtros opcionales por destinatario, colectivo o solo no leídas.",
+        parameters: [
+          {
+            name: "destinatarioId",
+            in: "query",
+            required: false,
+            schema: { type: "string" },
+            description: "Filtrar por ID de la persona colaboradora destinataria"
+          },
+          {
+            name: "colectivoId",
+            in: "query",
+            required: false,
+            schema: { type: "string" },
+            description: "Filtrar por ID del colectivo emisor"
+          },
+          {
+            name: "soloNoLeidas",
+            in: "query",
+            required: false,
+            schema: { type: "boolean" },
+            description: "Filtrar únicamente notificaciones no leídas"
+          }
+        ],
+        responses: {
+          200: {
+            description: "Lista de notificaciones obtenida exitosamente",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "array",
+                  items: {
+                    $ref: "#/components/schemas/Notificacion"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notificaciones/{id}": {
+      get: {
+        tags: ["Notificaciones"],
+        summary: "Obtener una notificación por ID",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+            description: "Identificador de la notificación"
+          }
+        ],
+        responses: {
+          200: {
+            description: "Notificación encontrada",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Notificacion"
+                }
+              }
+            }
+          },
+          404: respuestaDeError("Notificación no encontrada")
+        }
+      },
+      patch: {
+        tags: ["Notificaciones"],
+        summary: "Actualizar el estado de lectura de una notificación",
+        description: "Permite marcar una notificación como leída o no leída",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+            description: "Identificador de la notificación"
+          }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ActualizarNotificacionLecturaInput"
+              }
+            }
+          }
+        },
+        responses: {
+          200: {
+            description: "Estado de lectura actualizado exitosamente",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Notificacion"
+                }
+              }
+            }
+          },
+          400: respuestaDeError("Body inválido"),
+          404: respuestaDeError("Notificación no encontrada")
+        }
+      }
     }
   },
   components: {
@@ -1497,6 +1642,31 @@ export const swaggerDocument = {
             items: {
               $ref: "#/components/schemas/Habilidad"
             }
+          },
+          mensajesInternos: {
+            type: "boolean",
+            default: false,
+            description: "Si la persona acepta ser contactada por mensajería interna (HU10). Por defecto false.",
+            example: true
+          },
+          mediosDeContacto: {
+            type: "array",
+            description: "Medios externos registrados internamente para replicar notificaciones (HU11). No se muestran públicamente.",
+            items: {
+              type: "object",
+              required: ["tipo", "valor"],
+              properties: {
+                tipo: {
+                  type: "string",
+                  enum: ["EMAIL", "WHATSAPP", "SMS"],
+                  example: "EMAIL"
+                },
+                valor: {
+                  type: "string",
+                  example: "ana@example.com"
+                }
+              }
+            }
           }
         }
       },
@@ -1547,6 +1717,11 @@ export const swaggerDocument = {
             items: {
               type: "object"
             }
+          },
+          mensajesInternos: {
+            type: "boolean",
+            description: "Indica si la persona aceptó ser contactada por mensajería interna. Los medios de contacto no se exponen públicamente.",
+            example: true
           }
         }
       },
@@ -1644,6 +1819,69 @@ export const swaggerDocument = {
             type: "string",
             enum: ["GITHUB", "GITLAB"],
             example: "GITHUB"
+          }
+        }
+      },
+      CrearNotificacionInput: {
+        type: "object",
+        required: ["colectivoId", "personaColaboradoraId", "perfilId", "contenido"],
+        properties: {
+          colectivoId: { type: "string", example: "col-1" },
+          personaColaboradoraId: { type: "string", example: "colab-1" },
+          perfilId: { type: "string", example: "perf-1" },
+          contenido: { type: "string", example: "Te invitamos a sumarte al proyecto de reforestación en el rol de Frontend React." },
+          replicarMediosExternos: { type: "boolean", default: true, example: true }
+        }
+      },
+      ActualizarNotificacionLecturaInput: {
+        type: "object",
+        required: ["leida"],
+        properties: {
+          leida: { type: "boolean", example: true }
+        }
+      },
+      Notificacion: {
+        type: "object",
+        properties: {
+          id: { type: "string", example: "notif-1234" },
+          contenido: { type: "string", example: "Te invitamos a sumarte al proyecto..." },
+          fecha: { type: "string", format: "date-time" },
+          leida: { type: "boolean", example: false },
+          colectivo: {
+            type: "object",
+            properties: {
+              id: { type: "string", example: "col-1" },
+              nombre: { type: "string", example: "Fundación Raíces" }
+            }
+          },
+          personaColaboradora: {
+            type: "object",
+            properties: {
+              id: { type: "string", example: "colab-1" },
+              nombre: { type: "string", example: "Ana" },
+              apellido: { type: "string", example: "García" },
+              nombreFantasia: { type: "string", example: "AnaDev" }
+            }
+          },
+          perfil: {
+            type: "object",
+            properties: {
+              id: { type: "string", example: "perf-1" },
+              nombre: { type: "string", example: "Desarrollador Frontend" }
+            }
+          },
+          mediosExternosUtilizados: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                tipo: { type: "string", example: "EMAIL" },
+                valor: { type: "string", example: "colab@gmail.com" },
+                fechaEnvio: { type: "string", format: "date-time" },
+                exitoso: { type: "boolean", example: true },
+                error: { type: "string", nullable: true }
+              }
+            }
           }
         }
       }

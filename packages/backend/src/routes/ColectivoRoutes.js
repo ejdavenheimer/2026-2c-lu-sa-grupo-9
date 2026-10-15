@@ -8,7 +8,6 @@ const router = Router();
 router.route("/")
     .get(colectivoController.listar)
     .post(colectivoController.crear);
-    
 router.route("/:id")
     .get(colectivoController.obtenerPorId)
     .put(colectivoController.actualizar)

@@ -2,6 +2,11 @@ import { PersonaColaboradoraService } from "../services/PersonaColaboradoraServi
 import { z } from 'zod';
 import { BadRequestError, UnprocessableEntityError } from "../errors/AppError.js";
 
+const medioContactoEsquema = z.object({
+    tipo: z.string(),
+    valor: z.string()
+}).strict();
+
 const personaColaboradoraValida = z.object({
     nombreFantasia: z.string().default(null),
     nombre: z.string().default(null),
@@ -10,7 +15,9 @@ const personaColaboradoraValida = z.object({
     presentacion: z.string().default(""),
     cuentas: z.array(z.any()).default([]),
     habilidades: z.array(z.any()).default([]),
-    colaboraciones: z.array(z.any()).default([])
+    colaboraciones: z.array(z.any()).default([]),
+    mensajesInternos: z.boolean().default(false),
+    mediosDeContacto: z.array(medioContactoEsquema).default([])
 }).strict();
 
 const habilidadEsquema = z.object({
@@ -25,7 +32,9 @@ const actualizacionPersonaColaboradoraEsquema = z.object({
     apellido: z.string().optional().nullable(),
     pronombres: z.array(z.string()).optional(),
     presentacion: z.string().optional(),
-    cuentas: z.array(z.any()).optional()
+    cuentas: z.array(z.any()).optional(),
+    mensajesInternos: z.boolean().optional(),
+    mediosDeContacto: z.array(medioContactoEsquema).optional()
 }).strict();
 
 export class PersonaColaboradoraController {

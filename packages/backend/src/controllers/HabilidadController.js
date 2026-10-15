@@ -73,7 +73,7 @@ export class HabilidadController {
             });
         }
     }
-}
+
 
     // 400 si la request está malformada (falta un campo, tipo incorrecto, campo de más);
     // 422 si los valores llegaron bien pero violan una regla, igual que el dominio.

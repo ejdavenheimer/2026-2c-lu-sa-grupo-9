@@ -29,6 +29,7 @@ export class Notificacion {
         this.colectivo = colectivo;
         this.personaColaboradora = personaColaboradora;
         this.perfil = perfil;
+
         this.fecha = fecha || new Date();
         this.leida = Boolean(leida);
         this.mediosExternosUtilizados = [...mediosExternosUtilizados];
@@ -36,6 +37,10 @@ export class Notificacion {
 
     marcarLeida() {
         this.leida = true;
+    }
+
+    setLeida(estado = true) {
+        this.leida = Boolean(estado);
     }
 
     registrarMedioUtilizado(medio) {
@@ -51,20 +56,20 @@ export class Notificacion {
             contenido: this.contenido,
             fecha: this.fecha,
             leida: this.leida,
-            colectivo: this.colectivo ? {
+            colectivo: {
                 id: this.colectivo.id,
                 nombre: this.colectivo.nombre
-            } : null,
-            personaColaboradora: this.personaColaboradora ? {
+            },
+            personaColaboradora: {
                 id: this.personaColaboradora.id,
                 nombre: this.personaColaboradora.nombre,
                 apellido: this.personaColaboradora.apellido,
                 nombreFantasia: this.personaColaboradora.nombreFantasia
-            } : null,
-            perfil: this.perfil ? {
+            },
+            perfil: {
                 id: this.perfil.id,
                 nombre: this.perfil.nombre || this.perfil.descripcion
-            } : null,
+            },
             mediosExternosUtilizados: this.mediosExternosUtilizados
         };
     }
