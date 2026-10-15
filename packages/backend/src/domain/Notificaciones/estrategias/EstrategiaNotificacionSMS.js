@@ -1,7 +1,7 @@
 import { EstrategiaNotificacion } from "./EstrategiaNotificacion.js";
 
 export class EstrategiaNotificacionSMS extends EstrategiaNotificacion {
-    notificar({ destinatario, mensaje, notificacion }) {
+    async notificar({ destinatario, mensaje, notificacion }) {
         if (!destinatario) {
             throw new Error("El número de SMS es requerido");
         }

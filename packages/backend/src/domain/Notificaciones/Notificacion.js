@@ -8,6 +8,7 @@ export class Notificacion {
         personaColaboradora,
         perfil,
         fecha,
+        leida = false,
         mediosExternosUtilizados = []
     } = {}) {
         if (!contenido || typeof contenido !== "string" || !contenido.trim()) {
@@ -29,7 +30,12 @@ export class Notificacion {
         this.personaColaboradora = personaColaboradora;
         this.perfil = perfil;
         this.fecha = fecha || new Date();
+        this.leida = Boolean(leida);
         this.mediosExternosUtilizados = [...mediosExternosUtilizados];
+    }
+
+    marcarLeida() {
+        this.leida = true;
     }
 
     registrarMedioUtilizado(medio) {
@@ -44,6 +50,7 @@ export class Notificacion {
             id: this.id,
             contenido: this.contenido,
             fecha: this.fecha,
+            leida: this.leida,
             colectivo: this.colectivo ? {
                 id: this.colectivo.id,
                 nombre: this.colectivo.nombre

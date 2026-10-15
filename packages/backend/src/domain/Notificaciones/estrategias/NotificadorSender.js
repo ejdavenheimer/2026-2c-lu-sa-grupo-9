@@ -13,7 +13,7 @@ export class NotificadorSender {
         };
     }
 
-    notificarPorMedio(medio, notificacion) {
+    async notificarPorMedio(medio, notificacion) {
         if (!medio || !medio.tipo) {
             throw new Error("El medio de contacto debe indicar un tipo");
         }
@@ -24,21 +24,36 @@ export class NotificadorSender {
             console.warn(`[NotificadorSender] No existe estrategia configurada para el tipo de medio: ${medio.tipo}`);
             return false;
         }
-        //TODO revisar
-        estrategia.notificar({
-            destinatario: medio.valor,
-            mensaje: notificacion.contenido,
-            notificacion
-        });
-
-        notificacion.registrarMedioUtilizado(medio);
-        return true;
+        try {
+            const resultado = await estrategia.notificar({
+                destinatario: medio.valor,
+                mensaje: notificacion.contenido,
+                notificacion
+            });
+            notificacion.registrarMedioUtilizado({
+                tipo: medio.tipo,
+                valor: medio.valor,
+                fechaEnvio: resultado.fechaEnvio || new Date(),
+                exitoso: true
+            });
+            return true;
+        } catch (error) {
+            console.error(`[NotificadorSender] Falló el envío por ${medio.tipo} a ${medio.valor}:`, error.message);
+            notificacion.registrarMedioUtilizado({
+                tipo: medio.tipo,
+                valor: medio.valor,
+                fechaEnvio: new Date(),
+                exitoso: false,
+                error: error.message
+            });
+            return false;
+        }
     }
 
-    replicarPorMedios(medios = [], notificacion) {
+    async replicarPorMedios(medios = [], notificacion) {
         const resultados = [];
         for (const medio of medios) {
-            const enviado = this.notificarPorMedio(medio, notificacion);
+            const enviado = await this.notificarPorMedio(medio, notificacion);
             resultados.push({ medio, enviado });
         }
         return resultados;

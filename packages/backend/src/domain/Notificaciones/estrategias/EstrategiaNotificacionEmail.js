@@ -1,7 +1,7 @@
 import { EstrategiaNotificacion } from "./EstrategiaNotificacion.js";
 
 export class EstrategiaNotificacionEmail extends EstrategiaNotificacion {
-    notificar({ destinatario, mensaje, notificacion }) {
+    async notificar({ destinatario, mensaje, notificacion }) {
         if (!destinatario) {
             throw new Error("El destinatario de email es requerido");
         }
