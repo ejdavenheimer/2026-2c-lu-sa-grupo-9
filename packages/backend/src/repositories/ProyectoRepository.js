@@ -23,6 +23,15 @@ export class ProyectoRepository {
         return this.#proyectos.find((p) => p.id === id) || null;
     }
 
+    static eliminarPorId(id) {
+        const index = this.#proyectos.findIndex((p) => p.id === id);
+        if (index === -1) {
+            return false;
+        }
+        this.#proyectos.splice(index, 1);
+        return true;
+    }
+
     static limpiar() {
         this.#proyectos = [];
         this.#nextId = 1;

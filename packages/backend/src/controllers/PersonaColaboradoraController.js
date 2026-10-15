@@ -1,5 +1,6 @@
 import { PersonaColaboradoraService } from "../services/PersonaColaboradoraService.js";
 import { z } from 'zod';
+import { BadRequestError, UnprocessableEntityError } from "../errors/AppError.js";
 
 const personaColaboradoraValida = z.object({
     nombreFantasia: z.string().default(null),
@@ -18,53 +19,106 @@ const habilidadEsquema = z.object({
     descripcion: z.string().default("")
 }).strict();
 
+const actualizacionPersonaColaboradoraEsquema = z.object({
+    nombreFantasia: z.string().optional().nullable(),
+    nombre: z.string().optional().nullable(),
+    apellido: z.string().optional().nullable(),
+    pronombres: z.array(z.string()).optional(),
+    presentacion: z.string().optional(),
+    cuentas: z.array(z.any()).optional()
+}).strict();
+
 export class PersonaColaboradoraController {
 
     constructor(personaColaboradoraService = new PersonaColaboradoraService()) {
         this.personaColaboradoraService = personaColaboradoraService
     }
 
-    obtenerPersonasColaboradoras = (req, res) => {
-        res.status(200).json(this.personaColaboradoraService.listarPersonasColaboradoras())
-    }
-
-    obtenerPersonaColaboradoraPorId = (req, res) => {
+    obtenerPersonasColaboradoras = async (req, res, next) => {
         try {
-            const { id } = req.params;
-            res.status(200).json(this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(id))
+            const personas = this.personaColaboradoraService.listarPersonasColaboradoras()
+
+            return res.status(200).json(personas)
         } catch (error) {
-            return res.status(404).json({
-                error: error.message
-            });
+            return next(error)
         }
     }
 
-    crearPersonaColaboradora = (req, res) => {
-        const body = req.body
-        const esquemaValido = personaColaboradoraValida.safeParse(body)
-        if (esquemaValido.error) {
-            return res.status(400).json(esquemaValido.error.issues)
-        }
+    obtenerPersonaColaboradoraPorId = async (req, res, next) => {
         try {
-            return res.status(201).json(this.personaColaboradoraService.crearPersonaColaboradora(esquemaValido.data))
+            const persona = this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(req.params.id)
+
+            return res.status(200).json(persona)
         } catch (error) {
-            return res.status(409).json(error.message)
+            return next(error)
         }
     }
 
-    agregarHabilidad = (req, res) => {
-        const habilidadValida = habilidadEsquema.safeParse(req.body)
-        const id = req.params.id
+    crearPersonaColaboradora = async (req, res, next) => {
+        try {
+            const datosPersona = this.validarBody(personaColaboradoraValida, req.body)
+            const nuevaPersona = this.personaColaboradoraService.crearPersonaColaboradora(datosPersona)
 
-        if (habilidadValida.error) {
-            return res.status(400).json(habilidadValida.error.issues)
+            return res.status(201).json(nuevaPersona)
+        } catch (error) {
+            return next(error)
+        }
+    }
+
+    agregarHabilidad = async (req, res, next) => {
+        try {
+            const habilidad = this.validarBody(habilidadEsquema, req.body)
+            const persona = this.personaColaboradoraService.agregarHabilidad(req.params.id, habilidad)
+
+            return res.status(200).json(persona)
+        } catch (error) {
+            return next(error)
+        }
+    }
+
+    // 400 si la request está malformada (falta un campo, tipo incorrecto, campo de más);
+    // 422 si los valores llegaron bien pero violan una regla, igual que el dominio.
+    validarBody(esquema, body) {
+        const resultado = esquema.safeParse(body)
+        if (resultado.success) {
+            return resultado.data
+        }
+
+        const esEstructural = resultado.error.issues.some(
+            (issue) => issue.code === "invalid_type" || issue.code === "unrecognized_keys"
+        )
+        const detalle = resultado.error.issues
+            .map((issue) => {
+                const campo = issue.path.join(".")
+                return campo ? `${campo}: ${issue.message}` : issue.message
+            })
+            .join("; ")
+
+        throw esEstructural ? new BadRequestError(detalle) : new UnprocessableEntityError(detalle)
+    }
+
+    actualizarPersonaColaboradora = (req, res) => {
+        const { id } = req.params;
+        const parseResult = actualizacionPersonaColaboradoraEsquema.safeParse(req.body);
+        if (!parseResult.success) {
+            return res.status(400).json(parseResult.error.issues);
         }
 
         try {
-            return res.status(200).json(this.personaColaboradoraService.agregarHabilidad(id, habilidadValida.data))
+            const personaActualizada = this.personaColaboradoraService.actualizarPersonaColaboradora(id, parseResult.data);
+            return res.status(200).json(personaActualizada);
         } catch (error) {
             return res.status(404).json({ error: error.message });
         }
+    }
 
+    eliminarPersonaColaboradora = (req, res) => {
+        const { id } = req.params;
+        try {
+            this.personaColaboradoraService.eliminarPersonaColaboradora(id);
+            return res.status(204).send();
+        } catch (error) {
+            return res.status(404).json({ error: error.message });
+        }
     }
 }

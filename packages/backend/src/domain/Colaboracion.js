@@ -1,9 +1,10 @@
 import { randomUUID } from "crypto";
+import { UnprocessableEntityError } from "../errors/AppError.js";
 
 export class Colaboracion {
     constructor({ id, personaColaboradora, proyecto, fechaInscripcion } = {}) {
         if (!personaColaboradora || !proyecto) {
-            throw new Error('La colaboracion debe tener una persona colaboradora y un proyecto');
+            throw new UnprocessableEntityError('La colaboracion debe tener una persona colaboradora y un proyecto');
         }
 
         this.id = id || randomUUID();

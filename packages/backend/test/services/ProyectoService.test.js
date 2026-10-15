@@ -334,4 +334,40 @@ describe("ProyectoService", () => {
             expect(() => proyectoService.cerrarProyecto("id-inexistente")).toThrow("No se encontró el proyecto con ID 'id-inexistente'");
         });
     });
+
+    describe("actualizarProyecto", () => {
+        test("actualiza los datos de un proyecto", () => {
+            const colectivo = crearColectivoDePrueba();
+            const habilidad = crearHabilidadDePrueba();
+
+            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+                colectivo,
+                habilidadesRequeridas: [habilidad]
+            }));
+
+            const actualizado = proyectoService.actualizarProyecto(proyecto.id, {
+                titulo: "Nuevo Titulo",
+                cantidadHoras: 30
+            });
+
+            expect(actualizado.titulo).toBe("Nuevo Titulo");
+            expect(actualizado.cantidadHoras).toBe(30);
+        });
+    });
+
+    describe("eliminarProyecto", () => {
+        test("elimina un proyecto existente", () => {
+            const colectivo = crearColectivoDePrueba();
+            const habilidad = crearHabilidadDePrueba();
+
+            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+                colectivo,
+                habilidadesRequeridas: [habilidad]
+            }));
+
+            const eliminado = proyectoService.eliminarProyecto(proyecto.id);
+            expect(eliminado).toBe(true);
+            expect(() => proyectoService.obtenerProyectoPorId(proyecto.id)).toThrow();
+        });
+    });
 });

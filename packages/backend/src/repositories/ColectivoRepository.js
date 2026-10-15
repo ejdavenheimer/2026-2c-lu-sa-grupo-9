@@ -1,3 +1,5 @@
+import { ConflictError } from "../errors/AppError.js";
+
 export class ColectivoRepository {
     static #colectivos = [];
     static #nextId = 1;
@@ -13,7 +15,7 @@ export class ColectivoRepository {
 
         const existePorNombre = this.#colectivos.some((c) => c.nombre === colectivo.nombre);
         if (existePorNombre) {
-            throw new Error(`Ya existe un colectivo con el nombre '${colectivo.nombre}'`);
+            throw new ConflictError(`Ya existe un colectivo con el nombre '${colectivo.nombre}'`);
         }
 
         if (!colectivo.id) {
@@ -29,6 +31,15 @@ export class ColectivoRepository {
 
     static buscarPorId(id) {
         return this.#colectivos.find((c) => c.id === id) || null;
+    }
+
+    static eliminarPorId(id) {
+        const index = this.#colectivos.findIndex((c) => c.id === id);
+        if (index === -1) {
+            return false;
+        }
+        this.#colectivos.splice(index, 1);
+        return true;
     }
 
     static limpiar() {
