@@ -129,4 +129,41 @@ export class ProyectoService {
         this.obtenerProyectoPorId(id);
         return ProyectoRepository.eliminarPorId(id);
     }
+
+    registrarHito = (proyectoId, { porcentajeConcrecion, descripcion, fecha }) => {
+        const proyecto = this.obtenerProyectoPorId(proyectoId);
+        const nuevoHito = proyecto.agregarHito({ porcentajeConcrecion, descripcion, fecha });
+        ProyectoRepository.guardar(proyecto);
+        return nuevoHito;
+    }
+
+    obtenerHitos = (proyectoId) => {
+        const proyecto = this.obtenerProyectoPorId(proyectoId);
+        return proyecto.hitos;
+    }
+
+    obtenerHitoPorId = (proyectoId, hitoId) => {
+        const proyecto = this.obtenerProyectoPorId(proyectoId);
+        return proyecto.getHito(hitoId);
+    }
+
+    actualizarHito = (proyectoId, hitoId, { porcentajeConcrecion, descripcion } = {}) => {
+        const proyecto = this.obtenerProyectoPorId(proyectoId);
+        proyecto.actualizarHito(hitoId, { porcentajeConcrecion, descripcion });
+        ProyectoRepository.guardar(proyecto);
+        return proyecto.getHito(hitoId);
+    }
+
+    eliminarHito = (proyectoId, hitoId) => {
+        const proyecto = this.obtenerProyectoPorId(proyectoId);
+        proyecto.eliminarHito(hitoId);
+        ProyectoRepository.guardar(proyecto);
+    }
+
+    actualizarEnlaces = (proyectoId, { enlaceSistemaEnFuncionamiento, enlaceCodigoFuente } = {}) => {
+        const proyecto = this.obtenerProyectoPorId(proyectoId);
+        proyecto.actualizarEnlaces({ enlaceSistemaEnFuncionamiento, enlaceCodigoFuente });
+        ProyectoRepository.guardar(proyecto);
+        return proyecto;
+    }
 }

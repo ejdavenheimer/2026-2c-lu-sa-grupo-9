@@ -1,5 +1,6 @@
 import { EstadoProyecto } from "./enums.js";
 import { Colaboracion } from "./Colaboracion.js";
+import { Hito } from "./Hito.js";
 import { Perfil } from "./Perfil.js";
 import { Compatibilidad } from "./Compatibilidad.js";
 import { ConflictError, NotFoundError, UnprocessableEntityError } from "../errors/AppError.js";
@@ -13,9 +14,12 @@ export class Proyecto {
         cantidadHoras,
         modalidadesColaboracion,
         fechaAlta,
+        enlaceSistemaEnFuncionamiento,
+        enlaceCodigoFuente,
         colectivo,
         habilidadesRequeridas,
         perfiles = [],
+        hitos = [],
         colaboraciones = []
     } = {}) {
         const tienePerfiles = Array.isArray(perfiles) && perfiles.length > 0;
@@ -41,9 +45,12 @@ export class Proyecto {
         this.estado = EstadoProyecto.PUBLICADO;
         this.fechaAlta = fechaAlta || new Date();
         this.fechaCierre = undefined;
+        this.enlaceSistemaEnFuncionamiento = enlaceSistemaEnFuncionamiento;
+        this.enlaceCodigoFuente = enlaceCodigoFuente;
         this.colectivo = colectivo;
         this.habilidadesRequeridas = habilidadesRequeridas;
         this.perfiles = [];
+        this.hitos = hitos;
         this.colaboraciones = colaboraciones;
 
         if (Array.isArray(perfiles)) {
@@ -176,6 +183,79 @@ export class Proyecto {
         this.estado = EstadoProyecto.CERRADO;
     }
 
+    actualizarEnlaces({ enlaceSistemaEnFuncionamiento, enlaceCodigoFuente } = {}) {
+        if (enlaceSistemaEnFuncionamiento !== undefined) {
+            this.enlaceSistemaEnFuncionamiento = enlaceSistemaEnFuncionamiento;
+        }
+        if (enlaceCodigoFuente !== undefined) {
+            this.enlaceCodigoFuente = enlaceCodigoFuente;
+        }
+    }
+
+    agregarHito({ fecha, porcentajeConcrecion, descripcion } = {}) {
+        if (this.estado !== EstadoProyecto.PUBLICADO || this.fechaCierre !== undefined) {
+            throw new ConflictError("No se pueden agregar hitos a un proyecto cerrado");
+        }
+        if (!this.validarHito(porcentajeConcrecion)) {
+            throw new UnprocessableEntityError("El porcentaje de concreción debe ser mayor al del último hito registrado");
+        }
+
+        const nuevoHito = new Hito({
+            fecha,
+            porcentajeConcrecion,
+            descripcion,
+            proyecto: this
+        });
+
+        this.hitos.push(nuevoHito);
+        return nuevoHito;
+    }
+
+    validarHito(porcentajeConcrecion) {
+        const ultimoHito = this.hitos[this.hitos.length - 1];
+        return !ultimoHito || porcentajeConcrecion > ultimoHito.porcentajeConcrecion;
+    }
+
+    obtenerPorcentajeAvance() {
+        const ultimoHito = this.hitos[this.hitos.length - 1];
+        return ultimoHito ? ultimoHito.porcentajeConcrecion : 0;
+    }
+
+    getHito(hitoId) {
+        const hito = this.hitos.find((h) => h.id === hitoId);
+        if (!hito) {
+            throw new NotFoundError(`Hito con id ${hitoId} no encontrado`);
+        }
+        return hito;
+    }
+
+    eliminarHito(hitoId) {
+        const hito = this.getHito(hitoId);
+        this.hitos = this.hitos.filter((h) => h.id !== hito.id);
+    }
+
+    actualizarHito(hitoId, { porcentajeConcrecion, descripcion } = {}) {
+        const hito = this.getHito(hitoId);
+
+        if (descripcion !== undefined) {
+            hito.descripcion = descripcion;
+        }
+
+        if (porcentajeConcrecion !== undefined) {
+            const posicion = this.hitos.findIndex((h) => h.id === hito.id);
+            const hitoAnterior = this.hitos[posicion - 1];
+            const hitoSiguiente = this.hitos[posicion + 1];
+
+            if (hitoAnterior && porcentajeConcrecion <= hitoAnterior.porcentajeConcrecion) {
+                throw new UnprocessableEntityError("El porcentaje de concreción debe ser mayor al del hito anterior");
+            }
+            if (hitoSiguiente && porcentajeConcrecion >= hitoSiguiente.porcentajeConcrecion) {
+                throw new UnprocessableEntityError("El porcentaje de concreción debe ser menor al del hito siguiente");
+            }
+            hito.porcentajeConcrecion = porcentajeConcrecion;
+        }
+    }
+
     toJSON() {
         return {
             id: this.id,
@@ -187,6 +267,8 @@ export class Proyecto {
             estado: this.estado,
             fechaAlta: this.fechaAlta,
             fechaCierre: this.fechaCierre,
+            enlaceSistemaEnFuncionamiento: this.enlaceSistemaEnFuncionamiento,
+            enlaceCodigoFuente: this.enlaceCodigoFuente,
             colectivo: this.colectivo ? {
                 id: this.colectivo.id,
                 nombre: this.colectivo.nombre,
@@ -196,6 +278,13 @@ export class Proyecto {
             } : null,
             habilidadesRequeridas: this.habilidadesRequeridas,
             perfiles: this.perfiles.map((p) => (typeof p.toJSON === "function" ? p.toJSON() : p)),
+            porcentajeAvance: this.obtenerPorcentajeAvance(),
+            hitos: this.hitos.map((h) => ({
+                id: h.id,
+                fecha: h.fecha,
+                porcentajeConcrecion: h.porcentajeConcrecion,
+                descripcion: h.descripcion
+            })),
             colaboraciones: this.colaboraciones.map((c) => ({
                 id: c.id,
                 fechaInscripcion: c.fechaInscripcion,

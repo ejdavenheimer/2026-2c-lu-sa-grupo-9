@@ -795,6 +795,226 @@ export const swaggerDocument = {
         }
       }
     },
+    "/proyectos/{id}/hitos": {
+      get: {
+        tags: ["Proyectos"],
+        summary: "Listar los hitos de un proyecto",
+        description: "Devuelve todos los hitos registrados para un proyecto, en orden cronológico de carga.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID del proyecto",
+            schema: {
+              type: "string",
+              example: "proy-1"
+            }
+          }
+        ],
+        responses: {
+          "200": {
+            description: "Lista de hitos del proyecto",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "array",
+                  items: {
+                    $ref: "#/components/schemas/Hito"
+                  }
+                }
+              }
+            }
+          },
+          "404": respuestaDeError("Proyecto no encontrado")
+        }
+      },
+      post: {
+        tags: ["Proyectos"],
+        summary: "Registrar un hito en un proyecto",
+        description:
+          "Carga un nuevo hito con su porcentaje de concreción. El porcentaje debe ser estrictamente mayor al del último hito registrado, y el proyecto no puede estar cerrado.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID del proyecto",
+            schema: {
+              type: "string",
+              example: "proy-1"
+            }
+          }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/HitoInput"
+              }
+            }
+          }
+        },
+        responses: {
+          "201": {
+            description: "Hito registrado exitosamente",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Hito"
+                }
+              }
+            }
+          },
+          "400": respuestaDeError("Falta un campo obligatorio, tiene el tipo incorrecto o se envió un campo no permitido"),
+          "404": respuestaDeError("Proyecto no encontrado"),
+          "409": respuestaDeError("El proyecto está cerrado: ya no admite nuevos hitos"),
+          "422": respuestaDeError("El porcentaje de concreción debe ser mayor al del último hito registrado")
+        }
+      }
+    },
+    "/proyectos/{id}/hitos/{hitoId}": {
+      get: {
+        tags: ["Proyectos"],
+        summary: "Obtener un hito por ID",
+        description: "Devuelve el detalle de un hito específico dentro de un proyecto.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID del proyecto",
+            schema: { type: "string", example: "proy-1" }
+          },
+          {
+            name: "hitoId",
+            in: "path",
+            required: true,
+            description: "ID del hito",
+            schema: { type: "string", example: "26a597d8-ce6c-418e-a068-1baa613ec889" }
+          }
+        ],
+        responses: {
+          "200": {
+            description: "Hito encontrado",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/Hito" }
+              }
+            }
+          },
+          "404": respuestaDeError("Proyecto o hito no encontrado")
+        }
+      },
+      patch: {
+        tags: ["Proyectos"],
+        summary: "Actualizar un hito",
+        description:
+          "Actualiza el porcentaje de concreción y/o la descripción de un hito ya cargado. Si se actualiza el porcentaje, debe seguir siendo mayor al del hito anterior y menor al del hito siguiente (si existen).",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID del proyecto",
+            schema: { type: "string", example: "proy-1" }
+          },
+          {
+            name: "hitoId",
+            in: "path",
+            required: true,
+            description: "ID del hito",
+            schema: { type: "string", example: "26a597d8-ce6c-418e-a068-1baa613ec889" }
+          }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ActualizarHitoInput" }
+            }
+          }
+        },
+        responses: {
+          "200": {
+            description: "Hito actualizado exitosamente",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/Hito" }
+              }
+            }
+          },
+          "400": respuestaDeError("Algún campo tiene el tipo incorrecto o se envió un campo no permitido"),
+          "404": respuestaDeError("Proyecto o hito no encontrado"),
+          "422": respuestaDeError("El porcentaje debe ser mayor al del hito anterior y menor al del hito siguiente")
+        }
+      },
+      delete: {
+        tags: ["Proyectos"],
+        summary: "Eliminar un hito",
+        description: "Elimina un hito del proyecto de forma permanente.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID del proyecto",
+            schema: { type: "string", example: "proy-1" }
+          },
+          {
+            name: "hitoId",
+            in: "path",
+            required: true,
+            description: "ID del hito",
+            schema: { type: "string", example: "26a597d8-ce6c-418e-a068-1baa613ec889" }
+          }
+        ],
+        responses: {
+          "204": {
+            description: "Hito eliminado exitosamente (sin contenido)"
+          },
+          "404": respuestaDeError("Proyecto o hito no encontrado")
+        }
+      }
+    },
+    "/proyectos/{id}/enlaces": {
+      patch: {
+        tags: ["Proyectos"],
+        summary: "Actualizar los enlaces de un proyecto",
+        description:
+          "Actualiza el enlace al sistema en funcionamiento y/o al repositorio de código fuente público. Se puede enviar uno solo de los dos campos; el que no se envíe queda sin modificar.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID del proyecto",
+            schema: { type: "string", example: "proy-1" }
+          }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ActualizarEnlacesInput" }
+            }
+          }
+        },
+        responses: {
+          "200": {
+            description: "Enlaces actualizados exitosamente",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/Proyecto" }
+              }
+            }
+          },
+          "400": respuestaDeError("Alguno de los enlaces no es una URL válida, o se envió un campo no permitido"),
+          "404": respuestaDeError("Proyecto no encontrado")
+        }
+      }
+    },
     "/personas-colaboradoras": {
       get: {
         tags: ["Personas Colaboradoras"],
@@ -1569,6 +1789,16 @@ export const swaggerDocument = {
             format: "date-time",
             nullable: true
           },
+          enlaceSistemaEnFuncionamiento: {
+            type: "string",
+            nullable: true,
+            example: "https://codigoavoluntad-demo.com"
+          },
+          enlaceCodigoFuente: {
+            type: "string",
+            nullable: true,
+            example: "https://github.com/ddso-utn/proyecto-ejemplo"
+          },
           colectivo: {
             type: "object"
           },
@@ -1576,6 +1806,17 @@ export const swaggerDocument = {
             type: "array",
             items: {
               $ref: "#/components/schemas/Habilidad"
+            }
+          },
+          porcentajeAvance: {
+            type: "number",
+            description: "Porcentaje de concreción del último hito registrado. 0 si el proyecto todavía no tiene hitos.",
+            example: 60
+          },
+          hitos: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/Hito"
             }
           },
           perfiles: {
@@ -1589,6 +1830,85 @@ export const swaggerDocument = {
             items: {
               $ref: "#/components/schemas/Colaboracion"
             }
+          }
+        }
+      },
+      HitoInput: {
+        type: "object",
+        required: ["porcentajeConcrecion", "descripcion"],
+        properties: {
+          porcentajeConcrecion: {
+            type: "number",
+            minimum: 0,
+            maximum: 100,
+            example: 60
+          },
+          descripcion: {
+            type: "string",
+            example: "Se completó el módulo de autenticación"
+          },
+          fecha: {
+            type: "string",
+            format: "date-time",
+            description: "Opcional. Si no se indica, se usa la fecha y hora actuales.",
+            example: "2026-10-06T21:31:53.613Z"
+          }
+        }
+      },
+      ActualizarHitoInput: {
+        type: "object",
+        description: "Los dos campos son opcionales; se actualiza solo lo que se envíe.",
+        properties: {
+          porcentajeConcrecion: {
+            type: "number",
+            minimum: 0,
+            maximum: 100,
+            example: 70
+          },
+          descripcion: {
+            type: "string",
+            example: "Descripción corregida del hito"
+          }
+        }
+      },
+      Hito: {
+        type: "object",
+        properties: {
+          id: {
+            type: "string",
+            example: "26a597d8-ce6c-418e-a068-1baa613ec889"
+          },
+          fecha: {
+            type: "string",
+            format: "date-time"
+          },
+          porcentajeConcrecion: {
+            type: "number",
+            example: 60
+          },
+          descripcion: {
+            type: "string",
+            example: "Se completó el módulo de autenticación"
+          },
+          proyecto: {
+            type: "object",
+            description: "Resumen del proyecto al que pertenece el hito."
+          }
+        }
+      },
+      ActualizarEnlacesInput: {
+        type: "object",
+        description: "Los dos campos son opcionales; se actualiza solo lo que se envíe.",
+        properties: {
+          enlaceSistemaEnFuncionamiento: {
+            type: "string",
+            format: "uri",
+            example: "https://codigoavoluntad-demo.com"
+          },
+          enlaceCodigoFuente: {
+            type: "string",
+            format: "uri",
+            example: "https://github.com/ddso-utn/proyecto-ejemplo"
           }
         }
       },
