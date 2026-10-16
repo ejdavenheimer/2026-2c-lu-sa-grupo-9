@@ -1,4 +1,5 @@
 import { ConflictError, UnprocessableEntityError } from "../errors/AppError.js";
+import { TipoMedioContacto } from "./enums.js";
 
 export class PersonaColaboradora {
     constructor({
@@ -9,7 +10,9 @@ export class PersonaColaboradora {
         presentacion,
         cuentas = [],
         habilidades = [],
-        colaboraciones = []
+        colaboraciones = [],
+        mensajesInternos = false,
+        mediosDeContacto = []
     } = {}) {
         if (!nombreFantasia && (!nombre || !apellido) && cuentas.length === 0)  {
             throw new UnprocessableEntityError("La persona colaboradora debe poseer al menos un nombre de fantasia o nombre y apellido");
@@ -24,6 +27,28 @@ export class PersonaColaboradora {
         this.cuentas = cuentas;
         this.habilidades = habilidades;
         this.colaboraciones = colaboraciones;
+        this.mensajesInternos = mensajesInternos === true;
+        this.mediosDeContacto = [];
+        mediosDeContacto.forEach((medio) => this.agregarMedioDeContacto(medio));
+    }
+
+    agregarMedioDeContacto(medio) {
+        const tipo = medio?.tipo;
+        const valor = typeof medio?.valor === "string" ? medio.valor.trim() : "";
+        if (!Object.values(TipoMedioContacto).includes(tipo)) {
+            throw new UnprocessableEntityError(`Tipo de medio de contacto inválido. Valores permitidos: ${Object.values(TipoMedioContacto).join(", ")}`);
+        }
+        if (!valor) {
+            throw new UnprocessableEntityError("El medio de contacto debe tener un valor");
+        }
+        if (this.mediosDeContacto.some((m) => m.tipo === tipo && m.valor === valor)) {
+            return;
+        }
+        this.mediosDeContacto.push({ tipo, valor });
+    }
+
+    aceptaMensajesInternos() {
+        return this.mensajesInternos === true;
     }
 
     agregarHabilidad(habilidad) {
@@ -71,6 +96,7 @@ export class PersonaColaboradora {
             presentacion: this.presentacion,
             cuentas: this.cuentas,
             habilidades: this.habilidades,
+            mensajesInternos: this.mensajesInternos,
             colaboraciones: this.colaboraciones.map((c) => ({
                 id: c.id,
                 fechaInscripcion: c.fechaInscripcion,
