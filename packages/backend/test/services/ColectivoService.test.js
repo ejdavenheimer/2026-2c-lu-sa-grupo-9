@@ -71,4 +71,23 @@ describe("ColectivoService", () => {
     test("obtenerColectivoPorId lanza un error si no existe", () => {
         expect(() => colectivoService.obtenerColectivoPorId("id-inexistente")).toThrow("No se encontro el colectivo con id");
     });
+
+    test("actualizarColectivo modifica los datos del colectivo", () => {
+        const colectivo = colectivoService.crearColectivo(datosColectivoDePrueba());
+        const colectivoActualizado = colectivoService.actualizarColectivo(colectivo.id, {
+            descripcion: "Nueva descripcion",
+            tipo: "FUNDACION"
+        });
+
+        expect(colectivoActualizado.descripcion).toBe("Nueva descripcion");
+        expect(colectivoActualizado.tipo).toBe("FUNDACION");
+    });
+
+    test("eliminarColectivo borra el colectivo existente", () => {
+        const colectivo = colectivoService.crearColectivo(datosColectivoDePrueba());
+        const eliminado = colectivoService.eliminarColectivo(colectivo.id);
+
+        expect(eliminado).toBe(true);
+        expect(() => colectivoService.obtenerColectivoPorId(colectivo.id)).toThrow();
+    });
 });

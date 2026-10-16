@@ -29,4 +29,26 @@ export class PersonaColaboradoraService{
         personaColaboradora.agregarHabilidad(habilidad)
         return PersonaColaboradoraRepository.guardar(personaColaboradora)
     }
+
+    actualizarPersonaColaboradora = (id, datos) => {
+        const persona = this.obtenerPersonaColaboradoraPorId(id);
+        if (datos.nombreFantasia !== undefined) persona.nombreFantasia = datos.nombreFantasia;
+        if (datos.nombre !== undefined) persona.nombre = datos.nombre;
+        if (datos.apellido !== undefined) persona.apellido = datos.apellido;
+        if (datos.pronombres !== undefined) persona.pronombres = datos.pronombres;
+        if (datos.presentacion !== undefined) persona.presentacion = datos.presentacion;
+        if (datos.cuentas !== undefined) persona.cuentas = datos.cuentas;
+        if (datos.mensajesInternos !== undefined) persona.mensajesInternos = datos.mensajesInternos;
+        if (datos.mediosDeContacto !== undefined) {
+            const medios = datos.mediosDeContacto;
+            persona.mediosDeContacto = [];
+            medios.forEach((medio) => persona.agregarMedioDeContacto(medio));
+        }
+        return PersonaColaboradoraRepository.guardar(persona);
+    }
+
+    eliminarPersonaColaboradora = (id) => {
+        this.obtenerPersonaColaboradoraPorId(id);
+        return PersonaColaboradoraRepository.eliminarPorId(id);
+    }
 }

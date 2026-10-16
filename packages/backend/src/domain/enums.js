@@ -19,3 +19,9 @@ export const TipoCuenta = {
     GITHUB: "GITHUB",
     GITLAB: "GITLAB"
 };
+
+export const TipoMedioContacto = {
+    EMAIL: "EMAIL",
+    WHATSAPP: "WHATSAPP",
+    SMS: "SMS"
+};
