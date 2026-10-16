@@ -5,7 +5,9 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js"
+    "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js",
+    "test:email": "node test-envio-email.js",
+    "test:twilio": "node test-envio-twilio.js"
   },
   "keywords": [],
   "author": "",
@@ -16,7 +18,9 @@
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
     "mongoose": "^9.11.0",
+    "nodemailer": "^10.1.1",
     "swagger-ui-express": "^5.0.1",
+    "twilio": "^6.2.0",
     "zod": "^4.6.2"
   },
   "type": "module",
