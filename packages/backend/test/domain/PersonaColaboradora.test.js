@@ -71,6 +71,41 @@ describe("PersonaColaboradora", () => {
         const persona = crearPersonaColaboradoraDePrueba();
         expect(() => persona.agregarColaboracion()).toThrowError("Debe proporcionar una colaboracion para agregar");
     });
+    test("por defecto no acepta mensajes internos y no tiene medios de contacto", () => {
+        const persona = crearPersonaColaboradoraDePrueba();
+        expect(persona.aceptaMensajesInternos()).toBe(false);
+        expect(persona.mediosDeContacto).toEqual([]);
+    });
+
+    test("acepta mensajes internos solo si se indica explícitamente true", () => {
+        expect(crearPersonaColaboradoraDePrueba({ mensajesInternos: true }).aceptaMensajesInternos()).toBe(true);
+        expect(crearPersonaColaboradoraDePrueba({ mensajesInternos: "true" }).aceptaMensajesInternos()).toBe(false);
+    });
+
+    test("registra medios de contacto válidos sin duplicados", () => {
+        const persona = crearPersonaColaboradoraDePrueba({
+            mediosDeContacto: [
+                { tipo: "EMAIL", valor: "a@b.com" },
+                { tipo: "EMAIL", valor: "a@b.com" },
+                { tipo: "SMS", valor: "1155550000" }
+            ]
+        });
+        expect(persona.mediosDeContacto).toEqual([
+            { tipo: "EMAIL", valor: "a@b.com" },
+            { tipo: "SMS", valor: "1155550000" }
+        ]);
+    });
+
+    test("lanza un error si el tipo de medio de contacto es inválido o falta el valor", () => {
+        expect(() => crearPersonaColaboradoraDePrueba({ mediosDeContacto: [{ tipo: "FAX", valor: "1" }] })).toThrowError("Tipo de medio de contacto inválido");
+        expect(() => crearPersonaColaboradoraDePrueba({ mediosDeContacto: [{ tipo: "EMAIL", valor: " " }] })).toThrowError("El medio de contacto debe tener un valor");
+    });
+
+    test("toJSON expone mensajesInternos pero no los medios de contacto", () => {
+        const json = crearPersonaColaboradoraDePrueba({ mensajesInternos: true, mediosDeContacto: [{ tipo: "EMAIL", valor: "a@b.com" }] }).toJSON();
+        expect(json.mensajesInternos).toBe(true);
+        expect(json.mediosDeContacto).toBeUndefined();
+    });
 
     test("tieneHabilidad devuelve true si la persona tiene esa habilidad", () => {
         const persona = crearPersonaColaboradoraDePrueba({ habilidades: [{ codigo: "react" }] });
@@ -103,6 +138,6 @@ describe("PersonaColaboradora", () => {
         const persona = crearPersonaColaboradoraDePrueba();
         expect(persona.codigosDeHabilidades()).toEqual([]);
     });
-});
 
+});
 

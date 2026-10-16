@@ -1,4 +1,5 @@
 import { ConflictError, UnprocessableEntityError } from "../errors/AppError.js";
+import { TipoMedioContacto } from "./enums.js";
 
 export class PersonaColaboradora {
     constructor({
@@ -101,6 +102,7 @@ export class PersonaColaboradora {
             presentacion: this.presentacion,
             cuentas: this.cuentas,
             habilidades: this.habilidades,
+            mensajesInternos: this.mensajesInternos,
             colaboraciones: this.colaboraciones.map((c) => ({
                 id: c.id,
                 fechaInscripcion: c.fechaInscripcion,

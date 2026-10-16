@@ -65,6 +65,12 @@ export class PersonaColaboradoraService{
         if (datos.pronombres !== undefined) persona.pronombres = datos.pronombres;
         if (datos.presentacion !== undefined) persona.presentacion = datos.presentacion;
         if (datos.cuentas !== undefined) persona.cuentas = datos.cuentas;
+        if (datos.mensajesInternos !== undefined) persona.mensajesInternos = datos.mensajesInternos;
+        if (datos.mediosDeContacto !== undefined) {
+            const medios = datos.mediosDeContacto;
+            persona.mediosDeContacto = [];
+            medios.forEach((medio) => persona.agregarMedioDeContacto(medio));
+        }
         return PersonaColaboradoraRepository.guardar(persona);
     }
 

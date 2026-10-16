@@ -2,9 +2,10 @@ import { Router } from "express";
 import HealthRoutes from "./HealthRoutes.js";
 import HabilidadRoutes from "./HabilidadRoutes.js";
 import ProyectoRoutes from "./ProyectoRoutes.js";
-import ColectivoRoutes from "./ColectivoRoutes.js" 
+import ColectivoRoutes from "./ColectivoRoutes.js";
 import PersonaColaboradoraRoutes from "./PersonaColaboradoraRoutes.js";
 import UbicacionRoutes from "./UbicacionRoutes.js";
+import NotificacionRoutes from "./NotificacionRoutes.js";
 
 const router = Router();
 
@@ -14,4 +15,5 @@ router.use("/proyectos", ProyectoRoutes);
 router.use("/colectivos", ColectivoRoutes);
 router.use("/personas-colaboradoras", PersonaColaboradoraRoutes);
 router.use("/ubicaciones", UbicacionRoutes);
+router.use("/notificaciones", NotificacionRoutes);
 export default router;
