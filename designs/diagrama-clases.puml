@@ -111,6 +111,7 @@ class Compatibilidad {
 class Colaboracion {
     fechaInscripcion: Date
     personaColaboradora: PersonaColaboradora
+    esAnonima: Boolean
     proyecto: Proyecto
 }
 
