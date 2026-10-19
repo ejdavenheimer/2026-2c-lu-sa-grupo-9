@@ -509,7 +509,7 @@ export const swaggerDocument = {
                   },
                   esAnonima: {
                     type: "boolean",
-                    example: "true",
+                    example: true,
                   }
                 }
               }

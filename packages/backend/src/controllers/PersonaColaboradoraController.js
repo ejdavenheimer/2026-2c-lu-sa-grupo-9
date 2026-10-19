@@ -178,7 +178,7 @@ export class PersonaColaboradoraController {
         try {
             const { id, tipoMedio } = req.params;
             const personaActualizada = await this.personaColaboradoraService.eliminarMedioDeContacto(id, tipoMedio);
-            return res.status(204).json(personaActualizada);
+            return res.status(204).send()
         } catch (error) {
             return next(error);
         }
