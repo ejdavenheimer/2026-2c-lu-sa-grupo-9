@@ -29,8 +29,10 @@ try {
                     trim: true
                 },
                 cantidadHoras: {
-                    type: String,
-                    trim: true
+                    // Number, no String: el controller valida z.number() y el
+                    // dominio exige un numero. Con String, Mongo casteaba al
+                    // guardar y al releer volvia "20" en vez de 20.
+                    type: Number
                 },
                 modalidadesColaboracion: [
                     {
