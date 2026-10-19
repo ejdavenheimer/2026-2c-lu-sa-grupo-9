@@ -11,8 +11,8 @@ const perfilCon = (nombre, ...codigos) => ({
     modalidadesColaboracion: ["GRATUITA"]
 });
 
-const guardarProyecto = (titulo, ...perfiles) =>
-    ProyectoRepository.guardar(
+const guardarProyecto = async (titulo, ...perfiles) =>
+    await ProyectoRepository.guardar(
         new Proyecto({
             titulo,
             descripcion: "desc",
@@ -27,16 +27,16 @@ describe("ProyectoRepository.buscarPorHabilidadesRequeridas", () => {
     });
 
     test("devuelve lista vacía si no se le pasan códigos", async () => {
-        guardarProyecto("Portal", perfilCon("Frontend", "react"));
+        await guardarProyecto("Portal", perfilCon("Frontend", "react"));
 
         expect(await ProyectoRepository.buscarPorHabilidadesRequeridas([])).toEqual([]);
         expect(await ProyectoRepository.buscarPorHabilidadesRequeridas()).toEqual([]);
     });
 
     test("devuelve los proyectos con algún perfil que requiera alguna de esas habilidades", async () => {
-        const portal = guardarProyecto("Portal", perfilCon("Frontend", "react"));
-        guardarProyecto("Censo", perfilCon("Datos", "python"));
-        const app = guardarProyecto("App", perfilCon("Backend", "node"), perfilCon("Mobile", "react"));
+        const portal = await guardarProyecto("Portal", perfilCon("Frontend", "react"));
+        await guardarProyecto("Censo", perfilCon("Datos", "python"));
+        const app = await guardarProyecto("App", perfilCon("Backend", "node"), perfilCon("Mobile", "react"));
 
         const encontrados = await ProyectoRepository.buscarPorHabilidadesRequeridas(["react"]);
 
@@ -44,7 +44,7 @@ describe("ProyectoRepository.buscarPorHabilidadesRequeridas", () => {
     });
 
     test("alcanza con que matchee uno de los perfiles del proyecto", async () => {
-        const app = guardarProyecto("App", perfilCon("Backend", "node"), perfilCon("Mobile", "react"));
+        const app = await guardarProyecto("App", perfilCon("Backend", "node"), perfilCon("Mobile", "react"));
 
         const encontrados = await ProyectoRepository.buscarPorHabilidadesRequeridas(["node"]);
 
@@ -52,7 +52,7 @@ describe("ProyectoRepository.buscarPorHabilidadesRequeridas", () => {
     });
 
     test("un proyecto sin perfiles nunca aparece en los resultados", async () => {
-        ProyectoRepository.guardar(
+        await ProyectoRepository.guardar(
             new Proyecto({
                 titulo: "Legado",
                 descripcion: "desc",
@@ -68,13 +68,13 @@ describe("ProyectoRepository.buscarPorHabilidadesRequeridas", () => {
     });
 
     test("devuelve lista vacía si ningún perfil requiere esas habilidades", async () => {
-        guardarProyecto("Portal", perfilCon("Frontend", "react"));
+        await guardarProyecto("Portal", perfilCon("Frontend", "react"));
 
         expect(await ProyectoRepository.buscarPorHabilidadesRequeridas(["cobol"])).toEqual([]);
     });
 
     test("devuelve instancias de dominio, que es lo que el dominio necesita para evaluar", async () => {
-        guardarProyecto("Portal", perfilCon("Frontend", "react"));
+        await guardarProyecto("Portal", perfilCon("Frontend", "react"));
 
         const [proyecto] = await ProyectoRepository.buscarPorHabilidadesRequeridas(["react"]);
 
