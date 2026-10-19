@@ -7,7 +7,7 @@ const fetchStub = jest.fn();
 globalThis.fetch = fetchStub;
 
 const { default: request } = await import("supertest");
-const { buildTestServer } = await import("./utils/buildTestServer.js");
+const { buildTestServer } = await import("../utils/buildTestServer.js");
 
 const app = buildTestServer();
 

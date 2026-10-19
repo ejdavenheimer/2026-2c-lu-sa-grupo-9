@@ -1,7 +1,7 @@
 import express from "express";
-import route from "../../../src/routes/router.js";
-import { notFoundHandler } from "../../../src/middlewares/notFoundHandler.js";
-import { errorHandler } from "../../../src/middlewares/errorHandler.js";
+import route from "../../src/routes/router.js";
+import { notFoundHandler } from "../../src/middlewares/notFoundHandler.js";
+import { errorHandler } from "../../src/middlewares/errorHandler.js";
 
 /**
  * Arma la misma app que index.js, pero sin app.listen() ni la conexion a Mongo,

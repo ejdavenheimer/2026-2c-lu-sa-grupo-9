@@ -1,5 +1,5 @@
 import request from "supertest";
-import { buildTestServer } from "./utils/buildTestServer.js";
+import { buildTestServer } from "../utils/buildTestServer.js";
 
 const app = buildTestServer();
 
