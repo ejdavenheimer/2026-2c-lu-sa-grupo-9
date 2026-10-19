@@ -5,6 +5,8 @@ import {Perfil} from "../domain/Perfil.js";
 import {Colectivo} from "../domain/Colectivo.js";
 import {Habilidad} from "../domain/Habilidad.js";
 import {PerfilModel} from "../schemas/PerfilSchema.js";
+import {PersonaColaboradoraModel} from "../schemas/PersonaColaboradoraSchema.js";
+import {Colaboracion} from "../domain/Colaboracion.js";
 
 const refId = (x) => x?.id ?? x?.codigo ?? x;
 
@@ -34,7 +36,6 @@ const aRegistro = (p) => ({
         porcentajeConcrecion: h.porcentajeConcrecion,
         descripcion: h.descripcion,
     })),
-    colaboraciones: p.colaboraciones,
 });
 
 const conReferencias = (query) =>
@@ -53,6 +54,45 @@ const conReferencias = (query) =>
             select: "id nombreFantasia nombre apellido",
         })
         .lean();
+
+/**
+ * Traduce las colaboraciones de dominio al formato del schema.
+ *
+ * personaColaboradora se guarda como ObjectId con ref, que es como la guia de
+ * la catedra modela las referencias. Hay que resolver el _id de Mongo a partir
+ * del id de dominio; antes se pasaba el objeto Colaboracion entero y Mongoose
+ * no podia castearlo.
+ */
+const colaboracionesARegistro = async (proyecto) => {
+    const colaboraciones = proyecto.colaboraciones ?? [];
+    if (colaboraciones.length === 0 || !PersonaColaboradoraModel) return [];
+
+    const idsDeDominio = colaboraciones
+        .map((c) => refId(c.personaColaboradora))
+        .filter(Boolean);
+
+    const personas = await PersonaColaboradoraModel.find(
+        { id: { $in: idsDeDominio } },
+        { _id: 1, id: 1 }
+    ).lean();
+
+    const objectIdPorIdDeDominio = new Map(personas.map((p) => [p.id, p._id]));
+
+    return colaboraciones
+        .map((c) => {
+            const objectId = objectIdPorIdDeDominio.get(refId(c.personaColaboradora));
+            // Mongo no valida referencias: si la persona no existe, se omite en
+            // vez de guardar una referencia rota.
+            if (!objectId) return null;
+            return {
+                id: c.id,
+                fechaInscripcion: c.fechaInscripcion,
+                esAnonima: Boolean(c.esAnonima),
+                personaColaboradora: objectId,
+            };
+        })
+        .filter(Boolean);
+};
 
 /**
  * Reconstruye la entidad de dominio a partir del documento de Mongo.
@@ -118,8 +158,20 @@ const aDominio = (doc) => {
         habilidadesRequeridas,
         perfiles,
         hitos: doc.hitos ?? [],
-        colaboraciones: doc.colaboraciones ?? [],
+        colaboraciones: [],
     });
+
+    // Se arman despues de construir: Colaboracion exige una referencia al
+    // proyecto que la contiene.
+    proyecto.colaboraciones = (doc.colaboraciones ?? [])
+        .filter((c) => c.personaColaboradora)
+        .map((c) => new Colaboracion({
+            id: c.id,
+            personaColaboradora: c.personaColaboradora,
+            proyecto,
+            fechaInscripcion: c.fechaInscripcion,
+            esAnonima: c.esAnonima,
+        }));
 
     // El constructor fuerza estado PUBLICADO y fechaCierre undefined, asi que
     // hay que restaurar el estado real despues de construir. Sin esto, un
@@ -148,7 +200,10 @@ export class ProyectoRepository {
 
         await ProyectoModel.findOneAndUpdate(
             { id: proyecto.id },
-            aRegistro(proyecto),
+            {
+                ...aRegistro(proyecto),
+                colaboraciones: await colaboracionesARegistro(proyecto),
+            },
             { upsert: true, new: true }
         );
 

@@ -72,7 +72,13 @@ try {
                 ],
                 colaboraciones:[
                     {
+                        // id y esAnonima faltaban en el schema. Con strict mode
+                        // (el default), Mongoose descarta en silencio todo campo
+                        // no declarado: la colaboracion se guardaba sin su id y
+                        // las contribuciones anonimas perdian esa marca.
+                        id: { type: String },
                         fechaInscripcion: { type: Date, required: true, default: Date.now },
+                        esAnonima: { type: Boolean, default: false },
                         personaColaboradora: {
                             type: mongoose.Schema.Types.ObjectId,
                             ref: "PersonaColaboradora",
