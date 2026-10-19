@@ -49,11 +49,11 @@ async function crearPersonaColaboradoraDePrueba(overrides = {}) {
 describe("ProyectoService", () => {
     let proyectoService;
 
-    beforeEach(() => {
-        ProyectoRepository.limpiar();
-        ColectivoRepository.limpiar();
-        PersonaColaboradoraRepository.limpiar();
-        HabilidadRepository.limpiar();
+    beforeEach(async () => {
+        await ProyectoRepository.limpiar();
+        await ColectivoRepository.limpiar();
+        await PersonaColaboradoraRepository.limpiar();
+        await HabilidadRepository.limpiar();
         proyectoService = new ProyectoService();
     });
 
@@ -80,7 +80,7 @@ describe("ProyectoService", () => {
 
             // Verifica persistencia en el repositorio
             const guardado = await ProyectoRepository.buscarPorId(proyectoCreado.id);
-            expect(guardado).toEqual(proyectoCreado);
+            expect(guardado.toJSON()).toEqual(proyectoCreado.toJSON());
         });
 
         test("crea y guarda un proyecto resolviendo colectivoId y habilidadesRequeridasCodigos", async () => {
@@ -213,7 +213,7 @@ describe("ProyectoService", () => {
             }));
 
             const obtenido = await proyectoService.obtenerProyectoPorId(creado.id);
-            expect(obtenido).toEqual(creado);
+            expect(obtenido.toJSON()).toEqual(creado.toJSON());
         });
 
         test("lanza un error si el proyecto no existe", async () => {
@@ -382,9 +382,12 @@ describe("ProyectoService", () => {
             const hito = await proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 50, descripcion: "Primer hito" });
             expect(hito.porcentajeConcrecion).toBe(50);
             expect(hito.descripcion).toBe("Primer hito");
-            expect(proyecto.hitos).toContain(hito);
             const proyectoGuardado = await ProyectoRepository.buscarPorId(proyecto.id);
-            expect(proyectoGuardado.hitos).toContainEqual(expect.objectContaining({ id: hito.id }));
+            expect(proyectoGuardado.hitos).toContainEqual(expect.objectContaining({
+                id: hito.id,
+                porcentajeConcrecion: 50,
+                descripcion: "Primer hito"
+            }));
         });
 
         test("lanza un error si el proyecto no existe", async () => {
@@ -425,7 +428,11 @@ describe("ProyectoService", () => {
             const hito1 = await proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 50, descripcion: "Primer hito" });
             const hito2 = await proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 70, descripcion: "Segundo hito" });
             const hitos = await proyectoService.obtenerHitos(proyecto.id);
-            expect(hitos).toEqual([hito1, hito2]);
+            expect(hitos.map((h) => ({ id: h.id, porcentajeConcrecion: h.porcentajeConcrecion, descripcion: h.descripcion })))
+                .toEqual([
+                    { id: hito1.id, porcentajeConcrecion: 50, descripcion: "Primer hito" },
+                    { id: hito2.id, porcentajeConcrecion: 70, descripcion: "Segundo hito" }
+                ]);
         });
 
         test("lanza un error si el proyecto no existe", async () => {
@@ -443,7 +450,11 @@ describe("ProyectoService", () => {
             }));
             const hito = await proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 50, descripcion: "Primer hito" });
             const obtenido = await proyectoService.obtenerHitoPorId(proyecto.id, hito.id);
-            expect(obtenido).toEqual(hito);
+            expect(obtenido).toMatchObject({
+                id: hito.id,
+                porcentajeConcrecion: hito.porcentajeConcrecion,
+                descripcion: hito.descripcion
+            });
         });
 
         test("lanza un error si el hito no existe", async () => {

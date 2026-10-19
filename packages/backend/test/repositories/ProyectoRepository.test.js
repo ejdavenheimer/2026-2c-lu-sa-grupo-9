@@ -1,4 +1,5 @@
 import { ProyectoRepository } from "../../src/repositories/ProyectoRepository.js";
+import { ColectivoRepository } from "../../src/repositories/ColectivoRepository.js";
 import { Proyecto } from "../../src/domain/Proyecto.js";
 import { Colectivo } from "../../src/domain/Colectivo.js";
 
@@ -11,19 +12,26 @@ const perfilCon = (nombre, ...codigos) => ({
     modalidadesColaboracion: ["GRATUITA"]
 });
 
+// El colectivo se persiste, no solo se instancia: el proyecto guarda una
+// referencia por id, asi que sin guardarlo queda colgada al releer.
+const guardarColectivo = async (titulo) =>
+    await ColectivoRepository.guardar(
+        new Colectivo({ nombre: `Colectivo ${titulo}`, descripcion: "desc", tipo: "ONG" })
+    );
+
 const guardarProyecto = async (titulo, ...perfiles) =>
     await ProyectoRepository.guardar(
         new Proyecto({
             titulo,
             descripcion: "desc",
-            colectivo: new Colectivo({ nombre: `Colectivo ${titulo}`, descripcion: "desc", tipo: "ONG" }),
+            colectivo: await guardarColectivo(titulo),
             perfiles
         })
     );
 
 describe("ProyectoRepository.buscarPorHabilidadesRequeridas", () => {
-    beforeEach(() => {
-        ProyectoRepository.limpiar();
+    beforeEach(async () => {
+        await ProyectoRepository.limpiar();
     });
 
     test("devuelve lista vacía si no se le pasan códigos", async () => {
@@ -40,7 +48,9 @@ describe("ProyectoRepository.buscarPorHabilidadesRequeridas", () => {
 
         const encontrados = await ProyectoRepository.buscarPorHabilidadesRequeridas(["react"]);
 
-        expect(encontrados).toEqual([portal, app]);
+        expect(encontrados).toHaveLength(2);
+        expect(encontrados.map((p) => p.id).sort()).toEqual([portal.id, app.id].sort());
+        expect(encontrados.map((p) => p.titulo).sort()).toEqual(["App", "Portal"]);
     });
 
     test("alcanza con que matchee uno de los perfiles del proyecto", async () => {
@@ -48,7 +58,12 @@ describe("ProyectoRepository.buscarPorHabilidadesRequeridas", () => {
 
         const encontrados = await ProyectoRepository.buscarPorHabilidadesRequeridas(["node"]);
 
-        expect(encontrados).toEqual([app]);
+        expect(encontrados).toHaveLength(1);
+        expect(encontrados[0].id).toBe(app.id);
+        expect(encontrados[0].titulo).toBe("App");
+        // El proyecto vuelve completo, con sus dos perfiles y su colectivo.
+        expect(encontrados[0].perfiles.map((p) => p.nombre).sort()).toEqual(["Backend", "Mobile"]);
+        expect(encontrados[0].colectivo.nombre).toBe("Colectivo App");
     });
 
     test("un proyecto sin perfiles nunca aparece en los resultados", async () => {
