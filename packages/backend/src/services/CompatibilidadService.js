@@ -52,7 +52,7 @@ export class CompatibilidadService {
         perfilId,
         { estricto = true, limite = LIMITE_POR_DEFECTO } = {}
     ) => {
-        const proyecto = this.proyectoRepository.buscarPorId(proyectoId);
+        const proyecto = await this.proyectoRepository.buscarPorId(proyectoId);
         if (!proyecto) {
             throw new NotFoundError(`No se encontró el proyecto con ID '${proyectoId}'`);
         }
@@ -83,7 +83,7 @@ export class CompatibilidadService {
         personaColaboradoraId,
         { estricto = false, limite = LIMITE_POR_DEFECTO } = {}
     ) => {
-        const persona = this.personaColaboradoraRepository.buscarPorId(personaColaboradoraId);
+        const persona = await this.personaColaboradoraRepository.buscarPorId(personaColaboradoraId);
         if (!persona) {
             throw new NotFoundError(
                 `No se encontró la persona colaboradora con ID '${personaColaboradoraId}'`

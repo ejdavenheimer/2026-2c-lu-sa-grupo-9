@@ -24,21 +24,21 @@ describe("CompatibilidadService", () => {
     let service;
     let colectivo;
 
-    const crearProyecto = (titulo, ...perfiles) =>
-        ProyectoRepository.guardar(new Proyecto({
+    const crearProyecto = async (titulo, ...perfiles) =>
+        await ProyectoRepository.guardar(new Proyecto({
             titulo,
             descripcion: "desc",
             colectivo,
             perfiles
         }));
 
-    const crearPersona = (nombreFantasia, ...codigos) =>
-        PersonaColaboradoraRepository.guardar(new PersonaColaboradora({
+    const crearPersona = async (nombreFantasia, ...codigos) =>
+        await PersonaColaboradoraRepository.guardar(new PersonaColaboradora({
             nombreFantasia,
             habilidades: codigos.map(habilidad)
         }));
 
-    beforeEach(() => {
+    beforeEach(async () => {
         ProyectoRepository.limpiar();
         PersonaColaboradoraRepository.limpiar();
         ColectivoRepository.limpiar();
@@ -48,7 +48,7 @@ describe("CompatibilidadService", () => {
             personaColaboradoraRepository: PersonaColaboradoraRepository
         });
 
-        colectivo = ColectivoRepository.guardar(new Colectivo({
+        colectivo = await ColectivoRepository.guardar(new Colectivo({
             nombre: "Colectivo Comunitario",
             descripcion: "Org social",
             tipo: "ONG"
@@ -62,22 +62,22 @@ describe("CompatibilidadService", () => {
         });
 
         test("falla con 404 si el perfil no pertenece al proyecto", async () => {
-            const proyecto = crearProyecto("Portal", perfilCon("Frontend", { requeridas: ["react"] }));
+            const proyecto = await crearProyecto("Portal", perfilCon("Frontend", { requeridas: ["react"] }));
 
             await expect(service.buscarColaboradoresCompatibles(proyecto.id, "perf-inexistente"))
                 .rejects.toThrow("No se encontró el perfil con ID 'perf-inexistente'");
         });
 
         test("devuelve sólo a quienes cumplen todas las requeridas, ordenados por puntaje", async () => {
-            const proyecto = crearProyecto(
+            const proyecto = await crearProyecto(
                 "Portal",
                 perfilCon("Fullstack", { requeridas: ["react", "node"], opcionales: ["docker"] })
             );
             const [perfil] = proyecto.perfiles;
 
-            crearPersona("Beto", "react", "node");
-            crearPersona("Ana", "react", "node", "docker");
-            crearPersona("Cris", "react");
+            await crearPersona("Beto", "react", "node");
+            await crearPersona("Ana", "react", "node", "docker");
+            await crearPersona("Cris", "react");
 
             const resultados = await service.buscarColaboradoresCompatibles(proyecto.id, perfil.id);
 
@@ -86,14 +86,14 @@ describe("CompatibilidadService", () => {
         });
 
         test("con estricto en false incluye a quien cumple alguna requerida", async () => {
-            const proyecto = crearProyecto(
+            const proyecto = await crearProyecto(
                 "Portal",
                 perfilCon("Fullstack", { requeridas: ["react", "node"] })
             );
             const [perfil] = proyecto.perfiles;
 
-            crearPersona("Beto", "react", "node");
-            crearPersona("Cris", "react");
+            await crearPersona("Beto", "react", "node");
+            await crearPersona("Cris", "react");
 
             const resultados = await service.buscarColaboradoresCompatibles(
                 proyecto.id,
@@ -105,14 +105,14 @@ describe("CompatibilidadService", () => {
         });
 
         test("no deja pasar a un candidato con más puntaje que no cumple todas las requeridas", async () => {
-            const proyecto = crearProyecto("Portal", perfilCon("Analista", {
+            const proyecto = await crearProyecto("Portal", perfilCon("Analista", {
                 requeridas: ["r1", "r2", "r3", "r4", "r5"],
                 opcionales: ["extra"]
             }));
             const [perfil] = proyecto.perfiles;
 
-            crearPersona("Incompleta", "r1", "r2", "r3", "r4", "extra");
-            crearPersona("Completa", "r1", "r2", "r3", "r4", "r5");
+            await crearPersona("Incompleta", "r1", "r2", "r3", "r4", "extra");
+            await crearPersona("Completa", "r1", "r2", "r3", "r4", "r5");
 
             const estrictos = await service.buscarColaboradoresCompatibles(proyecto.id, perfil.id);
 
@@ -130,12 +130,12 @@ describe("CompatibilidadService", () => {
         });
 
         test("respeta el límite de resultados", async () => {
-            const proyecto = crearProyecto("Portal", perfilCon("Frontend", { requeridas: ["react"] }));
+            const proyecto = await crearProyecto("Portal", perfilCon("Frontend", { requeridas: ["react"] }));
             const [perfil] = proyecto.perfiles;
 
-            crearPersona("Ana", "react");
-            crearPersona("Beto", "react");
-            crearPersona("Cris", "react");
+            await crearPersona("Ana", "react");
+            await crearPersona("Beto", "react");
+            await crearPersona("Cris", "react");
 
             const resultados = await service.buscarColaboradoresCompatibles(
                 proyecto.id,
@@ -147,19 +147,19 @@ describe("CompatibilidadService", () => {
         });
 
         test("devuelve lista vacía si no hay candidatos, no un 404", async () => {
-            const proyecto = crearProyecto("Portal", perfilCon("Cobolera", { requeridas: ["cobol"] }));
+            const proyecto = await crearProyecto("Portal", perfilCon("Cobolera", { requeridas: ["cobol"] }));
             const [perfil] = proyecto.perfiles;
 
-            crearPersona("Ana", "react");
+            await crearPersona("Ana", "react");
 
             await expect(service.buscarColaboradoresCompatibles(proyecto.id, perfil.id))
                 .resolves.toEqual([]);
         });
 
         test("no expone el historial de colaboraciones del candidato", async () => {
-            const proyecto = crearProyecto("Portal", perfilCon("Frontend", { requeridas: ["react"] }));
+            const proyecto = await crearProyecto("Portal", perfilCon("Frontend", { requeridas: ["react"] }));
             const [perfil] = proyecto.perfiles;
-            crearPersona("Ana", "react");
+            await crearPersona("Ana", "react");
 
             const [resultado] = await service.buscarColaboradoresCompatibles(proyecto.id, perfil.id);
 
@@ -177,8 +177,8 @@ describe("CompatibilidadService", () => {
         });
 
         test("devuelve el par proyecto y perfil que matcheó", async () => {
-            const portal = crearProyecto("Portal", perfilCon("Frontend", { requeridas: ["react"] }));
-            const persona = crearPersona("Ana", "react");
+            const portal = await crearProyecto("Portal", perfilCon("Frontend", { requeridas: ["react"] }));
+            const persona = await crearPersona("Ana", "react");
 
             const [resultado] = await service.buscarProyectosCompatibles(persona.id);
 
@@ -190,12 +190,12 @@ describe("CompatibilidadService", () => {
         });
 
         test("un proyecto con dos perfiles compatibles devuelve dos propuestas distintas", async () => {
-            const app = crearProyecto(
+            const app = await crearProyecto(
                 "App",
                 perfilCon("Backend", { requeridas: ["node"] }),
                 perfilCon("Mobile", { requeridas: ["react"] })
             );
-            const persona = crearPersona("Ana", "react", "node");
+            const persona = await crearPersona("Ana", "react", "node");
 
             const resultados = await service.buscarProyectosCompatibles(persona.id);
 
@@ -205,11 +205,12 @@ describe("CompatibilidadService", () => {
         });
 
         test("excluye los proyectos cerrados: no tiene sentido ofrecerlos", async () => {
-            const cerrado = crearProyecto("Cerrado", perfilCon("Frontend", { requeridas: ["react"] }));
+            const cerrado = await crearProyecto("Cerrado", perfilCon("Frontend", { requeridas: ["react"] }));
             cerrado.cerrarProyecto();
-            crearProyecto("Abierto", perfilCon("Frontend", { requeridas: ["react"] }));
+            await ProyectoRepository.guardar(cerrado);
+            await crearProyecto("Abierto", perfilCon("Frontend", { requeridas: ["react"] }));
 
-            const persona = crearPersona("Ana", "react");
+            const persona = await crearPersona("Ana", "react");
 
             const resultados = await service.buscarProyectosCompatibles(persona.id);
 
@@ -217,8 +218,8 @@ describe("CompatibilidadService", () => {
         });
 
         test("por defecto es laxo: muestra también proyectos donde le falta alguna habilidad", async () => {
-            crearProyecto("Portal", perfilCon("Fullstack", { requeridas: ["react", "node"] }));
-            const persona = crearPersona("Ana", "react");
+            await crearProyecto("Portal", perfilCon("Fullstack", { requeridas: ["react", "node"] }));
+            const persona = await crearPersona("Ana", "react");
 
             const resultados = await service.buscarProyectosCompatibles(persona.id);
 
@@ -228,12 +229,12 @@ describe("CompatibilidadService", () => {
         });
 
         test("con estricto en true deja sólo los perfiles que puede cubrir por completo", async () => {
-            crearProyecto(
+            await crearProyecto(
                 "Portal",
                 perfilCon("Fullstack", { requeridas: ["react", "node"] }),
                 perfilCon("Frontend", { requeridas: ["react"] })
             );
-            const persona = crearPersona("Ana", "react");
+            const persona = await crearPersona("Ana", "react");
 
             const resultados = await service.buscarProyectosCompatibles(persona.id, { estricto: true });
 
@@ -241,8 +242,8 @@ describe("CompatibilidadService", () => {
         });
 
         test("devuelve lista vacía si la persona no tiene habilidades", async () => {
-            crearProyecto("Portal", perfilCon("Frontend", { requeridas: ["react"] }));
-            const persona = crearPersona("Ana");
+            await crearProyecto("Portal", perfilCon("Frontend", { requeridas: ["react"] }));
+            const persona = await crearPersona("Ana");
 
             await expect(service.buscarProyectosCompatibles(persona.id)).resolves.toEqual([]);
         });

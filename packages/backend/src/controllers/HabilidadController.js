@@ -17,7 +17,7 @@ export class HabilidadController {
     static async crear(req, res, next) {
         try {
             const datosHabilidad = HabilidadController.validarBody(habilidadEsquema, req.body);
-            const nuevaHabilidad = HabilidadService.crearHabilidad(datosHabilidad);
+            const nuevaHabilidad = await HabilidadService.crearHabilidad(datosHabilidad);
 
             return res.status(201).json(nuevaHabilidad);
         } catch (error) {
@@ -27,7 +27,7 @@ export class HabilidadController {
 
     static async listar(req, res, next) {
         try {
-            const habilidades = HabilidadService.obtenerHabilidades();
+            const habilidades = await HabilidadService.obtenerHabilidades();
 
             return res.status(200).json(habilidades);
         } catch (error) {
@@ -37,7 +37,7 @@ export class HabilidadController {
 
     static async obtenerPorCodigo(req, res, next) {
         try {
-            const habilidad = HabilidadService.obtenerHabilidadPorCodigo(req.params.codigo);
+            const habilidad = await HabilidadService.obtenerHabilidadPorCodigo(req.params.codigo);
 
             return res.status(200).json(habilidad);
         } catch (error) {
@@ -45,7 +45,7 @@ export class HabilidadController {
         }
     }
 
-    static actualizar(req, res) {
+    static async actualizar(req, res, next) {
         const { codigo } = req.params;
         const parseResult = actualizacionHabilidadEsquema.safeParse(req.body);
         if (!parseResult.success) {
@@ -53,26 +53,23 @@ export class HabilidadController {
         }
 
         try {
-            const habilidadActualizada = HabilidadService.actualizarHabilidad(codigo, parseResult.data);
+            const habilidadActualizada = await HabilidadService.actualizarHabilidad(codigo, parseResult.data);
             return res.status(200).json(habilidadActualizada);
         } catch (error) {
-            return res.status(404).json({
-                error: error.message
-            });
+            return next ? next(error) : res.status(error.status || 404).json({ error: error.message });
         }
     }
 
-    static eliminar(req, res) {
+    static async eliminar(req, res, next) {
         const { codigo } = req.params;
         try {
-            HabilidadService.eliminarHabilidad(codigo);
+            await HabilidadService.eliminarHabilidad(codigo);
             return res.status(204).send();
         } catch (error) {
-            return res.status(404).json({
-                error: error.message
-            });
+            return next ? next(error) : res.status(error.status || 404).json({ error: error.message });
         }
     }
+
 
 
     // 400 si la request está malformada (falta un campo, tipo incorrecto, campo de más);

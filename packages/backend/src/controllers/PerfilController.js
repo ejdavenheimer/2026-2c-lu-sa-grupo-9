@@ -61,7 +61,7 @@ export class PerfilController {
         try {
             const { id: proyectoId } = req.params;
             const datosPerfil = this.validarBody(crearPerfilEsquema, req.body);
-            const nuevoPerfil = this.perfilService.crearPerfil(proyectoId, datosPerfil);
+            const nuevoPerfil = await this.perfilService.crearPerfil(proyectoId, datosPerfil);
 
             return res.status(201).json(nuevoPerfil);
         } catch (error) {
@@ -72,7 +72,7 @@ export class PerfilController {
     listarPorProyecto = async (req, res, next) => {
         try {
             const { id: proyectoId } = req.params;
-            const perfiles = this.perfilService.obtenerPerfiles(proyectoId);
+            const perfiles = await this.perfilService.obtenerPerfiles(proyectoId);
 
             return res.status(200).json(perfiles);
         } catch (error) {
@@ -83,7 +83,7 @@ export class PerfilController {
     obtenerPorId = async (req, res, next) => {
         try {
             const { id: proyectoId, perfilId } = req.params;
-            const perfil = this.perfilService.obtenerPerfilPorId(proyectoId, perfilId);
+            const perfil = await this.perfilService.obtenerPerfilPorId(proyectoId, perfilId);
 
             return res.status(200).json(perfil);
         } catch (error) {
@@ -95,7 +95,7 @@ export class PerfilController {
         try {
             const { id: proyectoId, perfilId } = req.params;
             const datosPerfil = this.validarBody(modificarPerfilEsquema, req.body);
-            const perfilModificado = this.perfilService.modificarPerfil(proyectoId, perfilId, datosPerfil);
+            const perfilModificado = await this.perfilService.modificarPerfil(proyectoId, perfilId, datosPerfil);
 
             return res.status(200).json(perfilModificado);
         } catch (error) {
@@ -106,7 +106,7 @@ export class PerfilController {
     eliminar = async (req, res, next) => {
         try {
             const { id: proyectoId, perfilId } = req.params;
-            this.perfilService.eliminarPerfil(proyectoId, perfilId);
+            await this.perfilService.eliminarPerfil(proyectoId, perfilId);
 
             return res.status(204).send();
         } catch (error) {

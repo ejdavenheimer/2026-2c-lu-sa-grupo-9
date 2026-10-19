@@ -31,7 +31,7 @@ export class ColectivoController {
 
     listar = async (req, res, next) => {
         try {
-            const colectivos = this.colectivoService.obtenerColectivos()
+            const colectivos = await this.colectivoService.obtenerColectivos()
 
             return res.status(200).json(colectivos)
         } catch (error) {
@@ -41,7 +41,7 @@ export class ColectivoController {
 
     obtenerPorCodigo = async (req, res, next) => {
         try {
-            const colectivo = this.colectivoService.obtenerColectivoPorId(req.params.id)
+            const colectivo = await this.colectivoService.obtenerColectivoPorId(req.params.id)
 
             return res.status(200).json(colectivo)
         } catch (error) {
@@ -52,13 +52,14 @@ export class ColectivoController {
     crear = async (req, res, next) => {
         try {
             const datosColectivo = this.validarBody(colectivoEsquema, req.body)
-            const nuevoColectivo = this.colectivoService.crearColectivo(datosColectivo)
+            const nuevoColectivo = await this.colectivoService.crearColectivo(datosColectivo)
 
             return res.status(201).json(nuevoColectivo)
         } catch (error) {
             return next(error)
         }
     }
+
 
     // 400 si la request está malformada (falta un campo, tipo incorrecto, campo de más);
     // 422 si los valores llegaron bien pero violan una regla, igual que el dominio.

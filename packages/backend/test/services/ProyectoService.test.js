@@ -19,8 +19,8 @@ function datosProyectoDePrueba(overrides = {}) {
     };
 }
 
-function crearColectivoDePrueba(overrides = {}) {
-    return ColectivoRepository.guardar(new Colectivo({
+async function crearColectivoDePrueba(overrides = {}) {
+    return await ColectivoRepository.guardar(new Colectivo({
         nombre: "Colectivo Comunitario",
         descripcion: "Colectivo de ayuda social",
         tipo: "ONG",
@@ -28,8 +28,8 @@ function crearColectivoDePrueba(overrides = {}) {
     }));
 }
 
-function crearHabilidadDePrueba(overrides = {}) {
-    return HabilidadRepository.guardar(new Habilidad({
+async function crearHabilidadDePrueba(overrides = {}) {
+    return await HabilidadRepository.guardar(new Habilidad({
         titulo: "Desarrollo Web Node",
         codigo: "node_js",
         descripcion: "Backend en Node",
@@ -37,8 +37,8 @@ function crearHabilidadDePrueba(overrides = {}) {
     }));
 }
 
-function crearPersonaColaboradoraDePrueba(overrides = {}) {
-    return PersonaColaboradoraRepository.guardar(new PersonaColaboradora({
+async function crearPersonaColaboradoraDePrueba(overrides = {}) {
+    return await PersonaColaboradoraRepository.guardar(new PersonaColaboradora({
         nombreFantasia: "Colaborador Dev",
         nombre: "Juan",
         apellido: "Pérez",
@@ -58,16 +58,16 @@ describe("ProyectoService", () => {
     });
 
     describe("crearProyecto", () => {
-        test("crea y guarda un proyecto pasando objetos de dominio directamente", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba();
+        test("crea y guarda un proyecto pasando objetos de dominio directamente", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidad = await crearHabilidadDePrueba();
 
             const datos = datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             });
 
-            const proyectoCreado = proyectoService.crearProyecto(datos);
+            const proyectoCreado = await proyectoService.crearProyecto(datos);
 
             expect(proyectoCreado).toHaveProperty("id");
             expect(proyectoCreado.titulo).toBe(datos.titulo);
@@ -79,20 +79,20 @@ describe("ProyectoService", () => {
             expect(colectivo.proyectos).toContain(proyectoCreado);
 
             // Verifica persistencia en el repositorio
-            const guardado = ProyectoRepository.buscarPorId(proyectoCreado.id);
+            const guardado = await ProyectoRepository.buscarPorId(proyectoCreado.id);
             expect(guardado).toEqual(proyectoCreado);
         });
 
-        test("crea y guarda un proyecto resolviendo colectivoId y habilidadesRequeridasCodigos", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba({ codigo: "react_native", titulo: "React Native" });
+        test("crea y guarda un proyecto resolviendo colectivoId y habilidadesRequeridasCodigos", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            await crearHabilidadDePrueba({ codigo: "react_native", titulo: "React Native" });
 
             const datos = datosProyectoDePrueba({
                 colectivoId: colectivo.id,
                 habilidadesRequeridasCodigos: ["react_native"]
             });
 
-            const proyectoCreado = proyectoService.crearProyecto(datos);
+            const proyectoCreado = await proyectoService.crearProyecto(datos);
 
             expect(proyectoCreado.id).toBeDefined();
             expect(proyectoCreado.colectivo.id).toBe(colectivo.id);
@@ -101,9 +101,9 @@ describe("ProyectoService", () => {
             );
         });
 
-        test("convierte una modalidad única (string) a un array", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba();
+        test("convierte una modalidad única (string) a un array", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidad = await crearHabilidadDePrueba();
 
             const datos = datosProyectoDePrueba({
                 colectivoId: colectivo.id,
@@ -111,53 +111,53 @@ describe("ProyectoService", () => {
                 modalidadesColaboracion: "PAGA"
             });
 
-            const proyectoCreado = proyectoService.crearProyecto(datos);
+            const proyectoCreado = await proyectoService.crearProyecto(datos);
             expect(proyectoCreado.modalidadesColaboracion).toEqual(["PAGA"]);
         });
 
-        test("lanza un error si no se indica colectivo ni colectivoId", () => {
-            const habilidad = crearHabilidadDePrueba();
+        test("lanza un error si no se indica colectivo ni colectivoId", async () => {
+            const habilidad = await crearHabilidadDePrueba();
             const datos = datosProyectoDePrueba({
                 habilidadesRequeridas: [habilidad]
             });
 
-            expect(() => proyectoService.crearProyecto(datos)).toThrow("El proyecto requiere un colectivo asociado");
+            await expect(proyectoService.crearProyecto(datos)).rejects.toThrow("El proyecto requiere un colectivo asociado");
         });
 
-        test("lanza un error si el colectivoId no existe", () => {
-            const habilidad = crearHabilidadDePrueba();
+        test("lanza un error si el colectivoId no existe", async () => {
+            const habilidad = await crearHabilidadDePrueba();
             const datos = datosProyectoDePrueba({
                 colectivoId: "id-inexistente",
                 habilidadesRequeridas: [habilidad]
             });
 
-            expect(() => proyectoService.crearProyecto(datos)).toThrow("No se encontró el colectivo con ID 'id-inexistente'");
+            await expect(proyectoService.crearProyecto(datos)).rejects.toThrow("No se encontró el colectivo con ID 'id-inexistente'");
         });
 
-        test("lanza un error si no se indican habilidades requeridas", () => {
-            const colectivo = crearColectivoDePrueba();
+        test("lanza un error si no se indican habilidades requeridas", async () => {
+            const colectivo = await crearColectivoDePrueba();
             const datos = datosProyectoDePrueba({
                 colectivoId: colectivo.id,
                 habilidadesRequeridas: [],
                 habilidadesRequeridasCodigos: []
             });
 
-            expect(() => proyectoService.crearProyecto(datos)).toThrow("El proyecto requiere al menos una habilidad requerida");
+            await expect(proyectoService.crearProyecto(datos)).rejects.toThrow("El proyecto requiere al menos una habilidad requerida");
         });
 
-        test("lanza un error si un código en habilidadesRequeridasCodigos no existe", () => {
-            const colectivo = crearColectivoDePrueba();
+        test("lanza un error si un código en habilidadesRequeridasCodigos no existe", async () => {
+            const colectivo = await crearColectivoDePrueba();
             const datos = datosProyectoDePrueba({
                 colectivoId: colectivo.id,
                 habilidadesRequeridasCodigos: ["codigo_fantasma"]
             });
 
-            expect(() => proyectoService.crearProyecto(datos)).toThrow("No se encontró la habilidad requerida con código 'codigo_fantasma'");
+            await expect(proyectoService.crearProyecto(datos)).rejects.toThrow("No se encontró la habilidad requerida con código 'codigo_fantasma'");
         });
 
-        test("lanza un error si ya existe un proyecto con el mismo título en el colectivo", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba();
+        test("lanza un error si ya existe un proyecto con el mismo título en el colectivo", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidad = await crearHabilidadDePrueba();
 
             const datos1 = datosProyectoDePrueba({
                 titulo: "Proyecto Único",
@@ -170,71 +170,71 @@ describe("ProyectoService", () => {
                 habilidadesRequeridas: [habilidad]
             });
 
-            proyectoService.crearProyecto(datos1);
-            expect(() => proyectoService.crearProyecto(datos2)).toThrow("El proyecto 'Proyecto Único' ya existe en el colectivo");
+            await proyectoService.crearProyecto(datos1);
+            await expect(proyectoService.crearProyecto(datos2)).rejects.toThrow("El proyecto 'Proyecto Único' ya existe en el colectivo");
         });
     });
 
     describe("obtenerProyectos", () => {
-        test("devuelve un array vacío si no hay proyectos", () => {
-            const proyectos = proyectoService.obtenerProyectos();
+        test("devuelve un array vacío si no hay proyectos", async () => {
+            const proyectos = await proyectoService.obtenerProyectos();
             expect(proyectos).toEqual([]);
         });
 
-        test("devuelve todos los proyectos guardados", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba();
+        test("devuelve todos los proyectos guardados", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidad = await crearHabilidadDePrueba();
 
-            proyectoService.crearProyecto(datosProyectoDePrueba({
+            await proyectoService.crearProyecto(datosProyectoDePrueba({
                 titulo: "Proyecto 1",
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
-            proyectoService.crearProyecto(datosProyectoDePrueba({
+            await proyectoService.crearProyecto(datosProyectoDePrueba({
                 titulo: "Proyecto 2",
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
 
-            const proyectos = proyectoService.obtenerProyectos();
+            const proyectos = await proyectoService.obtenerProyectos();
             expect(proyectos).toHaveLength(2);
             expect(proyectos.map((p) => p.titulo)).toEqual(["Proyecto 1", "Proyecto 2"]);
         });
     });
 
     describe("obtenerProyectoPorId", () => {
-        test("devuelve el proyecto si existe", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba();
+        test("devuelve el proyecto si existe", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidad = await crearHabilidadDePrueba();
 
-            const creado = proyectoService.crearProyecto(datosProyectoDePrueba({
+            const creado = await proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
 
-            const obtenido = proyectoService.obtenerProyectoPorId(creado.id);
+            const obtenido = await proyectoService.obtenerProyectoPorId(creado.id);
             expect(obtenido).toEqual(creado);
         });
 
-        test("lanza un error si el proyecto no existe", () => {
-            expect(() => proyectoService.obtenerProyectoPorId("id-inexistente")).toThrow("No se encontró el proyecto con ID 'id-inexistente'");
+        test("lanza un error si el proyecto no existe", async () => {
+            await expect(proyectoService.obtenerProyectoPorId("id-inexistente")).rejects.toThrow("No se encontró el proyecto con ID 'id-inexistente'");
         });
     });
 
     describe("anotarColaborador", () => {
-        test("anota a un colaborador existente por ID si posee la habilidad requerida", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba({ codigo: "python" });
-            const persona = crearPersonaColaboradoraDePrueba({
+        test("anota a un colaborador existente por ID si posee la habilidad requerida", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidad = await crearHabilidadDePrueba({ codigo: "python" });
+            const persona = await crearPersonaColaboradoraDePrueba({
                 habilidades: [habilidad]
             });
 
-            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+            const proyecto = await proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
 
-            const colaboracion = proyectoService.anotarColaborador(proyecto.id, {
+            const colaboracion = await proyectoService.anotarColaborador(proyecto.id, {
                 personaColaboradoraId: persona.id
             });
 
@@ -247,105 +247,105 @@ describe("ProyectoService", () => {
             expect(persona.colaboraciones).toContain(colaboracion);
         });
 
-        test("lanza un error si el proyecto a anotar no existe", () => {
-            const persona = crearPersonaColaboradoraDePrueba();
-            expect(() => proyectoService.anotarColaborador("id-invalido", {
+        test("lanza un error si el proyecto a anotar no existe", async () => {
+            const persona = await crearPersonaColaboradoraDePrueba();
+            await expect(proyectoService.anotarColaborador("id-invalido", {
                 personaColaboradoraId: persona.id
-            })).toThrow("No se encontró el proyecto con ID 'id-invalido'");
+            })).rejects.toThrow("No se encontró el proyecto con ID 'id-invalido'");
         });
 
-        test("lanza un error si no se pasa colaborador ni ID de colaborador", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba();
-            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+        test("lanza un error si no se pasa colaborador ni ID de colaborador", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidad = await crearHabilidadDePrueba();
+            const proyecto = await proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
 
-            expect(() => proyectoService.anotarColaborador(proyecto.id, {})).toThrow("Debe indicar una persona colaboradora para anotar en el proyecto");
+            await expect(proyectoService.anotarColaborador(proyecto.id, {})).rejects.toThrow("Debe indicar una persona colaboradora para anotar en el proyecto");
         });
 
-        test("lanza un error si el personaColaboradoraId no existe", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba();
-            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+        test("lanza un error si el personaColaboradoraId no existe", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidad = await crearHabilidadDePrueba();
+            const proyecto = await proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
 
-            expect(() => proyectoService.anotarColaborador(proyecto.id, {
+            await expect(proyectoService.anotarColaborador(proyecto.id, {
                 personaColaboradoraId: "id-inexistente"
-            })).toThrow("No se encontró la persona colaboradora con ID 'id-inexistente'");
+            })).rejects.toThrow("No se encontró la persona colaboradora con ID 'id-inexistente'");
         });
 
-        test("lanza un error si el colaborador no cumple con las habilidades requeridas", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidadProyecto = crearHabilidadDePrueba({ codigo: "rust" });
-            const persona = crearPersonaColaboradoraDePrueba({ habilidades: [] });
+        test("lanza un error si el colaborador no cumple con las habilidades requeridas", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidadProyecto = await crearHabilidadDePrueba({ codigo: "rust" });
+            const persona = await crearPersonaColaboradoraDePrueba({ habilidades: [] });
 
-            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+            const proyecto = await proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidadProyecto]
             }));
 
-            expect(() => proyectoService.anotarColaborador(proyecto.id, {
+            await expect(proyectoService.anotarColaborador(proyecto.id, {
                 personaColaboradoraId: persona.id
-            })).toThrow("El colaborador no cuenta con las habilidades requeridas para este proyecto");
+            })).rejects.toThrow("El colaborador no cuenta con las habilidades requeridas para este proyecto");
         });
 
-        test("lanza un error si el proyecto ya está cerrado", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba();
-            const persona = crearPersonaColaboradoraDePrueba({ habilidades: [habilidad] });
+        test("lanza un error si el proyecto ya está cerrado", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidad = await crearHabilidadDePrueba();
+            const persona = await crearPersonaColaboradoraDePrueba({ habilidades: [habilidad] });
 
-            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+            const proyecto = await proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
-            proyectoService.cerrarProyecto(proyecto.id);
+            await proyectoService.cerrarProyecto(proyecto.id);
 
-            expect(() => proyectoService.anotarColaborador(proyecto.id, {
+            await expect(proyectoService.anotarColaborador(proyecto.id, {
                 personaColaboradoraId: persona.id
-            })).toThrow("No se pueden agregar colaboraciones a un proyecto cerrado");
+            })).rejects.toThrow("No se pueden agregar colaboraciones a un proyecto cerrado");
         });
     });
 
     describe("cerrarProyecto", () => {
-        test("cierra un proyecto publicado y actualiza su estado y fecha de cierre", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba();
+        test("cierra un proyecto publicado y actualiza su estado y fecha de cierre", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidad = await crearHabilidadDePrueba();
 
-            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+            const proyecto = await proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
 
-            const proyectoCerrado = proyectoService.cerrarProyecto(proyecto.id);
+            const proyectoCerrado = await proyectoService.cerrarProyecto(proyecto.id);
 
             expect(proyectoCerrado.estado).toBe(EstadoProyecto.CERRADO);
             expect(proyectoCerrado.fechaCierre).toBeInstanceOf(Date);
 
             // Verifica persistencia
-            const guardado = ProyectoRepository.buscarPorId(proyecto.id);
+            const guardado = await ProyectoRepository.buscarPorId(proyecto.id);
             expect(guardado.estado).toBe(EstadoProyecto.CERRADO);
         });
 
-        test("lanza un error si se intenta cerrar un proyecto inexistente", () => {
-            expect(() => proyectoService.cerrarProyecto("id-inexistente")).toThrow("No se encontró el proyecto con ID 'id-inexistente'");
+        test("lanza un error si se intenta cerrar un proyecto inexistente", async () => {
+            await expect(proyectoService.cerrarProyecto("id-inexistente")).rejects.toThrow("No se encontró el proyecto con ID 'id-inexistente'");
         });
     });
 
     describe("actualizarProyecto", () => {
-        test("actualiza los datos de un proyecto", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba();
+        test("actualiza los datos de un proyecto", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidad = await crearHabilidadDePrueba();
 
-            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+            const proyecto = await proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
 
-            const actualizado = proyectoService.actualizarProyecto(proyecto.id, {
+            const actualizado = await proyectoService.actualizarProyecto(proyecto.id, {
                 titulo: "Nuevo Titulo",
                 cantidadHoras: 30
             });
@@ -356,122 +356,122 @@ describe("ProyectoService", () => {
     });
 
     describe("eliminarProyecto", () => {
-        test("elimina un proyecto existente", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba();
+        test("elimina un proyecto existente", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidad = await crearHabilidadDePrueba();
 
-            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+            const proyecto = await proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
 
-            const eliminado = proyectoService.eliminarProyecto(proyecto.id);
+            const eliminado = await proyectoService.eliminarProyecto(proyecto.id);
             expect(eliminado).toBe(true);
-            expect(() => proyectoService.obtenerProyectoPorId(proyecto.id)).toThrow();
+            await expect(proyectoService.obtenerProyectoPorId(proyecto.id)).rejects.toThrow();
         });
     });
 
     describe("registrarHito", () => {
-        test("registra un hito, lo persiste y lo devuelve", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba();
-            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+        test("registra un hito, lo persiste y lo devuelve", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidad = await crearHabilidadDePrueba();
+            const proyecto = await proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
-            const hito = proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 50, descripcion: "Primer hito" });
+            const hito = await proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 50, descripcion: "Primer hito" });
             expect(hito.porcentajeConcrecion).toBe(50);
             expect(hito.descripcion).toBe("Primer hito");
             expect(proyecto.hitos).toContain(hito);
-            const proyectoGuardado = ProyectoRepository.buscarPorId(proyecto.id);
+            const proyectoGuardado = await ProyectoRepository.buscarPorId(proyecto.id);
             expect(proyectoGuardado.hitos).toContainEqual(expect.objectContaining({ id: hito.id }));
         });
 
-        test("lanza un error si el proyecto no existe", () => {
-            expect(() => proyectoService.registrarHito("id-inexistente", { porcentajeConcrecion: 50, descripcion: "Hito" })).toThrow("No se encontró el proyecto con ID 'id-inexistente'");
+        test("lanza un error si el proyecto no existe", async () => {
+            await expect(proyectoService.registrarHito("id-inexistente", { porcentajeConcrecion: 50, descripcion: "Hito" })).rejects.toThrow("No se encontró el proyecto con ID 'id-inexistente'");
         });
 
-        test("lanza un error si el porcentaje no es mayor al del último hito", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba();
-            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+        test("lanza un error si el porcentaje no es mayor al del último hito", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidad = await crearHabilidadDePrueba();
+            const proyecto = await proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
-            proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 50, descripcion: "Primer hito" });
-            expect(() => proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 40, descripcion: "Segundo hito" })).toThrow("El porcentaje de concreción debe ser mayor al del último hito registrado");
+            await proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 50, descripcion: "Primer hito" });
+            await expect(proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 40, descripcion: "Segundo hito" })).rejects.toThrow("El porcentaje de concreción debe ser mayor al del último hito registrado");
         });
     });
 
     describe("obtenerHitos", () => {
-        test("devuelve un array vacío si el proyecto no tiene hitos", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba();
-            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+        test("devuelve un array vacío si el proyecto no tiene hitos", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidad = await crearHabilidadDePrueba();
+            const proyecto = await proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
-            const hitos = proyectoService.obtenerHitos(proyecto.id);
+            const hitos = await proyectoService.obtenerHitos(proyecto.id);
             expect(hitos).toEqual([]);
         });
 
-        test("devuelve todos los hitos del proyecto", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba();
-            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+        test("devuelve todos los hitos del proyecto", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidad = await crearHabilidadDePrueba();
+            const proyecto = await proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
-            const hito1 = proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 50, descripcion: "Primer hito" });
-            const hito2 = proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 70, descripcion: "Segundo hito" });
-            const hitos = proyectoService.obtenerHitos(proyecto.id);
+            const hito1 = await proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 50, descripcion: "Primer hito" });
+            const hito2 = await proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 70, descripcion: "Segundo hito" });
+            const hitos = await proyectoService.obtenerHitos(proyecto.id);
             expect(hitos).toEqual([hito1, hito2]);
         });
 
-        test("lanza un error si el proyecto no existe", () => {
-            expect(() => proyectoService.obtenerHitos("id-inexistente")).toThrow("No se encontró el proyecto con ID 'id-inexistente'");
+        test("lanza un error si el proyecto no existe", async () => {
+            await expect(proyectoService.obtenerHitos("id-inexistente")).rejects.toThrow("No se encontró el proyecto con ID 'id-inexistente'");
         });
     });
 
     describe("obtenerHitoPorId", () => {
-        test("devuelve el hito si existe", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba();
-            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+        test("devuelve el hito si existe", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidad = await crearHabilidadDePrueba();
+            const proyecto = await proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
-            const hito = proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 50, descripcion: "Primer hito" });
-            const obtenido = proyectoService.obtenerHitoPorId(proyecto.id, hito.id);
+            const hito = await proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 50, descripcion: "Primer hito" });
+            const obtenido = await proyectoService.obtenerHitoPorId(proyecto.id, hito.id);
             expect(obtenido).toEqual(hito);
         });
 
-        test("lanza un error si el hito no existe", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba();
-            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+        test("lanza un error si el hito no existe", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidad = await crearHabilidadDePrueba();
+            const proyecto = await proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
-            expect(() => proyectoService.obtenerHitoPorId(proyecto.id, "hito-inexistente")).toThrow("Hito con id hito-inexistente no encontrado");
+            await expect(proyectoService.obtenerHitoPorId(proyecto.id, "hito-inexistente")).rejects.toThrow("Hito con id hito-inexistente no encontrado");
         });
 
-        test("lanza un error si el proyecto no existe", () => {
-            expect(() => proyectoService.obtenerHitoPorId("proyecto-inexistente", "hito-inexistente")).toThrow("No se encontró el proyecto con ID 'proyecto-inexistente'");
+        test("lanza un error si el proyecto no existe", async () => {
+            await expect(proyectoService.obtenerHitoPorId("proyecto-inexistente", "hito-inexistente")).rejects.toThrow("No se encontró el proyecto con ID 'proyecto-inexistente'");
         });
     });
 
     describe("actualizarHito", () => {
-        test("actualiza el hito y lo persiste", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba();
-            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+        test("actualiza el hito y lo persiste", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidad = await crearHabilidadDePrueba();
+            const proyecto = await proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
-            const hito = proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 50, descripcion: "Primer hito" });
-            const hitoActualizado = proyectoService.actualizarHito(proyecto.id, hito.id, { porcentajeConcrecion: 60, descripcion: "Hito actualizado" });
-            const proyectoGuardado = ProyectoRepository.buscarPorId(proyecto.id);
+            const hito = await proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 50, descripcion: "Primer hito" });
+            const hitoActualizado = await proyectoService.actualizarHito(proyecto.id, hito.id, { porcentajeConcrecion: 60, descripcion: "Hito actualizado" });
+            const proyectoGuardado = await ProyectoRepository.buscarPorId(proyecto.id);
             const hitoGuardado = proyectoGuardado.hitos.find(h => h.id === hito.id);
             expect(hitoActualizado.porcentajeConcrecion).toBe(60);
             expect(hitoActualizado.descripcion).toBe("Hito actualizado");
@@ -479,55 +479,55 @@ describe("ProyectoService", () => {
             expect(hitoGuardado.descripcion).toBe("Hito actualizado");
         });
 
-        test("lanza un error si el proyecto no existe", () => {
-            expect(() => proyectoService.actualizarHito("proyecto-inexistente", "hito-inexistente", { porcentajeConcrecion: 60, descripcion: "Hito actualizado" })).toThrow("No se encontró el proyecto con ID 'proyecto-inexistente'");
+        test("lanza un error si el proyecto no existe", async () => {
+            await expect(proyectoService.actualizarHito("proyecto-inexistente", "hito-inexistente", { porcentajeConcrecion: 60, descripcion: "Hito actualizado" })).rejects.toThrow("No se encontró el proyecto con ID 'proyecto-inexistente'");
         });
 
-        test("lanza un error si el hito no existe", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba();
-            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+        test("lanza un error si el hito no existe", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidad = await crearHabilidadDePrueba();
+            const proyecto = await proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
-            expect(() => proyectoService.actualizarHito(proyecto.id, "hito-inexistente", { porcentajeConcrecion: 60, descripcion: "Hito actualizado" })).toThrow("Hito con id hito-inexistente no encontrado");
+            await expect(proyectoService.actualizarHito(proyecto.id, "hito-inexistente", { porcentajeConcrecion: 60, descripcion: "Hito actualizado" })).rejects.toThrow("Hito con id hito-inexistente no encontrado");
         });
     });
 
     describe("eliminarHito", () => {
-        test("elimina el hito y lo persiste", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba();
-            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+        test("elimina el hito y lo persiste", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidad = await crearHabilidadDePrueba();
+            const proyecto = await proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
-            const hito = proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 50, descripcion: "Primer hito" });
-            proyectoService.eliminarHito(proyecto.id, hito.id);
-            const proyectoGuardado = ProyectoRepository.buscarPorId(proyecto.id);
+            const hito = await proyectoService.registrarHito(proyecto.id, { porcentajeConcrecion: 50, descripcion: "Primer hito" });
+            await proyectoService.eliminarHito(proyecto.id, hito.id);
+            const proyectoGuardado = await ProyectoRepository.buscarPorId(proyecto.id);
             expect(proyectoGuardado.hitos).not.toContainEqual(expect.objectContaining({ id: hito.id }));
         });
 
-        test("lanza un error si el proyecto no existe", () => {
-            expect(() => proyectoService.eliminarHito("proyecto-inexistente", "hito-inexistente")).toThrow("No se encontró el proyecto con ID 'proyecto-inexistente'");
+        test("lanza un error si el proyecto no existe", async () => {
+            await expect(proyectoService.eliminarHito("proyecto-inexistente", "hito-inexistente")).rejects.toThrow("No se encontró el proyecto con ID 'proyecto-inexistente'");
         });
 
-        test("lanza un error si el hito no existe", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba();
-            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+        test("lanza un error si el hito no existe", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidad = await crearHabilidadDePrueba();
+            const proyecto = await proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
-            expect(() => proyectoService.eliminarHito(proyecto.id, "hito-inexistente")).toThrow("Hito con id hito-inexistente no encontrado");
+            await expect(proyectoService.eliminarHito(proyecto.id, "hito-inexistente")).rejects.toThrow("Hito con id hito-inexistente no encontrado");
         });
     });
 
     describe("actualizarEnlaces", () => {
-        test("actualiza los enlaces y los persiste", () => {
-            const colectivo = crearColectivoDePrueba();
-            const habilidad = crearHabilidadDePrueba();
-            const proyecto = proyectoService.crearProyecto(datosProyectoDePrueba({
+        test("actualiza los enlaces y los persiste", async () => {
+            const colectivo = await crearColectivoDePrueba();
+            const habilidad = await crearHabilidadDePrueba();
+            const proyecto = await proyectoService.crearProyecto(datosProyectoDePrueba({
                 colectivo,
                 habilidadesRequeridas: [habilidad]
             }));
@@ -535,14 +535,14 @@ describe("ProyectoService", () => {
                 enlaceSistemaEnFuncionamiento: "https://nuevo-enlace.com",
                 enlaceCodigoFuente: "https://nuevo-enlace-codigo.com"
             };
-            proyectoService.actualizarEnlaces(proyecto.id, enlacesActualizados);
-            const proyectoGuardado = ProyectoRepository.buscarPorId(proyecto.id);
+            await proyectoService.actualizarEnlaces(proyecto.id, enlacesActualizados);
+            const proyectoGuardado = await ProyectoRepository.buscarPorId(proyecto.id);
             expect(proyectoGuardado.enlaceSistemaEnFuncionamiento).toBe(enlacesActualizados.enlaceSistemaEnFuncionamiento);
             expect(proyectoGuardado.enlaceCodigoFuente).toBe(enlacesActualizados.enlaceCodigoFuente);
         });
 
-        test("lanza un error si el proyecto no existe", () => {
-            expect(() => proyectoService.actualizarEnlaces("proyecto-inexistente", { enlaceSistemaEnFuncionamiento: "https://nuevo-enlace.com" })).toThrow("No se encontró el proyecto con ID 'proyecto-inexistente'");
+        test("lanza un error si el proyecto no existe", async () => {
+            await expect(proyectoService.actualizarEnlaces("proyecto-inexistente", { enlaceSistemaEnFuncionamiento: "https://nuevo-enlace.com" })).rejects.toThrow("No se encontró el proyecto con ID 'proyecto-inexistente'");
         });
     });
 });

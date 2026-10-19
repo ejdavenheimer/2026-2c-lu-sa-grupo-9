@@ -3,7 +3,7 @@ import { HabilidadRepository } from "../repositories/HabilidadRepository.js";
 import { NotFoundError, UnprocessableEntityError } from "../errors/AppError.js";
 
 export class HabilidadService {
-    static crearHabilidad({ titulo, codigo, descripcion }) {
+    static async crearHabilidad({ titulo, codigo, descripcion }) {
         if (!titulo) {
             throw new UnprocessableEntityError("El título de la habilidad es requerido");
         }
@@ -20,34 +20,35 @@ export class HabilidadService {
             descripcion: descripcion ? descripcion.trim() : ""
         });
 
-        return HabilidadRepository.guardar(nuevaHabilidad);
+        return await HabilidadRepository.guardar(nuevaHabilidad);
     }
 
-    static obtenerHabilidades() {
-        return HabilidadRepository.buscarTodos();
+    static async obtenerHabilidades() {
+        return await HabilidadRepository.buscarTodos();
     }
 
-    static obtenerHabilidadPorCodigo(codigo) {
-        const habilidad = HabilidadRepository.buscarPorCodigo(codigo);
+    static async obtenerHabilidadPorCodigo(codigo) {
+        const habilidad = await HabilidadRepository.buscarPorCodigo(codigo);
         if (!habilidad) {
             throw new NotFoundError(`No se encontró la habilidad con el código '${codigo}'`);
         }
         return habilidad;
     }
 
-    static actualizarHabilidad(codigo, { titulo, descripcion }) {
-        const habilidad = this.obtenerHabilidadPorCodigo(codigo);
+    static async actualizarHabilidad(codigo, { titulo, descripcion }) {
+        const habilidad = await this.obtenerHabilidadPorCodigo(codigo);
         if (titulo) {
             habilidad.titulo = titulo.trim();
         }
         if (descripcion !== undefined) {
             habilidad.descripcion = descripcion.trim();
         }
-        return HabilidadRepository.actualizar(codigo, habilidad);
+        return await HabilidadRepository.actualizar(codigo, habilidad);
     }
 
-    static eliminarHabilidad(codigo) {
-        this.obtenerHabilidadPorCodigo(codigo);
-        return HabilidadRepository.eliminarPorCodigo(codigo);
+    static async eliminarHabilidad(codigo) {
+        await this.obtenerHabilidadPorCodigo(codigo);
+        return await HabilidadRepository.eliminarPorCodigo(codigo);
     }
 }
+
