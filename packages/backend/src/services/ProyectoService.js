@@ -4,6 +4,7 @@ import { ColectivoRepository } from "../repositories/ColectivoRepository.js";
 import { PersonaColaboradoraRepository } from "../repositories/PersonaColaboradoraRepository.js";
 import { HabilidadRepository } from "../repositories/HabilidadRepository.js";
 import { NotFoundError, UnprocessableEntityError } from "../errors/AppError.js";
+import {PersonaColaboradora} from "../domain/PersonaColaboradora.js";
 
 export class ProyectoService {
     crearProyecto = async ({
@@ -60,7 +61,8 @@ export class ProyectoService {
     }
 
     obtenerProyectos = async () => {
-        return await ProyectoRepository.buscarTodos();
+        const registros = await ProyectoRepository.buscarTodos();
+        return registros.map((p) => new Proyecto(p));
     }
 
     obtenerProyectoPorId = async (id) => {
@@ -68,7 +70,7 @@ export class ProyectoService {
         if (!proyecto) {
             throw new NotFoundError(`No se encontró el proyecto con ID '${id}'`);
         }
-        return proyecto;
+        return new Proyecto(proyecto);
     }
 
     anotarColaborador = async (proyectoId, { personaColaboradoraId, personaColaboradora, esAnonima= false }) => {
@@ -83,12 +85,11 @@ export class ProyectoService {
         if (!colaborador) {
             throw new UnprocessableEntityError("Debe indicar una persona colaboradora para anotar en el proyecto");
         }
-
-        const nuevaColaboracion = proyecto.agregarColaboracion(colaborador, esAnonima);
+        const colaboradorOb = new PersonaColaboradora(colaborador)
+        const nuevaColaboracion = proyecto.agregarColaboracion(colaboradorOb, esAnonima);
 
         await ProyectoRepository.guardar(proyecto);
-        await PersonaColaboradoraRepository.guardar(colaborador);
-
+        await PersonaColaboradoraRepository.guardar(colaboradorOb);
         return nuevaColaboracion;
     }
 

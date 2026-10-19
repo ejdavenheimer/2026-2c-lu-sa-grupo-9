@@ -14,7 +14,9 @@ export class Proyecto {
         unidadCompromiso,
         cantidadHoras,
         modalidadesColaboracion,
+        estado,
         fechaAlta,
+        fechaCierre,
         enlaceSistemaEnFuncionamiento,
         enlaceCodigoFuente,
         colectivo,
@@ -43,9 +45,9 @@ export class Proyecto {
         this.unidadCompromiso = unidadCompromiso;
         this.cantidadHoras = cantidadHoras;
         this.modalidadesColaboracion = modalidadesColaboracion;
-        this.estado = EstadoProyecto.PUBLICADO;
+        this.estado = estado ?? EstadoProyecto.PUBLICADO;
         this.fechaAlta = fechaAlta || new Date();
-        this.fechaCierre = undefined;
+        this.fechaCierre = fechaCierre ?? undefined;
         this.enlaceSistemaEnFuncionamiento = enlaceSistemaEnFuncionamiento;
         this.enlaceCodigoFuente = enlaceCodigoFuente;
         this.colectivo = colectivo;
