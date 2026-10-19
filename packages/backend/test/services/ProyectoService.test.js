@@ -239,12 +239,20 @@ describe("ProyectoService", () => {
             });
 
             expect(colaboracion).toBeDefined();
-            expect(colaboracion.proyecto).toBe(proyecto);
-            expect(colaboracion.personaColaboradora).toBe(persona);
+            // Se compara por id y no por referencia: el service relee el
+            // proyecto y la persona desde la base, asi que trabaja sobre otras
+            // instancias que las que tiene el test.
+            expect(colaboracion.proyecto.id).toBe(proyecto.id);
+            expect(colaboracion.personaColaboradora.id).toBe(persona.id);
 
-            // Verifica que se guardó en el proyecto y en la persona
-            expect(proyecto.colaboraciones).toContain(colaboracion);
-            expect(persona.colaboraciones).toContain(colaboracion);
+            // Verifica que quedo persistida en el proyecto
+            const proyectoGuardado = await ProyectoRepository.buscarPorId(proyecto.id);
+            expect(proyectoGuardado.colaboraciones).toHaveLength(1);
+            expect(proyectoGuardado.colaboraciones[0].personaColaboradora.id).toBe(persona.id);
+
+            // ...y en la persona
+            const personaGuardada = await PersonaColaboradoraRepository.buscarPorId(persona.id);
+            expect(personaGuardada.colaboraciones).toHaveLength(1);
         });
 
         test("lanza un error si el proyecto a anotar no existe", async () => {

@@ -221,3 +221,85 @@ describe("hitos de un proyecto", () => {
         expect(res.status).toBe(422);
     });
 });
+
+describe("POST /api/proyectos/:id/colaboraciones", () => {
+    async function crearPersonaCon(habilidad, nombreFantasia) {
+        const res = await request(app).post("/api/personas-colaboradoras").send({
+            nombreFantasia,
+            habilidades: [{ codigo: habilidad.codigo, titulo: habilidad.titulo }]
+        });
+        return res.body;
+    }
+
+    test("la colaboracion queda persistida", async () => {
+        // Regresion: el controller no hacia await del service, asi que
+        // respondia 201 con una Promise serializada ({}) antes de guardar.
+        // Ademas el schema no declaraba id ni esAnonima y, en strict mode,
+        // Mongoose los descartaba en silencio.
+        const { proyecto, habilidad } = await crearProyecto();
+        const persona = await crearPersonaCon(habilidad, "DevAna");
+
+        const res = await request(app)
+            .post(`/api/proyectos/${proyecto.id}/colaboraciones`)
+            .send({ personaColaboradoraId: persona.id });
+
+        expect(res.status).toBe(201);
+        expect(res.body.id).toBeDefined();
+
+        const detalle = await request(app).get(`/api/proyectos/${proyecto.id}`);
+        expect(detalle.body.colaboraciones).toHaveLength(1);
+        expect(detalle.body.colaboraciones[0].personaColaboradora.id).toBe(persona.id);
+    });
+
+    test("una contribucion anonima no revela quien la realizo", async () => {
+        // El enunciado pide que figure en la plataforma pero sin indicar quien
+        // la hizo. Proyecto.toJSON() armaba el objeto ignorando esAnonima.
+        const { proyecto, habilidad } = await crearProyecto();
+        const persona = await crearPersonaCon(habilidad, "DevAnonimo");
+
+        await request(app)
+            .post(`/api/proyectos/${proyecto.id}/colaboraciones`)
+            .send({ personaColaboradoraId: persona.id, esAnonima: true });
+
+        const detalle = await request(app).get(`/api/proyectos/${proyecto.id}`);
+        expect(detalle.body.colaboraciones).toHaveLength(1);
+        expect(detalle.body.colaboraciones[0].esAnonima).toBe(true);
+        expect(detalle.body.colaboraciones[0].personaColaboradora).toBeNull();
+    });
+
+    test("devuelve 422 si la persona no tiene ninguna habilidad requerida", async () => {
+        // El error ocurre dentro del service. Sin el await, el 201 se enviaba
+        // antes y este caso quedaba sin cubrir.
+        const { proyecto } = await crearProyecto();
+        const otra = await crearHabilidad("Cobol");
+        const persona = await crearPersonaCon(otra, "DevCobol");
+
+        const res = await request(app)
+            .post(`/api/proyectos/${proyecto.id}/colaboraciones`)
+            .send({ personaColaboradoraId: persona.id });
+
+        expect(res.status).toBe(422);
+    });
+
+    test("devuelve 404 si la persona no existe", async () => {
+        const { proyecto } = await crearProyecto();
+
+        const res = await request(app)
+            .post(`/api/proyectos/${proyecto.id}/colaboraciones`)
+            .send({ personaColaboradoraId: "no-existe" });
+
+        expect(res.status).toBe(404);
+    });
+
+    test("no se puede anotar en un proyecto cerrado", async () => {
+        const { proyecto, habilidad } = await crearProyecto();
+        const persona = await crearPersonaCon(habilidad, "DevTarde");
+        await request(app).patch(`/api/proyectos/${proyecto.id}/cerrar`).send({});
+
+        const res = await request(app)
+            .post(`/api/proyectos/${proyecto.id}/colaboraciones`)
+            .send({ personaColaboradoraId: persona.id });
+
+        expect(res.status).toBe(409);
+    });
+});
