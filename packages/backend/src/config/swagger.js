@@ -181,7 +181,7 @@ export const swaggerDocument = {
             description: "ID del colectivo",
             schema: {
               type: "string",
-              example: "col-1"
+              example: "colectivo-1"
             }
           }
         ],
@@ -211,7 +211,7 @@ export const swaggerDocument = {
             description: "ID del colectivo",
             schema: {
               type: "string",
-              example: "col-1"
+              example: "colectivo-1"
             }
           }
         ],
@@ -256,7 +256,7 @@ export const swaggerDocument = {
             description: "ID del colectivo",
             schema: {
               type: "string",
-              example: "col-1"
+              example: "colectivo-1"
             }
           }
         ],
@@ -896,7 +896,7 @@ export const swaggerDocument = {
             in: "path",
             required: true,
             description: "ID del hito",
-            schema: { type: "string", example: "26a597d8-ce6c-418e-a068-1baa613ec889" }
+            schema: { type: "string", example: "hito-1" }
           }
         ],
         responses: {
@@ -929,7 +929,7 @@ export const swaggerDocument = {
             in: "path",
             required: true,
             description: "ID del hito",
-            schema: { type: "string", example: "26a597d8-ce6c-418e-a068-1baa613ec889" }
+            schema: { type: "string", example: "hito-1" }
           }
         ],
         requestBody: {
@@ -971,7 +971,7 @@ export const swaggerDocument = {
             in: "path",
             required: true,
             description: "ID del hito",
-            schema: { type: "string", example: "26a597d8-ce6c-418e-a068-1baa613ec889" }
+            schema: { type: "string", example: "hito-1" }
           }
         ],
         responses: {
@@ -1496,7 +1496,7 @@ export const swaggerDocument = {
             description: "Código único de la habilidad",
             schema: {
               type: "string",
-              example: "desarrollo_web_react"
+              example: "react"
             }
           }
         ],
@@ -1526,7 +1526,7 @@ export const swaggerDocument = {
             description: "Código único de la habilidad",
             schema: {
               type: "string",
-              example: "desarrollo_web_react"
+              example: "react"
             }
           }
         ],
@@ -1575,7 +1575,7 @@ export const swaggerDocument = {
             description: "Código único de la habilidad",
             schema: {
               type: "string",
-              example: "desarrollo_web_react"
+              example: "react"
             }
           }
         ],
@@ -1728,7 +1728,7 @@ export const swaggerDocument = {
             name: "id",
             in: "path",
             required: true,
-            schema: { type: "string" },
+            schema: { type: "string", example: "notif-1" },
             description: "Identificador de la notificación"
           }
         ],
@@ -1755,7 +1755,7 @@ export const swaggerDocument = {
             name: "id",
             in: "path",
             required: true,
-            schema: { type: "string" },
+            schema: { type: "string", example: "notif-1" },
             description: "Identificador de la notificación"
           }
         ],
@@ -1839,7 +1839,7 @@ export const swaggerDocument = {
         properties: {
           id: {
             type: "string",
-            example: "col-1"
+            example: "colectivo-1"
           },
           nombre: {
             type: "string",
@@ -1903,7 +1903,7 @@ export const swaggerDocument = {
           },
           colectivoId: {
             type: "string",
-            example: "col-1"
+            example: "colectivo-1"
           },
           habilidadesRequeridasCodigos: {
             type: "array",
@@ -2045,7 +2045,7 @@ export const swaggerDocument = {
         properties: {
           id: {
             type: "string",
-            example: "26a597d8-ce6c-418e-a068-1baa613ec889"
+            example: "hito-1"
           },
           fecha: {
             type: "string",
@@ -2368,7 +2368,7 @@ export const swaggerDocument = {
           },
           codigo: {
             type: "string",
-            example: "desarrollo_web_react"
+            example: "react"
           },
           descripcion: {
             type: "string",
@@ -2385,7 +2385,7 @@ export const swaggerDocument = {
           },
           codigo: {
             type: "string",
-            example: "desarrollo_web_react"
+            example: "react"
           },
           descripcion: {
             type: "string",
@@ -2514,7 +2514,7 @@ export const swaggerDocument = {
                 type: "object",
                 nullable: true,
                 properties: {
-                  id: { type: "string", example: "col-1" },
+                  id: { type: "string", example: "colectivo-1" },
                   nombre: { type: "string", example: "Colectivo Comunitario" }
                 }
               }
@@ -2635,7 +2635,7 @@ export const swaggerDocument = {
         type: "object",
         required: ["colectivoId", "personaColaboradoraId", "perfilId", "contenido"],
         properties: {
-          colectivoId: { type: "string", example: "col-1" },
+          colectivoId: { type: "string", example: "colectivo-1" },
           personaColaboradoraId: { type: "string", example: "colab-1" },
           perfilId: { type: "string", example: "perfil-1" },
           contenido: { type: "string", example: "Te invitamos a sumarte al proyecto de reforestación en el rol de Frontend React." },
@@ -2659,7 +2659,7 @@ export const swaggerDocument = {
           colectivo: {
             type: "object",
             properties: {
-              id: { type: "string", example: "col-1" },
+              id: { type: "string", example: "colectivo-1" },
               nombre: { type: "string", example: "Fundación Raíces" }
             }
           },
