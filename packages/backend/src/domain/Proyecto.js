@@ -4,6 +4,7 @@ import { Hito } from "./Hito.js";
 import { Perfil } from "./Perfil.js";
 import { Compatibilidad } from "./Compatibilidad.js";
 import { ConflictError, NotFoundError, UnprocessableEntityError } from "../errors/AppError.js";
+import {randomUUID} from "crypto";
 
 export class Proyecto {
     constructor({
@@ -36,7 +37,7 @@ export class Proyecto {
             );
         }
 
-        this.id = id;
+        this.id = id || randomUUID();
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.unidadCompromiso = unidadCompromiso;
@@ -135,7 +136,8 @@ export class Proyecto {
         return perfil;
     }
 
-    agregarColaboracion(personaColaboradora) {
+    agregarColaboracion(personaColaboradora, esAnonima) {
+        console.log(personaColaboradora, esAnonima);
         if (this.estado !== EstadoProyecto.PUBLICADO || this.fechaCierre !== undefined) {
             throw new ConflictError("No se pueden agregar colaboraciones a un proyecto cerrado");
         }
@@ -146,7 +148,8 @@ export class Proyecto {
         const nuevaColaboracion = new Colaboracion({
             personaColaboradora,
             proyecto: this,
-            fechaInscripcion: new Date()
+            fechaInscripcion: new Date(),
+            esAnonima
         });
 
         this.colaboraciones.push(nuevaColaboracion);

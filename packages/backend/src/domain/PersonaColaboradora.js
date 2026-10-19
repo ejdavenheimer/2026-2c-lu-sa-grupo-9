@@ -1,8 +1,10 @@
-import { ConflictError, UnprocessableEntityError } from "../errors/AppError.js";
-import { TipoMedioContacto } from "./enums.js";
+import {ConflictError, NotFoundError, UnprocessableEntityError} from "../errors/AppError.js";
+import {TipoMedioContacto} from "./enums.js";
+import {randomUUID} from "crypto";
 
 export class PersonaColaboradora {
     constructor({
+        id,
         nombreFantasia,
         nombre,
         apellido,
@@ -17,6 +19,7 @@ export class PersonaColaboradora {
         if (!nombreFantasia && (!nombre || !apellido) && cuentas.length === 0)  {
             throw new UnprocessableEntityError("La persona colaboradora debe poseer al menos un nombre de fantasia o nombre y apellido");
         }
+        this.id = id || randomUUID();
         this.nombreFantasia = nombreFantasia;
         this.nombre = nombre;
         this.apellido = apellido;
@@ -33,18 +36,19 @@ export class PersonaColaboradora {
     }
 
     agregarMedioDeContacto(medio) {
-        const tipo = medio?.tipo;
-        const valor = typeof medio?.valor === "string" ? medio.valor.trim() : "";
-        if (!Object.values(TipoMedioContacto).includes(tipo)) {
-            throw new UnprocessableEntityError(`Tipo de medio de contacto inválido. Valores permitidos: ${Object.values(TipoMedioContacto).join(", ")}`);
+        const nuevo = this.#normalizarMedioDeContacto(medio);
+        if (this.#existeMedio(nuevo)) return;
+        this.mediosDeContacto.push(nuevo);
+    }
+
+    actualizarMediosDeContacto(medio) {
+        const nuevo = this.#normalizarMedioDeContacto(medio);
+        if (this.#existeMedio(nuevo)) return;
+        const existente = this.mediosDeContacto.find((m) => m.tipo === nuevo.tipo);
+        if (!existente) {
+            throw new NotFoundError(`No existe un medio de contacto de tipo ${nuevo.tipo}`);
         }
-        if (!valor) {
-            throw new UnprocessableEntityError("El medio de contacto debe tener un valor");
-        }
-        if (this.mediosDeContacto.some((m) => m.tipo === tipo && m.valor === valor)) {
-            return;
-        }
-        this.mediosDeContacto.push({ tipo, valor });
+        existente.valor = nuevo.valor;
     }
 
     aceptaMensajesInternos() {
@@ -62,7 +66,6 @@ export class PersonaColaboradora {
 
         this.habilidades.push(habilidad);
     }
-
 
     agregarColaboracion(colaboracion) {
         if (!colaboracion) {
@@ -86,6 +89,22 @@ export class PersonaColaboradora {
 
     }
 
+    #existeMedio({ tipo, valor }) {
+        return this.mediosDeContacto.some((m) => m.tipo === tipo && m.valor === valor);
+    }
+
+    #normalizarMedioDeContacto(medio) {
+        const tipo = medio?.tipo;
+        const valor = typeof medio?.valor === "string" ? medio.valor.trim() : "";
+        if (!Object.values(TipoMedioContacto).includes(tipo)) {
+            throw new UnprocessableEntityError(`Tipo de medio de contacto inválido. Valores permitidos: ${Object.values(TipoMedioContacto).join(", ")}`);
+        }
+        if (!valor) {
+            throw new UnprocessableEntityError("El medio de contacto debe tener un valor");
+        }
+        return { tipo, valor };
+    }
+
     toJSON() {
         return {
             id: this.id,
@@ -97,6 +116,7 @@ export class PersonaColaboradora {
             cuentas: this.cuentas,
             habilidades: this.habilidades,
             mensajesInternos: this.mensajesInternos,
+            mediosDeContacto: this.mediosDeContacto,
             colaboraciones: this.colaboraciones.map((c) => ({
                 id: c.id,
                 fechaInscripcion: c.fechaInscripcion,

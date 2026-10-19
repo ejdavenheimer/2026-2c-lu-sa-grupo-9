@@ -16,7 +16,8 @@ const proyectoEsquema = z.object({
 }).strict();
 
 const anotacionEsquema = z.object({
-    personaColaboradoraId: z.string().min(1, "El ID de la persona colaboradora es requerido")
+    personaColaboradoraId: z.string().min(1, "El ID de la persona colaboradora es requerido"),
+    esAnonima: z.boolean().default(false)
 }).strict();
 
 const actualizacionProyectoEsquema = z.object({
@@ -91,8 +92,8 @@ export class ProyectoController {
 
     anotarColaboracion = async (req, res, next) => {
         try {
-            const { personaColaboradoraId } = this.validarBody(anotacionEsquema, req.body);
-            const colaboracion = await this.proyectoService.anotarColaborador(req.params.id, { personaColaboradoraId });
+            const { personaColaboradoraId, esAnonima } = this.validarBody(anotacionEsquema, req.body);
+            const colaboracion = this.proyectoService.anotarColaborador(req.params.id, { personaColaboradoraId, esAnonima });
 
             return res.status(201).json(colaboracion);
         } catch (error) {

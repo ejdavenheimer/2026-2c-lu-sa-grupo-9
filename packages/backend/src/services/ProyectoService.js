@@ -71,9 +71,8 @@ export class ProyectoService {
         return proyecto;
     }
 
-    anotarColaborador = async (proyectoId, { personaColaboradoraId, personaColaboradora }) => {
+    anotarColaborador = async (proyectoId, { personaColaboradoraId, personaColaboradora, esAnonima= false }) => {
         const proyecto = await this.obtenerProyectoPorId(proyectoId);
-
         let colaborador = personaColaboradora;
         if (!colaborador && personaColaboradoraId) {
             colaborador = await PersonaColaboradoraRepository.buscarPorId(personaColaboradoraId);
@@ -85,7 +84,7 @@ export class ProyectoService {
             throw new UnprocessableEntityError("Debe indicar una persona colaboradora para anotar en el proyecto");
         }
 
-        const nuevaColaboracion = proyecto.agregarColaboracion(colaborador);
+        const nuevaColaboracion = proyecto.agregarColaboracion(colaborador, esAnonima);
 
         await ProyectoRepository.guardar(proyecto);
         await PersonaColaboradoraRepository.guardar(colaborador);
