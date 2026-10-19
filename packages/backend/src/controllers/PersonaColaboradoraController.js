@@ -67,7 +67,7 @@ export class PersonaColaboradoraController {
 
     obtenerPersonasColaboradoras = async (req, res, next) => {
         try {
-            const personas = this.personaColaboradoraService.listarPersonasColaboradoras()
+            const personas = await this.personaColaboradoraService.listarPersonasColaboradoras()
 
             return res.status(200).json(personas)
         } catch (error) {
@@ -77,7 +77,7 @@ export class PersonaColaboradoraController {
 
     obtenerPersonaColaboradoraPorId = async (req, res, next) => {
         try {
-            const persona = this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(req.params.id)
+            const persona = await this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(req.params.id)
 
             return res.status(200).json(persona)
         } catch (error) {
@@ -88,7 +88,7 @@ export class PersonaColaboradoraController {
     crearPersonaColaboradora = async (req, res, next) => {
         try {
             const datosPersona = this.validarBody(personaColaboradoraValida, req.body)
-            const nuevaPersona = this.personaColaboradoraService.crearPersonaColaboradora(datosPersona)
+            const nuevaPersona = await this.personaColaboradoraService.crearPersonaColaboradora(datosPersona)
 
             return res.status(201).json(nuevaPersona)
         } catch (error) {
@@ -99,7 +99,7 @@ export class PersonaColaboradoraController {
     agregarHabilidad = async (req, res, next) => {
         try {
             const habilidad = this.validarBody(habilidadEsquema, req.body)
-            const persona = this.personaColaboradoraService.agregarHabilidad(req.params.id, habilidad)
+            const persona = await this.personaColaboradoraService.agregarHabilidad(req.params.id, habilidad)
 
             return res.status(200).json(persona)
         } catch (error) {
@@ -143,7 +143,7 @@ export class PersonaColaboradoraController {
         throw esEstructural ? new BadRequestError(detalle) : new UnprocessableEntityError(detalle)
     }
 
-    actualizarPersonaColaboradora = (req, res) => {
+    actualizarPersonaColaboradora = async (req, res, next) => {
         const { id } = req.params;
         const parseResult = actualizacionPersonaColaboradoraEsquema.safeParse(req.body);
         if (!parseResult.success) {
@@ -151,20 +151,21 @@ export class PersonaColaboradoraController {
         }
 
         try {
-            const personaActualizada = this.personaColaboradoraService.actualizarPersonaColaboradora(id, parseResult.data);
+            const personaActualizada = await this.personaColaboradoraService.actualizarPersonaColaboradora(id, parseResult.data);
             return res.status(200).json(personaActualizada);
         } catch (error) {
-            return res.status(404).json({ error: error.message });
+            return next ? next(error) : res.status(error.status || 404).json({ error: error.message });
         }
     }
 
-    eliminarPersonaColaboradora = (req, res) => {
+    eliminarPersonaColaboradora = async (req, res, next) => {
         const { id } = req.params;
         try {
-            this.personaColaboradoraService.eliminarPersonaColaboradora(id);
+            await this.personaColaboradoraService.eliminarPersonaColaboradora(id);
             return res.status(204).send();
         } catch (error) {
-            return res.status(404).json({ error: error.message });
+            return next ? next(error) : res.status(error.status || 404).json({ error: error.message });
         }
     }
 }
+

@@ -4,34 +4,34 @@ import { NotFoundError } from "../errors/AppError.js";
 
 export class PersonaColaboradoraService{
     
-    listarPersonasColaboradoras = () => {
-        return PersonaColaboradoraRepository.buscarTodos()
+    listarPersonasColaboradoras = async () => {
+        return await PersonaColaboradoraRepository.buscarTodos();
     }
 
-    obtenerPersonaColaboradoraPorId = (id) => {
-        const persona = PersonaColaboradoraRepository.buscarPorId(id)
+    obtenerPersonaColaboradoraPorId = async (id) => {
+        const persona = await PersonaColaboradoraRepository.buscarPorId(id);
         if(!persona){
-            throw new NotFoundError("Persona colaboradora no encontrada")
+            throw new NotFoundError("Persona colaboradora no encontrada");
         }
-        return persona
+        return persona;
     }
 
-    crearPersonaColaboradora = (personaColaboradora) => {
-        const nuevaPersonaColaboradora = new PersonaColaboradora(personaColaboradora)
-        return PersonaColaboradoraRepository.guardar(nuevaPersonaColaboradora)
+    crearPersonaColaboradora = async (personaColaboradora) => {
+        const nuevaPersonaColaboradora = new PersonaColaboradora(personaColaboradora);
+        return await PersonaColaboradoraRepository.guardar(nuevaPersonaColaboradora);
     }
 
-    agregarHabilidad = (id, habilidad) => {
-        const personaColaboradora = this.obtenerPersonaColaboradoraPorId(id)
+    agregarHabilidad = async (id, habilidad) => {
+        const personaColaboradora = await this.obtenerPersonaColaboradoraPorId(id);
         if(!personaColaboradora){
-            throw new NotFoundError("Persona colaboradora no encontrada")
+            throw new NotFoundError("Persona colaboradora no encontrada");
         }
-        personaColaboradora.agregarHabilidad(habilidad)
-        return PersonaColaboradoraRepository.guardar(personaColaboradora)
+        personaColaboradora.agregarHabilidad(habilidad);
+        return await PersonaColaboradoraRepository.guardar(personaColaboradora);
     }
 
-    actualizarPersonaColaboradora = (id, datos) => {
-        const persona = this.obtenerPersonaColaboradoraPorId(id);
+    actualizarPersonaColaboradora = async (id, datos) => {
+        const persona = await this.obtenerPersonaColaboradoraPorId(id);
         if (datos.nombreFantasia !== undefined) persona.nombreFantasia = datos.nombreFantasia;
         if (datos.nombre !== undefined) persona.nombre = datos.nombre;
         if (datos.apellido !== undefined) persona.apellido = datos.apellido;
@@ -44,11 +44,11 @@ export class PersonaColaboradoraService{
             persona.mediosDeContacto = [];
             medios.forEach((medio) => persona.agregarMedioDeContacto(medio));
         }
-        return PersonaColaboradoraRepository.guardar(persona);
+        return await PersonaColaboradoraRepository.guardar(persona);
     }
 
-    eliminarPersonaColaboradora = (id) => {
-        this.obtenerPersonaColaboradoraPorId(id);
-        return PersonaColaboradoraRepository.eliminarPorId(id);
+    eliminarPersonaColaboradora = async (id) => {
+        await this.obtenerPersonaColaboradoraPorId(id);
+        return await PersonaColaboradoraRepository.eliminarPorId(id);
     }
 }

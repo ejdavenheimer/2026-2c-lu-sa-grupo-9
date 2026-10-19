@@ -11,5 +11,20 @@ services:
     volumes:
       - mongo-data:/data/db
 
+  backend:
+    build:
+      context: .
+      dockerfile: packages/backend/Dockerfile
+    container_name: codigo-a-voluntad-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      SERVER_PORT: 8000
+      MONGODB_URI: mongodb://root:secret@mongo:27017
+      MONGODB_DB_NAME: codigo-a-voluntad
+    depends_on:
+      - mongo
+
 volumes:
   mongo-data:

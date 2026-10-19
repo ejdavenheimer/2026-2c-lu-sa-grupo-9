@@ -21,11 +21,11 @@ export class NotificacionService {
         this.notificadorSender = notificadorSender;
     }
 
-    #reconstruir(registro) {
+    async #reconstruir(registro) {
         if (!registro) return null;
-        const colectivo = this.colectivoRepository.buscarPorId(registro.colectivoId);
-        const personaColaboradora = this.personaColaboradoraRepository.buscarPorId(registro.personaColaboradoraId);
-        const perfil = this.perfilRepository.buscarPorId(registro.perfilId);
+        const colectivo = await this.colectivoRepository.buscarPorId(registro.colectivoId);
+        const personaColaboradora = await this.personaColaboradoraRepository.buscarPorId(registro.personaColaboradoraId);
+        const perfil = await this.perfilRepository.buscarPorId(registro.perfilId);
 
         if (!colectivo || !personaColaboradora || !perfil) {
             return null; // Referencia huérfana
@@ -54,17 +54,17 @@ export class NotificacionService {
             throw new UnprocessableEntityError("La notificación debe tener un contenido válido");
         }
 
-        const colectivo = this.colectivoRepository.buscarPorId(colectivoId);
+        const colectivo = await this.colectivoRepository.buscarPorId(colectivoId);
         if (!colectivo) {
             throw new NotFoundError(`No se encontró el colectivo con ID '${colectivoId}'`);
         }
 
-        const personaColaboradora = this.personaColaboradoraRepository.buscarPorId(personaColaboradoraId);
+        const personaColaboradora = await this.personaColaboradoraRepository.buscarPorId(personaColaboradoraId);
         if (!personaColaboradora) {
             throw new NotFoundError(`No se encontró la persona colaboradora con ID '${personaColaboradoraId}'`);
         }
 
-        const perfil = this.perfilRepository.buscarPorId(perfilId);
+        const perfil = await this.perfilRepository.buscarPorId(perfilId);
         if (!perfil) {
             throw new NotFoundError(`No se encontró el perfil con ID '${perfilId}'`);
         }
@@ -110,15 +110,15 @@ export class NotificacionService {
         }
 
         const registros = await this.notificacionRepository.buscarTodos(filtro);
-        return registros
-            .map((r) => this.#reconstruir(r))
+        const reconstruidos = await Promise.all(registros.map((r) => this.#reconstruir(r)));
+        return reconstruidos
             .filter(Boolean)
             .map((n) => n.toJSON());
     };
 
     obtenerNotificacionPorId = async (id) => {
         const registro = await this.notificacionRepository.buscarPorId(id);
-        const notificacion = registro ? this.#reconstruir(registro) : null;
+        const notificacion = registro ? await this.#reconstruir(registro) : null;
         if (!notificacion) {
             throw new NotFoundError(`No se encontró la notificación con ID '${id}'`);
         }
@@ -127,7 +127,7 @@ export class NotificacionService {
 
     actualizarEstadoLectura = async (id, leida) => {
         const registro = await this.notificacionRepository.buscarPorId(id);
-        const notificacion = registro ? this.#reconstruir(registro) : null;
+        const notificacion = registro ? await this.#reconstruir(registro) : null;
         if (!notificacion) {
             throw new NotFoundError(`No se encontró la notificación con ID '${id}'`);
         }

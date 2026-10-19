@@ -61,7 +61,7 @@ export class ProyectoController {
     crear = async (req, res, next) => {
         try {
             const datosProyecto = this.validarBody(proyectoEsquema, req.body);
-            const nuevoProyecto = this.proyectoService.crearProyecto(datosProyecto);
+            const nuevoProyecto = await this.proyectoService.crearProyecto(datosProyecto);
 
             return res.status(201).json(nuevoProyecto);
         } catch (error) {
@@ -71,7 +71,7 @@ export class ProyectoController {
 
     listar = async (req, res, next) => {
         try {
-            const proyectos = this.proyectoService.obtenerProyectos();
+            const proyectos = await this.proyectoService.obtenerProyectos();
 
             return res.status(200).json(proyectos);
         } catch (error) {
@@ -81,7 +81,7 @@ export class ProyectoController {
 
     obtenerPorId = async (req, res, next) => {
         try {
-            const proyecto = this.proyectoService.obtenerProyectoPorId(req.params.id);
+            const proyecto = await this.proyectoService.obtenerProyectoPorId(req.params.id);
 
             return res.status(200).json(proyecto);
         } catch (error) {
@@ -92,7 +92,7 @@ export class ProyectoController {
     anotarColaboracion = async (req, res, next) => {
         try {
             const { personaColaboradoraId } = this.validarBody(anotacionEsquema, req.body);
-            const colaboracion = this.proyectoService.anotarColaborador(req.params.id, { personaColaboradoraId });
+            const colaboracion = await this.proyectoService.anotarColaborador(req.params.id, { personaColaboradoraId });
 
             return res.status(201).json(colaboracion);
         } catch (error) {
@@ -100,7 +100,7 @@ export class ProyectoController {
         }
     }
 
-    actualizar = (req, res) => {
+    actualizar = async (req, res, next) => {
         const parseResult = actualizacionProyectoEsquema.safeParse(req.body);
         if (!parseResult.success) {
             return res.status(400).json(parseResult.error.issues);
@@ -111,18 +111,17 @@ export class ProyectoController {
             const { estado } = parseResult.data;
 
             if (estado === EstadoProyecto.CERRADO) {
-                const proyectoCerrado = this.proyectoService.cerrarProyecto(id);
+                const proyectoCerrado = await this.proyectoService.cerrarProyecto(id);
                 return res.status(200).json(proyectoCerrado);
             }
         } catch (error) {
-            const status = error.message.includes("No se encontró") ? 404 : 400;
-            return res.status(status).json({
-                error: error.message
-            });
+            if (next) return next(error);
+            const status = error.statusCode || error.status || (error.message && error.message.includes("No se encontró") ? 404 : 400);
+            return res.status(status).json({ error: error.message });
         }
     }
 
-    modificar = (req, res) => {
+    modificar = async (req, res, next) => {
         const { id } = req.params;
         const parseResult = modificarProyectoEsquema.safeParse(req.body);
         if (!parseResult.success) {
@@ -130,31 +129,26 @@ export class ProyectoController {
         }
 
         try {
-            const proyectoModificado = this.proyectoService.actualizarProyecto(id, parseResult.data);
+            const proyectoModificado = await this.proyectoService.actualizarProyecto(id, parseResult.data);
             return res.status(200).json(proyectoModificado);
         } catch (error) {
-            const status = error.message.includes("No se encontró") ? 404 : 400;
-            return res.status(status).json({
-                error: error.message
-            });
+            return next ? next(error) : res.status(error.status || 400).json({ error: error.message });
         }
     }
 
-    eliminar = (req, res) => {
+    eliminar = async (req, res, next) => {
         const { id } = req.params;
         try {
-            this.proyectoService.eliminarProyecto(id);
+            await this.proyectoService.eliminarProyecto(id);
             return res.status(204).send();
         } catch (error) {
-            return res.status(404).json({
-                error: error.message
-            });
+            return next ? next(error) : res.status(error.status || 404).json({ error: error.message });
         }
     }
   
     cerrar = async (req, res, next) => {
         try {
-            const proyectoCerrado = this.proyectoService.cerrarProyecto(req.params.id);
+            const proyectoCerrado = await this.proyectoService.cerrarProyecto(req.params.id);
 
             return res.status(200).json({
                 message: "Proyecto cerrado exitosamente",
@@ -168,7 +162,7 @@ export class ProyectoController {
     registrarHito = async (req, res, next) => {
         try {
             const datosHito = this.validarBody(registrarHitoEsquema, req.body);
-            const nuevoHito = this.proyectoService.registrarHito(req.params.id, datosHito);
+            const nuevoHito = await this.proyectoService.registrarHito(req.params.id, datosHito);
 
             return res.status(201).json(nuevoHito);
         } catch (error) {
@@ -178,7 +172,7 @@ export class ProyectoController {
 
     listarHitos = async (req, res, next) => {
         try {
-            const hitos = this.proyectoService.obtenerHitos(req.params.id);
+            const hitos = await this.proyectoService.obtenerHitos(req.params.id);
             return res.status(200).json(hitos);
         } catch (error) {
             return next(error);
@@ -187,7 +181,7 @@ export class ProyectoController {
 
     obtenerHitoPorId = async (req, res, next) => {
         try {
-            const hito = this.proyectoService.obtenerHitoPorId(req.params.id, req.params.hitoId);
+            const hito = await this.proyectoService.obtenerHitoPorId(req.params.id, req.params.hitoId);
             return res.status(200).json(hito);
         } catch (error) {
             return next(error);
@@ -197,7 +191,7 @@ export class ProyectoController {
     actualizarHito = async (req, res, next) => {
         try {
             const datosHito = this.validarBody(actualizarHitoEsquema, req.body);
-            const hitoActualizado = this.proyectoService.actualizarHito(req.params.id, req.params.hitoId, datosHito);
+            const hitoActualizado = await this.proyectoService.actualizarHito(req.params.id, req.params.hitoId, datosHito);
             return res.status(200).json(hitoActualizado);
         } catch (error) {
             return next(error);
@@ -206,7 +200,7 @@ export class ProyectoController {
 
     eliminarHito = async (req, res, next) => {
         try {
-            this.proyectoService.eliminarHito(req.params.id, req.params.hitoId);
+            await this.proyectoService.eliminarHito(req.params.id, req.params.hitoId);
             return res.status(204).send();
         } catch (error) {
             return next(error);
@@ -216,12 +210,13 @@ export class ProyectoController {
     actualizarEnlaces = async (req, res, next) => {
         try {
             const datosEnlaces = this.validarBody(actualizarEnlacesEsquema, req.body);
-            const proyectoActualizado = this.proyectoService.actualizarEnlaces(req.params.id, datosEnlaces);
+            const proyectoActualizado = await this.proyectoService.actualizarEnlaces(req.params.id, datosEnlaces);
             return res.status(200).json(proyectoActualizado);
         } catch (error) {
             return next(error);
         }
     }
+
 
     // 400 si la request está malformada (falta un campo, tipo incorrecto, campo de más);
     // 422 si los valores llegaron bien pero violan una regla, igual que el dominio.
