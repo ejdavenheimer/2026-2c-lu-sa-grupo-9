@@ -1,41 +1,39 @@
-let ColectivoModel = null;
-let ColectivoSchema = null;
+import mongoose from "mongoose";
 
-try {
-    const mongooseModule = await import("mongoose").catch(() => null);
-    if (mongooseModule) {
-        const mongoose = mongooseModule.default || mongooseModule;
-
-        ColectivoSchema = new mongoose.Schema(
-            {
-                id: {
-                    type: String,
-                    unique: true,
-                    sparse: true,
-                    index: true
-                },
-                nombre: {
-                    type: String,
-                    required: true,
-                    trim: true
-                },
-                descripcion: {
-                    type: String,
-                    trim: true
-                },
-                tipo: {
-                    type: String
-                }
-            },
-            {
-                timestamps: true
-            }
-        );
-
-        ColectivoModel = mongoose.models.Colectivo || mongoose.model("Colectivo", ColectivoSchema);
+const ColectivoSchema = new mongoose.Schema(
+    {
+        id: {
+            type: String,
+            unique: true,
+            required: true,
+            index: true
+        },
+        nombre: {
+            type: String,
+            required: true,
+            trim: true
+        },
+        descripcion: {
+            type: String,
+            trim: true,
+            default: ""
+        },
+        tipo: {
+            type: String,
+            required: true
+        },
+        ubicacion: {
+            pais: { type: String },
+            provincia: { type: String },
+            ciudad: { type: String }
+        }
+    },
+    {
+        timestamps: true
     }
-} catch {
-    // Continuar sin romper tests unitarios si mongoose no está conectado
-}
+);
+
+const ColectivoModel = mongoose.models.Colectivo || mongoose.model("Colectivo", ColectivoSchema);
 
 export { ColectivoSchema, ColectivoModel };
+
