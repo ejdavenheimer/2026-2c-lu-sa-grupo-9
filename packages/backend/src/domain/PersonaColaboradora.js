@@ -1,6 +1,6 @@
 import {ConflictError, NotFoundError, UnprocessableEntityError} from "../errors/AppError.js";
 import {TipoMedioContacto} from "./enums.js";
-import {randomUUID} from "crypto";
+import {randomUUID} from "  crypto";
 
 export class PersonaColaboradora {
     constructor({
