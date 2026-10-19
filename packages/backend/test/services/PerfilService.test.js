@@ -14,7 +14,7 @@ describe("PerfilService", () => {
     let colectivoPrueba;
     let proyectoPrueba;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         ProyectoRepository.limpiar();
         HabilidadRepository.limpiar();
         PerfilRepository.limpiar();
@@ -26,30 +26,31 @@ describe("PerfilService", () => {
             perfilRepository: PerfilRepository
         });
 
-        HabilidadRepository.guardar(new Habilidad({ codigo: "react", titulo: "React", descripcion: "Frontend" }));
-        HabilidadRepository.guardar(new Habilidad({ codigo: "node", titulo: "NodeJS", descripcion: "Backend" }));
-        HabilidadRepository.guardar(new Habilidad({ codigo: "docker", titulo: "Docker", descripcion: "DevOps" }));
+        await HabilidadRepository.guardar(new Habilidad({ codigo: "react", titulo: "React", descripcion: "Frontend" }));
+        await HabilidadRepository.guardar(new Habilidad({ codigo: "node", titulo: "NodeJS", descripcion: "Backend" }));
+        await HabilidadRepository.guardar(new Habilidad({ codigo: "docker", titulo: "Docker", descripcion: "DevOps" }));
 
-        colectivoPrueba = ColectivoRepository.guardar(new Colectivo({
+        colectivoPrueba = await ColectivoRepository.guardar(new Colectivo({
             nombre: "Colectivo Comunitario",
             descripcion: "Org social",
             tipo: "ONG"
         }));
 
-        proyectoPrueba = ProyectoRepository.guardar(new Proyecto({
+        const habReact = await HabilidadRepository.buscarPorCodigo("react");
+        proyectoPrueba = await ProyectoRepository.guardar(new Proyecto({
             titulo: "Plataforma Barrial",
             descripcion: "App web barrial",
             unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
             cantidadHoras: 20,
             modalidadesColaboracion: [ModalidadColaboracion.GRATUITA],
             colectivo: colectivoPrueba,
-            habilidadesRequeridas: [HabilidadRepository.buscarPorCodigo("react")]
+            habilidadesRequeridas: [habReact]
         }));
     });
 
     describe("crearPerfil", () => {
-        test("crea un perfil exitosamente y lo asocia al proyecto", () => {
-            const perfil = service.crearPerfil(proyectoPrueba.id, {
+        test("crea un perfil exitosamente y lo asocia al proyecto", async () => {
+            const perfil = await service.crearPerfil(proyectoPrueba.id, {
                 nombre: "Backend Dev",
                 descripcion: "Desarrollador Backend",
                 habilidadesRequeridasCodigos: ["node"],
@@ -68,80 +69,80 @@ describe("PerfilService", () => {
             expect(perfil.habilidadesOpcionales.length).toBe(1);
             expect(perfil.habilidadesOpcionales[0].codigo).toBe("docker");
 
-            const proyectoActualizado = ProyectoRepository.buscarPorId(proyectoPrueba.id);
+            const proyectoActualizado = await ProyectoRepository.buscarPorId(proyectoPrueba.id);
             expect(proyectoActualizado.perfiles.length).toBe(1);
-            expect(PerfilRepository.buscarPorId(perfil.id)).toBeDefined();
+            expect(await PerfilRepository.buscarPorId(perfil.id)).toBeDefined();
         });
 
-        test("lanza NotFoundError si el proyecto no existe", () => {
-            expect(() => service.crearPerfil("id-inexistente", {
+        test("lanza NotFoundError si el proyecto no existe", async () => {
+            await expect(service.crearPerfil("id-inexistente", {
                 descripcion: "Frontend",
                 habilidadesRequeridasCodigos: ["react"],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
                 cantidadHoras: 10,
                 modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
-            })).toThrow(NotFoundError);
+            })).rejects.toThrow(NotFoundError);
         });
 
-        test("lanza ConflictError si el proyecto está cerrado", () => {
+        test("lanza ConflictError si el proyecto está cerrado", async () => {
             proyectoPrueba.cerrarProyecto();
-            ProyectoRepository.guardar(proyectoPrueba);
+            await ProyectoRepository.guardar(proyectoPrueba);
 
-            expect(() => service.crearPerfil(proyectoPrueba.id, {
+            await expect(service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "Frontend",
                 habilidadesRequeridasCodigos: ["react"],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
                 cantidadHoras: 10,
                 modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
-            })).toThrow(ConflictError);
+            })).rejects.toThrow(ConflictError);
         });
 
-        test("lanza UnprocessableEntityError si no se indican habilidades requeridas", () => {
-            expect(() => service.crearPerfil(proyectoPrueba.id, {
+        test("lanza UnprocessableEntityError si no se indican habilidades requeridas", async () => {
+            await expect(service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "Frontend",
                 habilidadesRequeridasCodigos: [],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
                 cantidadHoras: 10,
                 modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
-            })).toThrow(UnprocessableEntityError);
+            })).rejects.toThrow(UnprocessableEntityError);
         });
 
-        test("lanza NotFoundError si alguna habilidad requerida no existe", () => {
-            expect(() => service.crearPerfil(proyectoPrueba.id, {
+        test("lanza NotFoundError si alguna habilidad requerida no existe", async () => {
+            await expect(service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "Frontend",
                 habilidadesRequeridasCodigos: ["habilidad_inexistente"],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
                 cantidadHoras: 10,
                 modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
-            })).toThrow(NotFoundError);
+            })).rejects.toThrow(NotFoundError);
         });
 
-        test("lanza NotFoundError si alguna habilidad opcional no existe", () => {
-            expect(() => service.crearPerfil(proyectoPrueba.id, {
+        test("lanza NotFoundError si alguna habilidad opcional no existe", async () => {
+            await expect(service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "Frontend",
                 habilidadesRequeridasCodigos: ["react"],
                 habilidadesOpcionalesCodigos: ["opcional_inexistente"],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
                 cantidadHoras: 10,
                 modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
-            })).toThrow(NotFoundError);
+            })).rejects.toThrow(NotFoundError);
         });
 
-        test("lanza UnprocessableEntityError si una habilidad se repite en requerida y opcional", () => {
-            expect(() => service.crearPerfil(proyectoPrueba.id, {
+        test("lanza UnprocessableEntityError si una habilidad se repite en requerida y opcional", async () => {
+            await expect(service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "Frontend",
                 habilidadesRequeridasCodigos: ["react"],
                 habilidadesOpcionalesCodigos: ["react"],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
                 cantidadHoras: 10,
                 modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
-            })).toThrow(UnprocessableEntityError);
+            })).rejects.toThrow(UnprocessableEntityError);
         });
     });
 
     describe("obtenerPerfiles", () => {
-        test("devuelve los perfiles asociados al proyecto", () => {
-            service.crearPerfil(proyectoPrueba.id, {
+        test("devuelve los perfiles asociados al proyecto", async () => {
+            await service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "Frontend",
                 habilidadesRequeridasCodigos: ["react"],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
@@ -149,7 +150,7 @@ describe("PerfilService", () => {
                 modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
             });
 
-            service.crearPerfil(proyectoPrueba.id, {
+            await service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "Backend",
                 habilidadesRequeridasCodigos: ["node"],
                 unidadCompromiso: UnidadCompromiso.HORAS_SEMANALES,
@@ -157,18 +158,18 @@ describe("PerfilService", () => {
                 modalidadesColaboracion: [ModalidadColaboracion.CON_INCENTIVO_ECONOMICO]
             });
 
-            const perfiles = service.obtenerPerfiles(proyectoPrueba.id);
+            const perfiles = await service.obtenerPerfiles(proyectoPrueba.id);
             expect(perfiles.length).toBe(2);
         });
 
-        test("lanza NotFoundError si el proyecto no existe", () => {
-            expect(() => service.obtenerPerfiles("proy-fantasma")).toThrow(NotFoundError);
+        test("lanza NotFoundError si el proyecto no existe", async () => {
+            await expect(service.obtenerPerfiles("proy-fantasma")).rejects.toThrow(NotFoundError);
         });
     });
 
     describe("obtenerPerfilPorId", () => {
-        test("devuelve el perfil solicitado", () => {
-            const creado = service.crearPerfil(proyectoPrueba.id, {
+        test("devuelve el perfil solicitado", async () => {
+            const creado = await service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "Frontend",
                 habilidadesRequeridasCodigos: ["react"],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
@@ -176,19 +177,19 @@ describe("PerfilService", () => {
                 modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
             });
 
-            const perfil = service.obtenerPerfilPorId(proyectoPrueba.id, creado.id);
+            const perfil = await service.obtenerPerfilPorId(proyectoPrueba.id, creado.id);
             expect(perfil).toBeDefined();
             expect(perfil.id).toBe(creado.id);
         });
 
-        test("lanza NotFoundError si el perfil no existe en el proyecto", () => {
-            expect(() => service.obtenerPerfilPorId(proyectoPrueba.id, "perf-inexistente")).toThrow(NotFoundError);
+        test("lanza NotFoundError si el perfil no existe en el proyecto", async () => {
+            await expect(service.obtenerPerfilPorId(proyectoPrueba.id, "perf-inexistente")).rejects.toThrow(NotFoundError);
         });
     });
 
     describe("modificarPerfil", () => {
-        test("modifica exitosamente los datos del perfil", () => {
-            const creado = service.crearPerfil(proyectoPrueba.id, {
+        test("modifica exitosamente los datos del perfil", async () => {
+            const creado = await service.crearPerfil(proyectoPrueba.id, {
                 nombre: "Junior Dev",
                 descripcion: "Junior Dev",
                 habilidadesRequeridasCodigos: ["react"],
@@ -197,7 +198,7 @@ describe("PerfilService", () => {
                 modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
             });
 
-            const modificado = service.modificarPerfil(proyectoPrueba.id, creado.id, {
+            const modificado = await service.modificarPerfil(proyectoPrueba.id, creado.id, {
                 nombre: "Semi-Senior Dev",
                 descripcion: "Semi-Senior Dev",
                 cantidadHoras: 15,
@@ -212,8 +213,8 @@ describe("PerfilService", () => {
             expect(modificado.habilidadesOpcionales.length).toBe(1);
         });
 
-        test("lanza ConflictError si el proyecto está cerrado", () => {
-            const creado = service.crearPerfil(proyectoPrueba.id, {
+        test("lanza ConflictError si el proyecto está cerrado", async () => {
+            const creado = await service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "Junior Dev",
                 habilidadesRequeridasCodigos: ["react"],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
@@ -222,15 +223,15 @@ describe("PerfilService", () => {
             });
 
             proyectoPrueba.cerrarProyecto();
-            ProyectoRepository.guardar(proyectoPrueba);
+            await ProyectoRepository.guardar(proyectoPrueba);
 
-            expect(() => service.modificarPerfil(proyectoPrueba.id, creado.id, {
+            await expect(service.modificarPerfil(proyectoPrueba.id, creado.id, {
                 descripcion: "Senior"
-            })).toThrow(ConflictError);
+            })).rejects.toThrow(ConflictError);
         });
 
-        test("lanza NotFoundError si la habilidad a actualizar no existe", () => {
-            const creado = service.crearPerfil(proyectoPrueba.id, {
+        test("lanza NotFoundError si la habilidad a actualizar no existe", async () => {
+            const creado = await service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "Junior Dev",
                 habilidadesRequeridasCodigos: ["react"],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
@@ -238,15 +239,15 @@ describe("PerfilService", () => {
                 modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
             });
 
-            expect(() => service.modificarPerfil(proyectoPrueba.id, creado.id, {
+            await expect(service.modificarPerfil(proyectoPrueba.id, creado.id, {
                 habilidadesRequeridasCodigos: ["hab_no_existe"]
-            })).toThrow(NotFoundError);
+            })).rejects.toThrow(NotFoundError);
         });
     });
 
     describe("eliminarPerfil", () => {
-        test("elimina el perfil del proyecto y del repositorio", () => {
-            const creado = service.crearPerfil(proyectoPrueba.id, {
+        test("elimina el perfil del proyecto y del repositorio", async () => {
+            const creado = await service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "A eliminar",
                 habilidadesRequeridasCodigos: ["react"],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
@@ -254,19 +255,20 @@ describe("PerfilService", () => {
                 modalidadesColaboracion: [ModalidadColaboracion.GRATUITA]
             });
 
-            const resultado = service.eliminarPerfil(proyectoPrueba.id, creado.id);
+            const resultado = await service.eliminarPerfil(proyectoPrueba.id, creado.id);
             expect(resultado).toBe(true);
 
-            expect(service.obtenerPerfiles(proyectoPrueba.id).length).toBe(0);
-            expect(PerfilRepository.buscarPorId(creado.id)).toBeNull();
+            const perfiles = await service.obtenerPerfiles(proyectoPrueba.id);
+            expect(perfiles.length).toBe(0);
+            expect(await PerfilRepository.buscarPorId(creado.id)).toBeNull();
         });
 
-        test("lanza NotFoundError si el perfil no existe", () => {
-            expect(() => service.eliminarPerfil(proyectoPrueba.id, "perf-inexistente")).toThrow(NotFoundError);
+        test("lanza NotFoundError si el perfil no existe", async () => {
+            await expect(service.eliminarPerfil(proyectoPrueba.id, "perf-inexistente")).rejects.toThrow(NotFoundError);
         });
 
-        test("lanza ConflictError si el proyecto está cerrado", () => {
-            const creado = service.crearPerfil(proyectoPrueba.id, {
+        test("lanza ConflictError si el proyecto está cerrado", async () => {
+            const creado = await service.crearPerfil(proyectoPrueba.id, {
                 descripcion: "Para eliminar",
                 habilidadesRequeridasCodigos: ["react"],
                 unidadCompromiso: UnidadCompromiso.HORAS_TOTALES,
@@ -275,9 +277,9 @@ describe("PerfilService", () => {
             });
 
             proyectoPrueba.cerrarProyecto();
-            ProyectoRepository.guardar(proyectoPrueba);
+            await ProyectoRepository.guardar(proyectoPrueba);
 
-            expect(() => service.eliminarPerfil(proyectoPrueba.id, creado.id)).toThrow(ConflictError);
+            await expect(service.eliminarPerfil(proyectoPrueba.id, creado.id)).rejects.toThrow(ConflictError);
         });
     });
 });

@@ -1,10 +1,12 @@
-let PersonaColaboradoraModel = null;
-let PersonaColaboradoraSchema = null;
+import mongoose from "mongoose";
 
-try {
-    const mongooseModule = await import("mongoose").catch(() => null);
-    if (mongooseModule) {
-        const mongoose = mongooseModule.default || mongooseModule;
+const CuentaSubSchema = new mongoose.Schema(
+    {
+        nombreUsuario: { type: String, required: true },
+        tipo: { type: String, required: true }
+    },
+    { _id: false }
+);
 
         PersonaColaboradoraSchema = new mongoose.Schema(
             {
@@ -69,14 +71,30 @@ try {
                 ]
             },
             {
-                timestamps: true
+                type: String,
+                trim: true
             }
-        );
-
-        PersonaColaboradoraModel = mongoose.models.PersonaColaboradora || mongoose.model("PersonaColaboradora", PersonaColaboradoraSchema);
+        ],
+        presentacion: {
+            type: String
+        },
+        cuentas: [CuentaSubSchema],
+        habilidades: [HabilidadPersonaSubSchema],
+        mensajesInternos: {
+            type: Boolean,
+            default: false
+        },
+        mediosDeContacto: [MedioContactoSubSchema],
+        colaboraciones: [ColaboracionPersonaSubSchema]
+    },
+    {
+        timestamps: true
     }
-} catch {
-    // Continuar sin romper tests unitarios si mongoose no está conectado
-}
+);
+
+const PersonaColaboradoraModel =
+    mongoose.models.PersonaColaboradora ||
+    mongoose.model("PersonaColaboradora", PersonaColaboradoraSchema);
 
 export { PersonaColaboradoraSchema, PersonaColaboradoraModel };
+

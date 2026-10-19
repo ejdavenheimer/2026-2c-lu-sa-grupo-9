@@ -17,9 +17,9 @@ export class ProyectoService {
         habilidadesRequeridasCodigos = [],
         habilidadesRequeridas = []
     }) => {
-        let colectivoAsociado = colectivo;
+        let colectivoAsociado = await colectivo;
         if (!colectivoAsociado && colectivoId) {
-            colectivoAsociado = ColectivoRepository.buscarPorId(colectivoId);
+            colectivoAsociado = await ColectivoRepository.buscarPorId(colectivoId);
             if (!colectivoAsociado) {
                 throw new NotFoundError(`No se encontró el colectivo con ID '${colectivoId}'`);
             }
@@ -27,10 +27,10 @@ export class ProyectoService {
         if (!colectivoAsociado) {
             throw new UnprocessableEntityError("El proyecto requiere un colectivo asociado");
         }
-        let habilidadesFinales = [...habilidadesRequeridas];
+        let habilidadesFinales = await Promise.all([...habilidadesRequeridas]);
         if (habilidadesRequeridasCodigos.length > 0) {
             for (const codigo of habilidadesRequeridasCodigos) {
-                const hab = HabilidadRepository.buscarPorCodigo(codigo);
+                const hab = await HabilidadRepository.buscarPorCodigo(codigo);
                 if (!hab) {
                     throw new NotFoundError(`No se encontró la habilidad requerida con código '${codigo}'`);
                 }
@@ -113,7 +113,7 @@ export class ProyectoService {
         if (datos.habilidadesRequeridasCodigos && datos.habilidadesRequeridasCodigos.length > 0) {
             const nuevasHabilidades = [];
             for (const codigo of datos.habilidadesRequeridasCodigos) {
-                const hab = HabilidadRepository.buscarPorCodigo(codigo);
+                const hab = await HabilidadRepository.buscarPorCodigo(codigo);
                 if (!hab) {
                     throw new Error(`No se encontró la habilidad requerida con código '${codigo}'`);
                 }
@@ -166,3 +166,4 @@ export class ProyectoService {
         return proyecto;
     }
 }
+

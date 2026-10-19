@@ -16,7 +16,7 @@ export class PerfilService {
         this.perfilRepository = perfilRepository;
     }
 
-    crearPerfil = (proyectoId, {
+    crearPerfil = async (proyectoId, {
         nombre,
         descripcion,
         habilidadesRequeridasCodigos = [],
@@ -25,7 +25,7 @@ export class PerfilService {
         cantidadHoras,
         modalidadesColaboracion = []
     } = {}) => {
-        const proyecto = this.proyectoRepository.buscarPorId(proyectoId);
+        const proyecto = await this.proyectoRepository.buscarPorId(proyectoId);
         if (!proyecto) {
             throw new NotFoundError(`No se encontró el proyecto con ID '${proyectoId}'`);
         }
@@ -39,7 +39,7 @@ export class PerfilService {
 
         const habilidadesRequeridas = [];
         for (const codigo of habilidadesRequeridasCodigos) {
-            const habilidad = this.habilidadRepository.buscarPorCodigo(codigo);
+            const habilidad = await this.habilidadRepository.buscarPorCodigo(codigo);
             if (!habilidad) {
                 throw new NotFoundError(`No se encontró la habilidad requerida con código '${codigo}'`);
             }
@@ -54,7 +54,7 @@ export class PerfilService {
                 if (habilidadesRequeridas.some((h) => h.codigo === codigo)) {
                     throw new UnprocessableEntityError(`La habilidad '${codigo}' no puede ser requerida y opcional simultáneamente`);
                 }
-                const habilidad = this.habilidadRepository.buscarPorCodigo(codigo);
+                const habilidad = await this.habilidadRepository.buscarPorCodigo(codigo);
                 if (!habilidad) {
                     throw new NotFoundError(`No se encontró la habilidad opcional con código '${codigo}'`);
                 }
@@ -78,22 +78,22 @@ export class PerfilService {
         });
 
         proyecto.agregarPerfil(nuevoPerfil);
-        this.proyectoRepository.guardar(proyecto);
-        this.perfilRepository.guardar(nuevoPerfil);
+        await this.proyectoRepository.guardar(proyecto);
+        await this.perfilRepository.guardar(nuevoPerfil);
 
         return nuevoPerfil;
     };
 
-    obtenerPerfiles = (proyectoId) => {
-        const proyecto = this.proyectoRepository.buscarPorId(proyectoId);
+    obtenerPerfiles = async (proyectoId) => {
+        const proyecto = await this.proyectoRepository.buscarPorId(proyectoId);
         if (!proyecto) {
             throw new NotFoundError(`No se encontró el proyecto con ID '${proyectoId}'`);
         }
         return proyecto.perfiles;
     };
 
-    obtenerPerfilPorId = (proyectoId, perfilId) => {
-        const proyecto = this.proyectoRepository.buscarPorId(proyectoId);
+    obtenerPerfilPorId = async (proyectoId, perfilId) => {
+        const proyecto = await this.proyectoRepository.buscarPorId(proyectoId);
         if (!proyecto) {
             throw new NotFoundError(`No se encontró el proyecto con ID '${proyectoId}'`);
         }
@@ -104,8 +104,8 @@ export class PerfilService {
         return perfil;
     };
 
-    modificarPerfil = (proyectoId, perfilId, datos = {}) => {
-        const proyecto = this.proyectoRepository.buscarPorId(proyectoId);
+    modificarPerfil = async (proyectoId, perfilId, datos = {}) => {
+        const proyecto = await this.proyectoRepository.buscarPorId(proyectoId);
         if (!proyecto) {
             throw new NotFoundError(`No se encontró el proyecto con ID '${proyectoId}'`);
         }
@@ -133,7 +133,7 @@ export class PerfilService {
             }
             const nuevasRequeridas = [];
             for (const codigo of datos.habilidadesRequeridasCodigos) {
-                const hab = this.habilidadRepository.buscarPorCodigo(codigo);
+                const hab = await this.habilidadRepository.buscarPorCodigo(codigo);
                 if (!hab) {
                     throw new NotFoundError(`No se encontró la habilidad requerida con código '${codigo}'`);
                 }
@@ -147,7 +147,7 @@ export class PerfilService {
         if (datos.habilidadesOpcionalesCodigos !== undefined) {
             const nuevasOpcionales = [];
             for (const codigo of datos.habilidadesOpcionalesCodigos) {
-                const hab = this.habilidadRepository.buscarPorCodigo(codigo);
+                const hab = await this.habilidadRepository.buscarPorCodigo(codigo);
                 if (!hab) {
                     throw new NotFoundError(`No se encontró la habilidad opcional con código '${codigo}'`);
                 }
@@ -173,14 +173,14 @@ export class PerfilService {
         }
 
         const perfilModificado = proyecto.modificarPerfil(perfilId, datosActualizados);
-        this.proyectoRepository.guardar(proyecto);
-        this.perfilRepository.guardar(perfilModificado);
+        await this.proyectoRepository.guardar(proyecto);
+        await this.perfilRepository.guardar(perfilModificado);
 
         return perfilModificado;
     };
 
-    eliminarPerfil = (proyectoId, perfilId) => {
-        const proyecto = this.proyectoRepository.buscarPorId(proyectoId);
+    eliminarPerfil = async (proyectoId, perfilId) => {
+        const proyecto = await this.proyectoRepository.buscarPorId(proyectoId);
         if (!proyecto) {
             throw new NotFoundError(`No se encontró el proyecto con ID '${proyectoId}'`);
         }
@@ -193,8 +193,8 @@ export class PerfilService {
         }
 
         proyecto.quitarPerfil(perfilId);
-        this.proyectoRepository.guardar(proyecto);
-        this.perfilRepository.eliminarPorId(perfilId);
+        await this.proyectoRepository.guardar(proyecto);
+        await this.perfilRepository.eliminarPorId(perfilId);
         return true;
     };
 }

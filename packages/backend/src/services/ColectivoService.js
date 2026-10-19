@@ -4,27 +4,28 @@ import { NotFoundError } from "../errors/AppError.js"
 
 export class ColectivoService{
 
-    crearColectivo = (body) => {
-        const colectivo = new Colectivo(body)
-        return ColectivoRepository.guardar(colectivo)
+    crearColectivo = async (body) => {
+        const colectivo = new Colectivo(body);
+        return await ColectivoRepository.guardar(colectivo);
     }
 
-    obtenerColectivos = () => {
-        return ColectivoRepository.buscarTodos() 
+    obtenerColectivos = async () => {
+        return await ColectivoRepository.buscarTodos();
     }
 
-    obtenerColectivoPorId = (id) => {
-        const colectivo = ColectivoRepository.buscarPorId(id)
+    obtenerColectivoPorId = async (id) => {
+        const colectivo = await ColectivoRepository.buscarPorId(id);
         if(!colectivo){
-            throw new NotFoundError(`No se encontro el colectivo con id ${id}`)
+            throw new NotFoundError(`No se encontro el colectivo con id ${id}`);
         }
-        return colectivo
+        return colectivo;
     }
 
-    actualizarColectivo = (id, datos) => {
-        const colectivo = this.obtenerColectivoPorId(id);
+    actualizarColectivo = async (id, datos) => {
+        const colectivo = await this.obtenerColectivoPorId(id);
         if (datos.nombre && datos.nombre !== colectivo.nombre) {
-            const existePorNombre = ColectivoRepository.buscarTodos().some(
+            const todos = await ColectivoRepository.buscarTodos();
+            const existePorNombre = todos.some(
                 (c) => c.id !== id && c.nombre === datos.nombre
             );
             if (existePorNombre) {
@@ -36,11 +37,11 @@ export class ColectivoService{
         if (datos.tipo !== undefined) colectivo.tipo = datos.tipo;
         if (datos.ubicacion !== undefined) colectivo.ubicacion = datos.ubicacion;
 
-        return ColectivoRepository.guardar(colectivo);
+        return await ColectivoRepository.guardar(colectivo);
     }
 
-    eliminarColectivo = (id) => {
-        this.obtenerColectivoPorId(id);
-        return ColectivoRepository.eliminarPorId(id);
+    eliminarColectivo = async (id) => {
+        await this.obtenerColectivoPorId(id);
+        return await ColectivoRepository.eliminarPorId(id);
     }
 }
