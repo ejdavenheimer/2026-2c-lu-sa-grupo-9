@@ -26,7 +26,7 @@ const conReferencias = (query) =>
     query
         .populate({
             path: "colectivoDoc",
-            select: "id nombre -_id",
+            select: "id nombre descripcion tipo ubicacion -_id",
             transform: (doc) => doc?.nombre ?? null,
         })
         .populate({
@@ -35,6 +35,10 @@ const conReferencias = (query) =>
             transform: (doc) => doc?.codigo,
         })
         .populate("perfilesDocs")
+        .populate({
+            path: "colaboraciones.personaColaboradora",
+            select: "id nombreFantasia nombre apellido",
+        })
         .lean();
 
 export class ProyectoRepository {

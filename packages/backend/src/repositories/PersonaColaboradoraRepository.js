@@ -1,7 +1,5 @@
-import { PersonaColaboradoraModel } from "../schemas/PersonaColaboradoraSchema.js";
 import { ConflictError } from "../errors/AppError.js";
 import { PersonaColaboradoraModel } from "../schemas/PersonaColaboradoraSchema.js";
-import { PersonaColaboradora } from "../domain/PersonaColaboradora.js";
 
 const isMongoActive = () => mongoose.connection && mongoose.connection.readyState === 1;
 
