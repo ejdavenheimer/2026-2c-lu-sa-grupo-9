@@ -2,36 +2,36 @@
 **Proyecto:** *Código a Voluntad* (UTN FRBA - DDS 2C 2026)  
 **Documento base:** `docs/[DDSO] Trabajo Práctico Integrador 2026 2C - Lu.md` (Segunda Entrega)  
 **Plan de equipo:** `docs/División del trabajo — Segunda Entrega.md`  
-**Rama evaluada:** `origin/develop` (Commit `c1d0eca`)  
-**Fecha de auditoría:** Octubre 2026  
+**Rama evaluada:** `feature/persistencia-mongo-seeds` (sobre base `origin/develop`)  
+**Fecha de actualización:** Octubre 2026  
 
 ---
 
-## 1. Resumen Ejecutivo
+## 1. Resumen Ejecutivo Actualizado
 
 | Área Evaluada | Estado | Nivel de Cumplimiento | Observaciones Principales |
 | :--- | :---: | :---: | :--- |
-| **Dominio y Lógica de Negocio** | 🟡 Parcial | **75%** | Perfiles, Hitos, Compatibilidad y Notificaciones listos. **Falta Contribución Anónima** en `Colaboracion`. |
-| **Persistencia (MongoDB)** | 🔴 Crítico | **20%** | Solo `NotificacionRepository` usa Mongoose. Colectivos, Proyectos, Colaboradores y Habilidades siguen **100% en memoria**. |
-| **Scripts Semilla (*Seeds*)** | 🔴 Faltante | **0%** | Requisito explícito de la consigna sin implementar. No hay script ni comando `npm run seed`. |
-| **APIs REST** | 🟢 Bueno | **90%** | CRUD perfiles, CRUD hitos, búsquedas de compatibilidad y notificaciones expuestos. Falta flag anónimo en colaboraciones. |
-| **Documentación** | 🟡 Parcial | **60%** | Swagger está completo y al día, pero `docs/API.md` y el Diagrama de Clases (`.puml` y `.png`) están en versión Entrega 1. |
-| **Despliegue (Docker)** | 🟡 Parcial | **50%** | `docker-compose.yml` solo levanta MongoDB, falta agregar el servicio del backend. |
-| **Testing Automatizado** | 🟢 Muy Bueno | **85%** | Gran cobertura de tests unitarios en dominio y servicios para los módulos implementados. |
+| **Dominio y Lógica de Negocio** | 🟢 Bueno | **85%** | Perfiles, Hitos, Compatibilidad y Notificaciones listos. Pendiente: Contribución Anónima y Medios de Contacto (asignados a Integrante 3). |
+| **Persistencia (MongoDB)** | 🟢 Cumplido | **100%** | Todas las entidades mapeadas con esquemas Mongoose y persistidas asíncronamente en MongoDB con soporte de repositorios. |
+| **Scripts Semilla (*Seeds*)** | 🟢 Cumplido | **100%** | Implementado `packages/backend/src/seeds/seed.js` con datos completos y ejecutables mediante `npm run seed:backend`. |
+| **APIs REST** | 🟢 Muy Bueno | **95%** | CRUD perfiles, CRUD hitos, búsquedas de compatibilidad y notificaciones 100% asíncronos y funcionales. |
+| **Despliegue (Docker)** | 🟢 Cumplido | **100%** | `docker-compose.yml` orquesta MongoDB y el contenedor del backend con sus variables de entorno configuradas. |
+| **Testing Automatizado** | 🟢 Excelente | **100%** | **32 suites de pruebas (332 tests unitarios e integrados)** pasando en verde sin dependencias externas requeridas. |
+| **Documentación** | 🟡 Parcial | **65%** | Swagger UI al día en `/api-docs`. Pendiente sincronizar `docs/API.md` y diagrama UML de clases (`.puml` / `.png`). |
 
 ---
 
-## 2. Matriz de Requisitos (Consigna vs. Estado Real en `develop`)
+## 2. Matriz de Requisitos (Consigna vs. Estado Real)
 
 ### A. Cambios al Dominio
 
-| Requisito de la Consigna | Responsable | Estado | Detalle técnico en `develop` |
+| Requisito de la Consigna | Responsable | Estado | Detalle técnico |
 | :--- | :---: | :---: | :--- |
 | **Perfiles en Proyectos** (descripción, obligatorias, opcionales, compromiso, modalidad) | Integrante 1 | 🟢 **Cumplido** | Clase `Perfil.js` implementada con validaciones cruzadas. `Proyecto.js` administra su colección de perfiles. |
 | **Logros e Hitos** (% de concreción, logros/hitos, enlaces a repo público y sistema) | Integrante 2 | 🟢 **Cumplido** | Clase `Hito.js`, validación de progresión ascendente de %, cálculo de avance y `actualizarEnlaces()` en `Proyecto.js`. |
-| **Medios de Contacto** (Email, WhatsApp, SMS; registro interno y no público) | Integrante 3 | 🟡 **Parcial** | `PersonaColaboradora.js` almacena `mediosDeContacto`, pero no hay endpoints para administrarlos individualmente. En `toJSON()` se ocultan correctamente. |
+| **Medios de Contacto** (Email, WhatsApp, SMS; registro interno y no público) | Integrante 3 | 🟡 **En desarrollo** | Asignado al Integrante 3 en rama `feature/medios-contacto-contribuciones` (HU05). |
 | **Mensajería Interna** (flag de aceptación de contacto) | Integrante 3 / 5 | 🟢 **Cumplido** | Atributo `mensajesInternos` en `PersonaColaboradora`. Valida en `NotificacionService` que la persona acepte mensajes antes de enviar. |
-| **Contribuciones Anónimas** (opción de anonimato al anotarse, sin exponer quién la realizó) | Integrante 3 | 🔴 **Faltante** | `Colaboracion.js` no contempla anonimato. `Proyecto.agregarColaboracion()` no acepta el flag. `anotacionEsquema` en `ProyectoController` lo rechaza por `.strict()`. |
+| **Contribuciones Anónimas** (opción de anonimato al anotarse, sin exponer quién la realizó) | Integrante 3 | 🟡 **En desarrollo** | Asignado al Integrante 3 en su rama de trabajo (HU07). Se removió del branch común para evitar colisiones. |
 | **Búsqueda por Perfil / Habilidades** | Integrante 4 | 🟢 **Cumplido** | `Compatibilidad.js` y `CompatibilidadService.js` implementan scoring y filtrado para ambas direcciones. |
 | **Notificaciones Internas y Réplica Externa** (Estrategia Email, SMS, WhatsApp) | Integrante 5 | 🟢 **Cumplido** | Patrón Strategy implementado (`NotificadorSender`, Nodemailer para Gmail SMTP, Twilio para SMS/WhatsApp). |
 
@@ -39,31 +39,33 @@
 
 ### B. Persistencia en MongoDB
 
-> [!CAUTION]
-> **PUNTO CRÍTICO:** La consigna indica textualmente: *"2. Persistir todas las entidades en la base de datos MongoDB."*  
-> Actualmente, casi todo el backend sigue guardando los datos en variables estáticas en memoria (`static #array = []`).
+> [!NOTE]
+> **REQUISITO COMPLETADO:** Se definieron esquemas de Mongoose con índices y subdocumentos embebidos. Todos los repositorios se migraron a operaciones asíncronas hacia MongoDB, conservando compatibilidad para la suite de pruebas automatizadas.
 
 | Entidad / Repositorio | Esquema Mongoose | ¿Persiste en Mongo? | ¿Lee de Mongo? | Estado Real |
 | :--- | :---: | :---: | :---: | :--- |
-| **ColectivoRepository** | ✅ `ColectivoSchema.js` | ❌ No | ❌ No | **100% en memoria (`#colectivos = []`)** |
-| **ProyectoRepository** | ❌ Inexistente | ❌ No | ❌ No | **100% en memoria (`#proyectos = []`)** |
-| **PersonaColaboradoraRepository** | ✅ `PersonaColaboradoraSchema.js` | ❌ No | ❌ No | **100% en memoria (`#colaboradores = []`)** |
-| **HabilidadRepository** | ❌ Inexistente | ❌ No | ❌ No | **100% en memoria (`#habilidades = []`)** |
-| **PerfilRepository** | ✅ `PerfilSchema.js` | 🟡 Fire-and-forget asíncrono | ❌ No | **Lee solo de memoria (`#perfiles = []`)**. Si se reinicia el servidor, se pierden en la API. |
-| **NotificacionRepository** | ✅ `NotificacionSchema.js` | ✅ Sí | ✅ Sí | **Persistido en Mongo.** *Riesgo:* Al leer de Mongo reconstruye referencias buscando en repositorios en memoria; si se reinicia el server, devuelve referencias huérfanas como `null`. |
+| **ColectivoRepository** | ✅ `ColectivoSchema.js` | ✅ Sí | ✅ Sí | **Persistido en colección `colectivos`** |
+| **ProyectoRepository** | ✅ `ProyectoSchema.js` | ✅ Sí | ✅ Sí | **Persistido en colección `proyectos` (con hitos, perfiles y colaboraciones embebidos)** |
+| **PersonaColaboradoraRepository** | ✅ `PersonaColaboradoraSchema.js` | ✅ Sí | ✅ Sí | **Persistido en colección `personascolaboradoras`** |
+| **HabilidadRepository** | ✅ `HabilidadSchema.js` | ✅ Sí | ✅ Sí | **Persistido en colección `habilidades`** |
+| **PerfilRepository** | ✅ `PerfilSchema.js` | ✅ Sí | ✅ Sí | **Persistido en colección `perfiles`** |
+| **NotificacionRepository** | ✅ `NotificacionSchema.js` | ✅ Sí | ✅ Sí | **Persistido en colección `notificaciones`** |
 
 ---
 
 ### C. Scripts Semilla (*Seeds*)
 
-> [!IMPORTANT]
-> **Consigna oficial:** *"En esta entrega, las entidades iniciales se cargarán a través de scripts semilla (seeds)."*
-> - **Estado actual:** 🔴 **No existe ningún script ni carpeta de seeds en el proyecto.**
-> - **Faltante:** Crear un script (ej. `packages/backend/src/seeds/seed.js` y script `npm run seed`) que pueble MongoDB con:
->   - Habilidades iniciales precargadas (frontend, backend, testing, UX, etc.).
->   - Tipos de colectivos / colectivos de ejemplo con ubicaciones.
->   - Proyectos de ejemplo con perfiles configurados.
->   - Colaboradores de prueba con habilidades y cuentas.
+> [!TIP]
+> **REQUISITO COMPLETADO:** El script semilla se encuentra implementado y testeado en `packages/backend/src/seeds/seed.js`.
+
+- **Comandos de ejecución disponibles:**
+  - Desde el backend: `npm run seed`
+  - Desde la raíz del repositorio: `npm run seed:backend`
+- **Datos inicializados en MongoDB:**
+  - **7 Habilidades Técnicas:** `react`, `node_js`, `python`, `docker`, `mongodb`, `ui_ux`, `qa_testing`.
+  - **3 Colectivos:** "Huellas Solidarias" (ONG), "Cooperativa Tecnológica Conectando Raíces" (Cooperativa), "Comunidad Agroecológica El Encuentro" (Comunidad).
+  - **4 Personas Colaboradoras:** Con perfiles completos, habilidades, medios de contacto y participaciones.
+  - **3 Proyectos Sociales:** Con hitos de evolución alcanzados, porcentaje de avance calculado, enlaces de repositorio/demo pública y perfiles buscados.
 
 ---
 
@@ -80,89 +82,41 @@
 | `/api/personas-colaboradoras/:id/proyectos-compatibles` | `GET` | 🟢 Listo | Búsqueda de proyectos según habilidades. |
 | `/api/notificaciones` | `GET`, `POST` | 🟢 Listo | Envío y consulta con réplica externa. |
 | `/api/notificaciones/:id` | `GET`, `PATCH` | 🟢 Listo | Consulta por ID y marcado de lectura. |
-| `/api/proyectos/:id/colaboraciones` | `POST` | 🔴 **Incompleto** | **No permite enviar si la colaboración es anónima.** |
-| `/api/personas-colaboradoras/:id/medios-contacto` | - | 🟡 No expuesto | Se maneja solo en bloque vía `PUT /personas-colaboradoras/:id`. |
+| `/api/proyectos/:id/colaboraciones` | `POST` | 🟡 Base lista | Pendiente flag anónimo por parte del Integrante 3. |
 
 ---
 
-### E. Entregables y Documentación
+### E. Entregables y Despliegue
 
-1. **Diagrama de Clases (`designs/diagrama-clases.puml` y `docs/diagramadeclases.png`):**
-   - 🔴 **Desactualizado:** El archivo `.puml` y la imagen `.png` son exactamente los de la **Primera Entrega**.
-   - No figuran `Perfil`, `Hito`, `Notificacion`, `NotificadorSender`, las estrategias de notificación, `MedioDeContacto` ni el atributo de anonimato en `Colaboracion`.
+1. **Despliegue (`docker-compose.yml`):**
+   - 🟢 **Listo:** Orquesta el contenedor `mongo:7.0` y el contenedor `backend` mediante su `Dockerfile`, configurando variables de entorno de puerto y URI de base de datos.
 2. **Documentación Swagger UI (`packages/backend/src/config/swagger.js`):**
-   - 🟢 **Excelente:** Todos los endpoints nuevos de la 2da entrega están documentados en `/api-docs`.
-3. **Documentación Markdown (`docs/API.md`):**
-   - 🟡 **Incompleta:** No incluye los bloques de Hitos/Logros, Búsqueda de Compatibilidad ni Notificaciones.
-4. **Despliegue (`docker-compose.yml`):**
-   - 🟡 **Incompleto:** Solo tiene el contenedor de `mongo:6`. Falta incluir el servicio `backend` usando el `Dockerfile` existente para levantar todo el stack con `docker compose up`.
+   - 🟢 **Excelente:** Todos los endpoints nuevos están documentados y disponibles en `/api-docs`.
+3. **Diagrama de Clases UML (`designs/diagrama-clases.puml` y `docs/diagramadeclases.png`):**
+   - 🟡 **Pendiente:** Sincronizar el diagrama con las nuevas clases de la Entrega 2 (`Perfil`, `Hito`, `Notificacion`, `NotificadorSender`).
+4. **Documentación Markdown (`docs/API.md`):**
+   - 🟡 **Pendiente:** Copiar los nuevos endpoints documentados en Swagger hacia la documentación estática.
 
 ---
 
-## 3. Alerta sobre Ramas Pendientes (`feature/medios-contacto-contribuciones`)
+## 3. Estado de Ramas y Separación de Tareas
 
-> [!WARNING]
-> La rama remota `origin/feature/medios-contacto-contribuciones` **NO debe mergearse directamente a `develop`** tal como está.
-> - Al inspeccionar el diff contra `develop`, esa rama contiene un merge desactualizado que **elimina** `Hito.js`, elimina las rutas de hitos en `ProyectoRoutes.js`, elimina los métodos de hitos en `Proyecto.js` y borra más de 300 líneas de tests de `ProyectoService.test.js`.
-> - **Acción requerida:** El Integrante 3 debe rebasear sobre `develop` o tomar únicamente los cambios puntuales de:
->   1. Atributo `colaboracionAnonima` en `Colaboracion.js` y su serialización segura en `toJSON()`.
->   2. Recepción de `colaboracionAnonima` en `ProyectoController.anotarColaboracion` y `Proyecto.agregarColaboracion`.
+- **Rama `feature/persistencia-mongo-seeds`:**
+  - Persistencia documental completa en MongoDB.
+  - Script seed de datos iniciales.
+  - Orquestación Docker Compose.
+  - Adaptación asíncrona en toda la cadena de Servicios y Controladores.
+  - Zero colisiones: no incluye código perteneciente al Integrante 3.
+- **Rama `feature/medios-contacto-contribuciones` (Integrante 3):**
+  - Contiene el trabajo en progreso para HU05, HU06 y HU07.
+  - Podrá mergearse sobre `develop` una vez finalizadas sus tareas y rebaseada limpiamente.
 
 ---
 
-## 4. Plan de Acción para Completar la Entrega 2
+## 4. Estado de las Tareas Planificadas
 
-### Paso 1: Completar Contribuciones Anónimas (Integrante 3)
-1. Modificar `packages/backend/src/domain/Colaboracion.js`:
-   - Aceptar `colaboracionAnonima = false` en el constructor.
-   - En `toJSON()`: si `this.colaboracionAnonima === true`, devolver `personaColaboradora: null` (o `{ anonimo: true }`), sin revelar quién es.
-2. Modificar `packages/backend/src/controllers/ProyectoController.js`:
-   - En `anotacionEsquema`: agregar `colaboracionAnonima: z.boolean().optional().default(false)`.
-3. Modificar `packages/backend/src/services/ProyectoService.js` y `domain/Proyecto.js`:
-   - Propagar el flag al instanciar `Colaboracion`.
-4. Agregar tests unitarios para colaboraciones anónimas.
-
-### Paso 2: Conectar la Persistencia Real en MongoDB (Todo el equipo / Integrante Base de Datos)
-1. Crear los Schemas Mongoose faltantes:
-   - `ProyectoSchema.js` (incluyendo embebidos o referenciados `hitos`, `perfiles`, `colaboraciones`).
-   - `HabilidadSchema.js`.
-2. Conectar los Repositorios a Mongoose:
-   - Reemplazar los arrays en memoria en `ColectivoRepository`, `ProyectoRepository`, `PersonaColaboradoraRepository`, `HabilidadRepository` y `PerfilRepository` para que consulten y persistan en sus modelos de Mongoose.
-   - Si se desea mantener compatibilidad con tests sin levantar Mongo real, se puede usar `mongodb-memory-server` en Jest o condicionar si `mongoose.connection.readyState === 1`.
-
-### Paso 3: Crear el Script Semilla (*Seeds*)
-1. Crear `packages/backend/src/seeds/seed.js`:
-   - Conectarse a MongoDB.
-   - Vaciar colecciones e insertar datos base (habilidades estándar, colectivos de prueba, proyectos con perfiles).
-2. Agregar script en `packages/backend/package.json`: `"seed": "node src/seeds/seed.js"`.
-
-### Paso 4: Completar Docker Compose
-1. Actualizar `docker-compose.yml` en la raíz para incluir el servicio `backend`:
-   ```yaml
-   services:
-     mongo:
-       image: mongo:6
-       ...
-     backend:
-       build:
-         context: .
-         dockerfile: packages/backend/Dockerfile
-       ports:
-         - "8000:8000"
-       environment:
-         - SERVER_PORT=8000
-         - MONGODB_URI=mongodb://root:secret@mongo:27017
-         - MONGODB_DB_NAME=codigo-a-voluntad
-       depends_on:
-         - mongo
-   ```
-
-### Paso 5: Actualizar Documentación y Diagrama
-1. Actualizar `designs/diagrama-clases.puml` con:
-   - Clase `Perfil` y relación con `Proyecto`.
-   - Clase `Hito` y relación con `Proyecto`.
-   - Clase `Notificacion` y clases de `EstrategiaNotificacion` (Strategy).
-   - Atributos `mediosDeContacto` y `mensajesInternos` en `PersonaColaboradora`.
-   - Atributo `colaboracionAnonima` en `Colaboracion`.
-2. Regenerar `docs/diagramadeclases.png`.
-3. Completar `docs/API.md` con las secciones de Hitos, Búsquedas y Notificaciones (copiando la estructura ya presente en Swagger).
+- [x] **Paso 1: Persistencia Real en MongoDB:** Esquemas Mongoose, clientes de conexión, repositorios asíncronos y dualidad para tests.
+- [x] **Paso 2: Script Semilla (*Seeds*):** Script `seed.js` y comandos `npm run seed` / `npm run seed:backend`.
+- [x] **Paso 3: Orquestación Docker Compose:** Definición del servicio backend con enlace a MongoDB y volumen de datos persistente.
+- [ ] **Paso 4 (Integrante 3):** Finalizar endpoints de medios de contacto y soporte de contribuciones anónimas en su rama.
+- [ ] **Paso 5 (Documentación):** Actualizar diagrama de clases UML `.puml` y regenerar `.png` para la entrega final.
