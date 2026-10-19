@@ -23,7 +23,17 @@ const aRegistro = (p) => ({
     colectivo: refId(p.colectivo) ?? null,
     habilidadesRequeridas: (p.habilidadesRequeridas ?? []).map(refId),
     perfiles: (p.perfiles ?? []).map(refId),
-    hitos: p.hitos,
+    // Se mapea explicitamente en vez de pasar las instancias de Hito: el
+    // porcentaje vive en un campo privado (#porcentajeConcrecion) expuesto por
+    // un getter del prototipo, y Mongoose castea leyendo propiedades propias
+    // enumerables. Pasando la instancia cruda, el porcentaje se descartaba en
+    // silencio y todo hito se guardaba sin el.
+    hitos: (p.hitos ?? []).map((h) => ({
+        id: h.id,
+        fecha: h.fecha,
+        porcentajeConcrecion: h.porcentajeConcrecion,
+        descripcion: h.descripcion,
+    })),
     colaboraciones: p.colaboraciones,
 });
 

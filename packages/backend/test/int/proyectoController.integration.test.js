@@ -174,3 +174,50 @@ describe("PATCH /api/proyectos/:id/cerrar", () => {
         expect(releido.body.estado).toBe("CERRADO");
     });
 });
+
+describe("hitos de un proyecto", () => {
+    async function registrarHito(proyectoId, porcentajeConcrecion, descripcion) {
+        return request(app)
+            .post(`/api/proyectos/${proyectoId}/hitos`)
+            .send({ porcentajeConcrecion, descripcion });
+    }
+
+    test("el porcentaje de concrecion sobrevive al guardado", async () => {
+        // Regresion: Hito guarda el porcentaje en un campo privado
+        // (#porcentajeConcrecion) expuesto por un getter del prototipo. Al
+        // pasar la instancia cruda a Mongoose, que castea leyendo propiedades
+        // propias enumerables, el porcentaje se descartaba en silencio.
+        const { proyecto } = await crearProyecto();
+
+        const res = await registrarHito(proyecto.id, 50, "Primer hito");
+        expect(res.status).toBe(201);
+
+        const hitos = await request(app).get(`/api/proyectos/${proyecto.id}/hitos`);
+        expect(hitos.status).toBe(200);
+        expect(hitos.body).toHaveLength(1);
+        expect(hitos.body[0].porcentajeConcrecion).toBe(50);
+    });
+
+    test("se puede registrar un segundo hito con mayor porcentaje", async () => {
+        // Sin el porcentaje persistido, validarHito comparaba contra undefined
+        // y era imposible registrar un segundo hito.
+        const { proyecto } = await crearProyecto();
+
+        await registrarHito(proyecto.id, 50, "Primer hito");
+        const segundo = await registrarHito(proyecto.id, 70, "Segundo hito");
+
+        expect(segundo.status).toBe(201);
+
+        const hitos = await request(app).get(`/api/proyectos/${proyecto.id}/hitos`);
+        expect(hitos.body.map((h) => h.porcentajeConcrecion)).toEqual([50, 70]);
+    });
+
+    test("rechaza un hito con porcentaje menor al anterior", async () => {
+        const { proyecto } = await crearProyecto();
+
+        await registrarHito(proyecto.id, 70, "Primer hito");
+        const res = await registrarHito(proyecto.id, 50, "Retroceso");
+
+        expect(res.status).toBe(422);
+    });
+});
