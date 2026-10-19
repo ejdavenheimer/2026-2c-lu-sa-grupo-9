@@ -637,7 +637,7 @@ export const swaggerDocument = {
             description: "ID del perfil",
             schema: {
               type: "string",
-              example: "perf-1"
+              example: "perfil-1"
             }
           }
         ],
@@ -677,7 +677,7 @@ export const swaggerDocument = {
             description: "ID del perfil",
             schema: {
               type: "string",
-              example: "perf-1"
+              example: "perfil-1"
             }
           }
         ],
@@ -730,7 +730,7 @@ export const swaggerDocument = {
             description: "ID del perfil",
             schema: {
               type: "string",
-              example: "perf-1"
+              example: "perfil-1"
             }
           }
         ],
@@ -774,7 +774,7 @@ export const swaggerDocument = {
             description: "ID del perfil del proyecto contra el cual se evalúa la compatibilidad",
             schema: {
               type: "string",
-              example: "perf-1"
+              example: "perfil-1"
             }
           },
           ...parametrosDeBusqueda(true)
@@ -2181,7 +2181,7 @@ export const swaggerDocument = {
         properties: {
           id: {
             type: "string",
-            example: "perf-1"
+            example: "perfil-1"
           },
           nombre: {
             type: "string",
@@ -2442,6 +2442,15 @@ export const swaggerDocument = {
             items: {
               $ref: "#/components/schemas/Habilidad"
             }
+          },
+          opcionalesFaltantes: {
+            type: "array",
+            description:
+              "Habilidades opcionales del perfil que la persona no tiene. No afectan la compatibilidad ni el orden: " +
+              "indican qué podría sumar para encajar mejor en el perfil.",
+            items: {
+              $ref: "#/components/schemas/Habilidad"
+            }
           }
         }
       },
@@ -2525,7 +2534,7 @@ export const swaggerDocument = {
           perfil: {
             type: "object",
             properties: {
-              id: { type: "string", example: "perf-1" },
+              id: { type: "string", example: "perfil-1" },
               nombre: { type: "string", example: "Tester" },
               descripcion: { type: "string", example: "QA del portal" },
               unidadCompromiso: { type: "string", example: "HORAS_SEMANALES" },
@@ -2610,7 +2619,7 @@ export const swaggerDocument = {
         properties: {
           colectivoId: { type: "string", example: "col-1" },
           personaColaboradoraId: { type: "string", example: "colab-1" },
-          perfilId: { type: "string", example: "perf-1" },
+          perfilId: { type: "string", example: "perfil-1" },
           contenido: { type: "string", example: "Te invitamos a sumarte al proyecto de reforestación en el rol de Frontend React." },
           replicarMediosExternos: { type: "boolean", default: true, example: true }
         }
@@ -2648,7 +2657,7 @@ export const swaggerDocument = {
           perfil: {
             type: "object",
             properties: {
-              id: { type: "string", example: "perf-1" },
+              id: { type: "string", example: "perfil-1" },
               nombre: { type: "string", example: "Desarrollador Frontend" }
             }
           },
