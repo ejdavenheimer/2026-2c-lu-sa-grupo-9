@@ -58,6 +58,8 @@ export class ProyectoRepository {
             aRegistro(proyecto),
             { upsert: true, new: true }
         );
+
+        return proyecto;
     }
 
     static async buscarTodos() {
@@ -84,8 +86,8 @@ export class ProyectoRepository {
         return eliminado !== null;
     }
 
-    // static async limpiar() {
-    //     this.#proyectos = [];
-    //     this.#nextId = 1;
-    // }
+    static async limpiar() {
+        if (!ProyectoModel) return;
+        await ProyectoModel.deleteMany({});
+    }
 }
