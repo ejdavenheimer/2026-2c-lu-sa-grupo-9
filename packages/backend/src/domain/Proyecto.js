@@ -137,7 +137,6 @@ export class Proyecto {
     }
 
     agregarColaboracion(personaColaboradora, esAnonima) {
-        console.log(personaColaboradora, esAnonima);
         if (this.estado !== EstadoProyecto.PUBLICADO || this.fechaCierre !== undefined) {
             throw new ConflictError("No se pueden agregar colaboraciones a un proyecto cerrado");
         }
@@ -288,15 +287,19 @@ export class Proyecto {
                 porcentajeConcrecion: h.porcentajeConcrecion,
                 descripcion: h.descripcion
             })),
+            // Se respeta esAnonima: una contribucion anonima figura en la
+            // plataforma pero sin indicar quien la realizo. Antes se armaba el
+            // objeto a mano ignorando esa marca y se filtraba la identidad.
             colaboraciones: this.colaboraciones.map((c) => ({
                 id: c.id,
                 fechaInscripcion: c.fechaInscripcion,
-                personaColaboradora: c.personaColaboradora ? {
+                esAnonima: Boolean(c.esAnonima),
+                personaColaboradora: (c.esAnonima || !c.personaColaboradora) ? null : {
                     id: c.personaColaboradora.id,
                     nombreFantasia: c.personaColaboradora.nombreFantasia,
                     nombre: c.personaColaboradora.nombre,
                     apellido: c.personaColaboradora.apellido
-                } : null
+                }
             }))
         };
     }

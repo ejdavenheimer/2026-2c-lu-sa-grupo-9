@@ -181,7 +181,7 @@ export const swaggerDocument = {
             description: "ID del colectivo",
             schema: {
               type: "string",
-              example: "col-1"
+              example: "colectivo-1"
             }
           }
         ],
@@ -211,7 +211,7 @@ export const swaggerDocument = {
             description: "ID del colectivo",
             schema: {
               type: "string",
-              example: "col-1"
+              example: "colectivo-1"
             }
           }
         ],
@@ -256,7 +256,7 @@ export const swaggerDocument = {
             description: "ID del colectivo",
             schema: {
               type: "string",
-              example: "col-1"
+              example: "colectivo-1"
             }
           }
         ],
@@ -477,6 +477,35 @@ export const swaggerDocument = {
         }
       }
     },
+    "/proyectos/{id}/cerrar": {
+      patch: {
+        tags: ["Proyectos"],
+        summary: "Cerrar un proyecto",
+        description:
+          "Marca el proyecto como CERRADO y registra su fecha de cierre. A partir de ese momento no se admiten " +
+          "nuevas colaboraciones, perfiles ni hitos. No requiere cuerpo.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID del proyecto a cerrar",
+            schema: { type: "string", example: "proy-1" }
+          }
+        ],
+        responses: {
+          200: {
+            description: "Proyecto cerrado",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/Proyecto" }
+              }
+            }
+          },
+          404: respuestaDeError("No se encontró el proyecto con el ID indicado")
+        }
+      }
+    },
     "/proyectos/{id}/colaboraciones": {
       post: {
         tags: ["Proyectos"],
@@ -637,7 +666,7 @@ export const swaggerDocument = {
             description: "ID del perfil",
             schema: {
               type: "string",
-              example: "perf-1"
+              example: "perfil-1"
             }
           }
         ],
@@ -677,7 +706,7 @@ export const swaggerDocument = {
             description: "ID del perfil",
             schema: {
               type: "string",
-              example: "perf-1"
+              example: "perfil-1"
             }
           }
         ],
@@ -730,7 +759,7 @@ export const swaggerDocument = {
             description: "ID del perfil",
             schema: {
               type: "string",
-              example: "perf-1"
+              example: "perfil-1"
             }
           }
         ],
@@ -774,7 +803,7 @@ export const swaggerDocument = {
             description: "ID del perfil del proyecto contra el cual se evalúa la compatibilidad",
             schema: {
               type: "string",
-              example: "perf-1"
+              example: "perfil-1"
             }
           },
           ...parametrosDeBusqueda(true)
@@ -896,7 +925,7 @@ export const swaggerDocument = {
             in: "path",
             required: true,
             description: "ID del hito",
-            schema: { type: "string", example: "26a597d8-ce6c-418e-a068-1baa613ec889" }
+            schema: { type: "string", example: "hito-1" }
           }
         ],
         responses: {
@@ -929,7 +958,7 @@ export const swaggerDocument = {
             in: "path",
             required: true,
             description: "ID del hito",
-            schema: { type: "string", example: "26a597d8-ce6c-418e-a068-1baa613ec889" }
+            schema: { type: "string", example: "hito-1" }
           }
         ],
         requestBody: {
@@ -971,7 +1000,7 @@ export const swaggerDocument = {
             in: "path",
             required: true,
             description: "ID del hito",
-            schema: { type: "string", example: "26a597d8-ce6c-418e-a068-1baa613ec889" }
+            schema: { type: "string", example: "hito-1" }
           }
         ],
         responses: {
@@ -1496,7 +1525,7 @@ export const swaggerDocument = {
             description: "Código único de la habilidad",
             schema: {
               type: "string",
-              example: "desarrollo_web_react"
+              example: "react"
             }
           }
         ],
@@ -1526,7 +1555,7 @@ export const swaggerDocument = {
             description: "Código único de la habilidad",
             schema: {
               type: "string",
-              example: "desarrollo_web_react"
+              example: "react"
             }
           }
         ],
@@ -1575,7 +1604,7 @@ export const swaggerDocument = {
             description: "Código único de la habilidad",
             schema: {
               type: "string",
-              example: "desarrollo_web_react"
+              example: "react"
             }
           }
         ],
@@ -1728,7 +1757,7 @@ export const swaggerDocument = {
             name: "id",
             in: "path",
             required: true,
-            schema: { type: "string" },
+            schema: { type: "string", example: "notif-1" },
             description: "Identificador de la notificación"
           }
         ],
@@ -1755,7 +1784,7 @@ export const swaggerDocument = {
             name: "id",
             in: "path",
             required: true,
-            schema: { type: "string" },
+            schema: { type: "string", example: "notif-1" },
             description: "Identificador de la notificación"
           }
         ],
@@ -1839,7 +1868,7 @@ export const swaggerDocument = {
         properties: {
           id: {
             type: "string",
-            example: "col-1"
+            example: "colectivo-1"
           },
           nombre: {
             type: "string",
@@ -1903,7 +1932,7 @@ export const swaggerDocument = {
           },
           colectivoId: {
             type: "string",
-            example: "col-1"
+            example: "colectivo-1"
           },
           habilidadesRequeridasCodigos: {
             type: "array",
@@ -2045,7 +2074,7 @@ export const swaggerDocument = {
         properties: {
           id: {
             type: "string",
-            example: "26a597d8-ce6c-418e-a068-1baa613ec889"
+            example: "hito-1"
           },
           fecha: {
             type: "string",
@@ -2058,10 +2087,6 @@ export const swaggerDocument = {
           descripcion: {
             type: "string",
             example: "Se completó el módulo de autenticación"
-          },
-          proyecto: {
-            type: "object",
-            description: "Resumen del proyecto al que pertenece el hito."
           }
         }
       },
@@ -2181,7 +2206,7 @@ export const swaggerDocument = {
         properties: {
           id: {
             type: "string",
-            example: "perf-1"
+            example: "perfil-1"
           },
           nombre: {
             type: "string",
@@ -2325,13 +2350,6 @@ export const swaggerDocument = {
               type: "object"
             }
           },
-          mediosDeContacto:{
-            type: "array",
-            description: "Medios externos registrados internamente para replicar notificaciones. No se muestran públicamente.",
-            items: {
-              $ref: "#/components/schemas/MediosDeContacto"
-            }
-          },
           mensajesInternos: {
             type: "boolean",
             description: "Indica si la persona aceptó ser contactada por mensajería interna. Los medios de contacto no se exponen públicamente.",
@@ -2379,7 +2397,7 @@ export const swaggerDocument = {
           },
           codigo: {
             type: "string",
-            example: "desarrollo_web_react"
+            example: "react"
           },
           descripcion: {
             type: "string",
@@ -2396,7 +2414,7 @@ export const swaggerDocument = {
           },
           codigo: {
             type: "string",
-            example: "desarrollo_web_react"
+            example: "react"
           },
           descripcion: {
             type: "string",
@@ -2439,6 +2457,15 @@ export const swaggerDocument = {
           opcionalesCumplidas: {
             type: "array",
             description: "Habilidades opcionales del perfil que la persona sí tiene. Son las que mejoran la posición en el orden.",
+            items: {
+              $ref: "#/components/schemas/Habilidad"
+            }
+          },
+          opcionalesFaltantes: {
+            type: "array",
+            description:
+              "Habilidades opcionales del perfil que la persona no tiene. No afectan la compatibilidad ni el orden: " +
+              "indican qué podría sumar para encajar mejor en el perfil.",
             items: {
               $ref: "#/components/schemas/Habilidad"
             }
@@ -2516,7 +2543,7 @@ export const swaggerDocument = {
                 type: "object",
                 nullable: true,
                 properties: {
-                  id: { type: "string", example: "col-1" },
+                  id: { type: "string", example: "colectivo-1" },
                   nombre: { type: "string", example: "Colectivo Comunitario" }
                 }
               }
@@ -2525,7 +2552,7 @@ export const swaggerDocument = {
           perfil: {
             type: "object",
             properties: {
-              id: { type: "string", example: "perf-1" },
+              id: { type: "string", example: "perfil-1" },
               nombre: { type: "string", example: "Tester" },
               descripcion: { type: "string", example: "QA del portal" },
               unidadCompromiso: { type: "string", example: "HORAS_SEMANALES" },
@@ -2544,16 +2571,45 @@ export const swaggerDocument = {
       },
       Colaboracion: {
         type: "object",
+        description:
+          "Inscripción de una persona colaboradora a un proyecto. Cuando se consulta el detalle del proyecto se " +
+          "omite 'proyecto', que sería redundante.",
         properties: {
+          id: {
+            type: "string",
+            example: "colab-reg-1"
+          },
           fechaInscripcion: {
             type: "string",
             format: "date-time"
           },
+          esAnonima: {
+            type: "boolean",
+            description:
+              "Si es true, la contribución figura en la plataforma pero sin revelar quién la realizó: " +
+              "'personaColaboradora' viene en null.",
+            example: false
+          },
           personaColaboradora: {
-            type: "object"
+            type: "object",
+            nullable: true,
+            description: "Datos públicos de la persona, o null si la contribución es anónima.",
+            properties: {
+              id: { type: "string", example: "colab-1" },
+              nombreFantasia: { type: "string", example: "SofiDev" },
+              nombre: { type: "string", nullable: true, example: "Sofía" },
+              apellido: { type: "string", nullable: true, example: "Gómez" }
+            }
           },
           proyecto: {
-            type: "object"
+            type: "object",
+            description: "Solo presente al anotarse (POST). Se omite dentro del detalle del proyecto.",
+            properties: {
+              id: { type: "string", example: "proy-1" },
+              titulo: { type: "string", example: "Sistema de Adopciones y Tránsitos" },
+              descripcion: { type: "string" },
+              estado: { type: "string", enum: ["PUBLICADO", "CERRADO"], example: "PUBLICADO" }
+            }
           }
         }
       },
@@ -2608,9 +2664,9 @@ export const swaggerDocument = {
         type: "object",
         required: ["colectivoId", "personaColaboradoraId", "perfilId", "contenido"],
         properties: {
-          colectivoId: { type: "string", example: "col-1" },
+          colectivoId: { type: "string", example: "colectivo-1" },
           personaColaboradoraId: { type: "string", example: "colab-1" },
-          perfilId: { type: "string", example: "perf-1" },
+          perfilId: { type: "string", example: "perfil-1" },
           contenido: { type: "string", example: "Te invitamos a sumarte al proyecto de reforestación en el rol de Frontend React." },
           replicarMediosExternos: { type: "boolean", default: true, example: true }
         }
@@ -2632,7 +2688,7 @@ export const swaggerDocument = {
           colectivo: {
             type: "object",
             properties: {
-              id: { type: "string", example: "col-1" },
+              id: { type: "string", example: "colectivo-1" },
               nombre: { type: "string", example: "Fundación Raíces" }
             }
           },
@@ -2648,7 +2704,7 @@ export const swaggerDocument = {
           perfil: {
             type: "object",
             properties: {
-              id: { type: "string", example: "perf-1" },
+              id: { type: "string", example: "perfil-1" },
               nombre: { type: "string", example: "Desarrollador Frontend" }
             }
           },

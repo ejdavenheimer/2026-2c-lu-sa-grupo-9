@@ -14,11 +14,22 @@ export class PersonaColaboradoraService {
     }
 
     obtenerPersonaColaboradoraPorId = async (id) => {
+        return (await this.#obtenerEntidad(id)).toJSON();
+    }
+
+    /**
+     * Devuelve la ENTIDAD de dominio, no su forma serializada.
+     *
+     * toJSON() es la representacion publica y omite a proposito los medios de
+     * contacto (el enunciado pide que no se muestren). Reconstruir la persona
+     * desde ese JSON para despues guardarla los borraba de la base.
+     */
+    #obtenerEntidad = async (id) => {
         const persona = await this.personaColaboradoraRepository.buscarPorId(id);
         if(!persona){
             throw new NotFoundError("Persona colaboradora no encontrada");
         }
-        return new PersonaColaboradora(persona).toJSON();
+        return persona instanceof PersonaColaboradora ? persona : new PersonaColaboradora(persona);
     }
 
     crearPersonaColaboradora = async (personaColaboradora) => {
@@ -28,16 +39,14 @@ export class PersonaColaboradoraService {
     }
 
     agregarHabilidad = async (id, habilidad) => {
-        const personaData = await this.obtenerPersonaColaboradoraPorId(id);
-        const personaColaboradora = new PersonaColaboradora(personaData);
+        const personaColaboradora = await this.#obtenerEntidad(id);
         personaColaboradora.agregarHabilidad(habilidad);
         const resultado = await this.personaColaboradoraRepository.guardar(personaColaboradora);
         return new PersonaColaboradora(resultado).toJSON();
     }
 
     actualizarPersonaColaboradora = async (id, datos) => {
-        const personaData = await this.obtenerPersonaColaboradoraPorId(id);
-        const persona = new PersonaColaboradora(personaData);
+        const persona = await this.#obtenerEntidad(id);
         if (datos.nombreFantasia !== undefined) persona.nombreFantasia = datos.nombreFantasia;
         if (datos.nombre !== undefined) persona.nombre = datos.nombre;
         if (datos.apellido !== undefined) persona.apellido = datos.apellido;
@@ -59,30 +68,25 @@ export class PersonaColaboradoraService {
         return await this.personaColaboradoraRepository.eliminarPorId(id);
     }
     listarMediosDeContacto = async (id) => {
-        const personaData = await this.obtenerPersonaColaboradoraPorId(id);
-        const persona = new PersonaColaboradora(personaData);
-        return persona.mediosDeContacto;
+        return (await this.#obtenerEntidad(id)).mediosDeContacto;
     }
 
     agregarMedioDeContacto = async (id, datosMedio) => {
-        const personaData = await this.obtenerPersonaColaboradoraPorId(id);
-        const persona = new PersonaColaboradora(personaData);
+        const persona = await this.#obtenerEntidad(id);
         persona.agregarMedioDeContacto(datosMedio);
         const resultado = await this.personaColaboradoraRepository.guardar(persona);
         return new PersonaColaboradora(resultado).toJSON();
     }
 
     actualizarMediosDeContacto = async (id, nuevoMedios) => {
-        const personaData = await this.personaColaboradoraRepository.buscarPorId(id);
-        const persona = new PersonaColaboradora(personaData);
+        const persona = await this.#obtenerEntidad(id);
         persona.actualizarMediosDeContacto(nuevoMedios);
         const resultado = await this.personaColaboradoraRepository.guardar(persona);
         return new PersonaColaboradora(resultado).toJSON();
     }
 
     eliminarMedioDeContacto = async (id, tipoMedio) => {
-        const personaData = await this.obtenerPersonaColaboradoraPorId(id);
-        const persona = new PersonaColaboradora(personaData);
+        const persona = await this.#obtenerEntidad(id);
         const medioAEliminar = persona.mediosDeContacto.find((medio) => medio.tipo === tipoMedio);
         if (!medioAEliminar) {
             throw new NotFoundError(`La persona colaboradora '${persona.nombreFantasia}' no posee el medio de contacto '${tipoMedio}'.`)

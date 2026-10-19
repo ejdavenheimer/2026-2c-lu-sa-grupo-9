@@ -93,7 +93,7 @@ export class ProyectoController {
     anotarColaboracion = async (req, res, next) => {
         try {
             const { personaColaboradoraId, esAnonima } = this.validarBody(anotacionEsquema, req.body);
-            const colaboracion = this.proyectoService.anotarColaborador(req.params.id, { personaColaboradoraId, esAnonima });
+            const colaboracion = await this.proyectoService.anotarColaborador(req.params.id, { personaColaboradoraId, esAnonima });
 
             return res.status(201).json(colaboracion);
         } catch (error) {

@@ -1,7 +1,6 @@
 import { ConflictError } from "../errors/AppError.js";
 import { PersonaColaboradoraModel } from "../schemas/PersonaColaboradoraSchema.js";
-
-const isMongoActive = () => mongoose.connection && mongoose.connection.readyState === 1;
+import { PersonaColaboradora } from "../domain/PersonaColaboradora.js";
 
 const aRegistro = (c) => ({
     id: c.id,
@@ -16,6 +15,30 @@ const aRegistro = (c) => ({
     mensajesInternos: c.mensajesInternos,
     mediosDeContacto: c.mediosDeContacto
 });
+
+/**
+ * Reconstruye la entidad de dominio a partir del documento de Mongo.
+ *
+ * El repositorio devuelve instancias de PersonaColaboradora, no documentos
+ * crudos: CompatibilidadService necesita poder llamar a codigosDeHabilidades()
+ * y el dominio en general espera comportamiento, no solo datos.
+ */
+const aDominio = (doc) => {
+    if (!doc) return null;
+    return new PersonaColaboradora({
+        id: doc.id,
+        nombre: doc.nombre,
+        apellido: doc.apellido,
+        nombreFantasia: doc.nombreFantasia,
+        pronombres: doc.pronombres ?? [],
+        presentacion: doc.presentacion,
+        cuentas: doc.cuentas ?? [],
+        habilidades: doc.habilidades ?? [],
+        colaboraciones: doc.colaboraciones ?? [],
+        mensajesInternos: doc.mensajesInternos,
+        mediosDeContacto: doc.mediosDeContacto ?? []
+    });
+};
 
 export class PersonaColaboradoraRepository {
 
@@ -44,12 +67,13 @@ export class PersonaColaboradoraRepository {
 
     static async buscarPorId(id) {
         if (!PersonaColaboradoraModel) return null;
-        return await PersonaColaboradoraModel.findOne({ id }).lean();
+        return aDominio(await PersonaColaboradoraModel.findOne({ id }).lean());
     }
 
     static async buscarTodos(filtro = {}) {
         if (!PersonaColaboradoraModel) return [];
-        return await PersonaColaboradoraModel.find(filtro).lean();
+        const docs = await PersonaColaboradoraModel.find(filtro).lean();
+        return docs.map(aDominio);
     }
 
     static async buscarPorHabilidades(codigos) {
@@ -57,9 +81,10 @@ export class PersonaColaboradoraRepository {
         if (!Array.isArray(codigos) || codigos.length === 0) {
             return [];
         }
-        return await PersonaColaboradoraModel.find({
+        const docs = await PersonaColaboradoraModel.find({
             "habilidades.codigo": { $in: codigos }
         }).lean();
+        return docs.map(aDominio);
     }
 
     static async eliminarPorId(id) {
@@ -72,6 +97,4 @@ export class PersonaColaboradoraRepository {
         if (!PersonaColaboradoraModel) return;
         await PersonaColaboradoraModel.deleteMany({});
     }
-
-
 }

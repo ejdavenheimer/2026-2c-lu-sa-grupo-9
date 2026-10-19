@@ -136,21 +136,30 @@ export class ProyectoService {
         return nuevoHito;
     }
 
+    // Los hitos son subdocumentos de Mongo y arrastran su _id interno. Se
+    // exponen con una vista propia para no filtrarlo por la API.
+    #comoHitoPublico = (hito) => ({
+        id: hito.id,
+        fecha: hito.fecha,
+        porcentajeConcrecion: hito.porcentajeConcrecion,
+        descripcion: hito.descripcion
+    });
+
     obtenerHitos = async (proyectoId) => {
         const proyecto = await this.obtenerProyectoPorId(proyectoId);
-        return proyecto.hitos;
+        return proyecto.hitos.map(this.#comoHitoPublico);
     }
 
     obtenerHitoPorId = async (proyectoId, hitoId) => {
         const proyecto = await this.obtenerProyectoPorId(proyectoId);
-        return proyecto.getHito(hitoId);
+        return this.#comoHitoPublico(proyecto.getHito(hitoId));
     }
 
     actualizarHito = async (proyectoId, hitoId, { porcentajeConcrecion, descripcion } = {}) => {
         const proyecto = await this.obtenerProyectoPorId(proyectoId);
         proyecto.actualizarHito(hitoId, { porcentajeConcrecion, descripcion });
         await ProyectoRepository.guardar(proyecto);
-        return proyecto.getHito(hitoId);
+        return this.#comoHitoPublico(proyecto.getHito(hitoId));
     }
 
     eliminarHito = async (proyectoId, hitoId) => {
