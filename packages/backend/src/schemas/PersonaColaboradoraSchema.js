@@ -26,6 +26,37 @@ try {
                     type: String,
                     trim: true
                 },
+                pronombres: [
+                    {
+                        type: String,
+                        trim: true
+                    }
+                ],
+                presentacion: {
+                    type: String,
+                    trim: true
+                },
+                cuentas: [
+                    {
+                        nombreUsuario: { type: String, trim: true },
+                        tipo: { type: String, trim: true }
+                    }
+                ],
+                habilidades: [
+                    {
+                        titulo: { type: String, trim: true },
+                        codigo: { type: String, trim: true },
+                        descripcion: { type: String, trim: true }
+                    }
+                ],
+                colaboraciones: [
+                    {
+                        id: { type: String, trim: true },
+                        proyecto: { type: String, trim: true },
+                        fechaInscripcion: { type: Date, default: Date.now },
+                        esAnonima: { type: Boolean, default: false }
+                    }
+                ],
                 mensajesInternos: {
                     type: Boolean,
                     default: true

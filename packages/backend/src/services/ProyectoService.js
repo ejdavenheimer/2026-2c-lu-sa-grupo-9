@@ -6,7 +6,7 @@ import { HabilidadRepository } from "../repositories/HabilidadRepository.js";
 import { NotFoundError, UnprocessableEntityError } from "../errors/AppError.js";
 
 export class ProyectoService {
-    crearProyecto = ({
+    crearProyecto = async ({
         titulo,
         descripcion,
         unidadCompromiso,
@@ -56,27 +56,26 @@ export class ProyectoService {
         });
 
         colectivoAsociado.agregarProyecto(nuevoProyecto);
-        return ProyectoRepository.guardar(nuevoProyecto);
+        return await ProyectoRepository.guardar(nuevoProyecto);
     }
 
-    obtenerProyectos = () => {
-        return ProyectoRepository.buscarTodos();
+    obtenerProyectos = async () => {
+        return await ProyectoRepository.buscarTodos();
     }
 
-    obtenerProyectoPorId = (id) => {
-        const proyecto = ProyectoRepository.buscarPorId(id);
+    obtenerProyectoPorId = async (id) => {
+        const proyecto = await ProyectoRepository.buscarPorId(id);
         if (!proyecto) {
             throw new NotFoundError(`No se encontró el proyecto con ID '${id}'`);
         }
         return proyecto;
     }
 
-    anotarColaborador = (proyectoId, { personaColaboradoraId, personaColaboradora }) => {
-        const proyecto = this.obtenerProyectoPorId(proyectoId);
-
+    anotarColaborador = async (proyectoId, { personaColaboradoraId, personaColaboradora, esAnonima= false }) => {
+        const proyecto = await this.obtenerProyectoPorId(proyectoId);
         let colaborador = personaColaboradora;
         if (!colaborador && personaColaboradoraId) {
-            colaborador = PersonaColaboradoraRepository.buscarPorId(personaColaboradoraId);
+            colaborador = await PersonaColaboradoraRepository.buscarPorId(personaColaboradoraId);
             if (!colaborador) {
                 throw new NotFoundError(`No se encontró la persona colaboradora con ID '${personaColaboradoraId}'`);
             }
@@ -85,23 +84,23 @@ export class ProyectoService {
             throw new UnprocessableEntityError("Debe indicar una persona colaboradora para anotar en el proyecto");
         }
 
-        const nuevaColaboracion = proyecto.agregarColaboracion(colaborador);
+        const nuevaColaboracion = proyecto.agregarColaboracion(colaborador, esAnonima);
 
-        ProyectoRepository.guardar(proyecto);
-        PersonaColaboradoraRepository.guardar(colaborador);
+        await ProyectoRepository.guardar(proyecto);
+        await PersonaColaboradoraRepository.guardar(colaborador);
 
         return nuevaColaboracion;
     }
 
-    cerrarProyecto = (proyectoId) => {
-        const proyecto = this.obtenerProyectoPorId(proyectoId);
+    cerrarProyecto = async (proyectoId) => {
+        const proyecto = await this.obtenerProyectoPorId(proyectoId);
         proyecto.cerrarProyecto();
-        ProyectoRepository.guardar(proyecto);
+        await ProyectoRepository.guardar(proyecto);
         return proyecto;
     }
 
-    actualizarProyecto = (id, datos) => {
-        const proyecto = this.obtenerProyectoPorId(id);
+    actualizarProyecto = async (id, datos) => {
+        const proyecto = await this.obtenerProyectoPorId(id);
         if (datos.titulo !== undefined) proyecto.titulo = datos.titulo;
         if (datos.descripcion !== undefined) proyecto.descripcion = datos.descripcion;
         if (datos.unidadCompromiso !== undefined) proyecto.unidadCompromiso = datos.unidadCompromiso;
@@ -122,48 +121,48 @@ export class ProyectoService {
             }
             proyecto.habilidadesRequeridas = nuevasHabilidades;
         }
-        return ProyectoRepository.guardar(proyecto);
+        return await ProyectoRepository.guardar(proyecto);
     }
 
-    eliminarProyecto = (id) => {
-        this.obtenerProyectoPorId(id);
-        return ProyectoRepository.eliminarPorId(id);
+    eliminarProyecto = async (id) => {
+        await this.obtenerProyectoPorId(id);
+        return await ProyectoRepository.eliminarPorId(id);
     }
 
-    registrarHito = (proyectoId, { porcentajeConcrecion, descripcion, fecha }) => {
-        const proyecto = this.obtenerProyectoPorId(proyectoId);
+    registrarHito = async (proyectoId, { porcentajeConcrecion, descripcion, fecha }) => {
+        const proyecto = await this.obtenerProyectoPorId(proyectoId);
         const nuevoHito = proyecto.agregarHito({ porcentajeConcrecion, descripcion, fecha });
-        ProyectoRepository.guardar(proyecto);
+        await ProyectoRepository.guardar(proyecto);
         return nuevoHito;
     }
 
-    obtenerHitos = (proyectoId) => {
-        const proyecto = this.obtenerProyectoPorId(proyectoId);
+    obtenerHitos = async (proyectoId) => {
+        const proyecto = await this.obtenerProyectoPorId(proyectoId);
         return proyecto.hitos;
     }
 
-    obtenerHitoPorId = (proyectoId, hitoId) => {
-        const proyecto = this.obtenerProyectoPorId(proyectoId);
+    obtenerHitoPorId = async (proyectoId, hitoId) => {
+        const proyecto = await this.obtenerProyectoPorId(proyectoId);
         return proyecto.getHito(hitoId);
     }
 
-    actualizarHito = (proyectoId, hitoId, { porcentajeConcrecion, descripcion } = {}) => {
-        const proyecto = this.obtenerProyectoPorId(proyectoId);
+    actualizarHito = async (proyectoId, hitoId, { porcentajeConcrecion, descripcion } = {}) => {
+        const proyecto = await this.obtenerProyectoPorId(proyectoId);
         proyecto.actualizarHito(hitoId, { porcentajeConcrecion, descripcion });
-        ProyectoRepository.guardar(proyecto);
+        await ProyectoRepository.guardar(proyecto);
         return proyecto.getHito(hitoId);
     }
 
-    eliminarHito = (proyectoId, hitoId) => {
-        const proyecto = this.obtenerProyectoPorId(proyectoId);
+    eliminarHito = async (proyectoId, hitoId) => {
+        const proyecto = await this.obtenerProyectoPorId(proyectoId);
         proyecto.eliminarHito(hitoId);
-        ProyectoRepository.guardar(proyecto);
+        await ProyectoRepository.guardar(proyecto);
     }
 
-    actualizarEnlaces = (proyectoId, { enlaceSistemaEnFuncionamiento, enlaceCodigoFuente } = {}) => {
-        const proyecto = this.obtenerProyectoPorId(proyectoId);
+    actualizarEnlaces = async (proyectoId, { enlaceSistemaEnFuncionamiento, enlaceCodigoFuente } = {}) => {
+        const proyecto = await this.obtenerProyectoPorId(proyectoId);
         proyecto.actualizarEnlaces({ enlaceSistemaEnFuncionamiento, enlaceCodigoFuente });
-        ProyectoRepository.guardar(proyecto);
+        await ProyectoRepository.guardar(proyecto);
         return proyecto;
     }
 }

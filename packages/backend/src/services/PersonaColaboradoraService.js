@@ -1,37 +1,43 @@
 import { PersonaColaboradoraRepository } from "../repositories/PersonaColaboradoraRepository.js";
 import { PersonaColaboradora } from "../domain/PersonaColaboradora.js";
-import { NotFoundError } from "../errors/AppError.js";
+import {NotFoundError} from "../errors/AppError.js";
 
-export class PersonaColaboradoraService{
-    
-    listarPersonasColaboradoras = () => {
-        return PersonaColaboradoraRepository.buscarTodos()
+export class PersonaColaboradoraService {
+
+    constructor(personaColaboradoraRepository = PersonaColaboradoraRepository){
+        this.personaColaboradoraRepository = personaColaboradoraRepository;
     }
 
-    obtenerPersonaColaboradoraPorId = (id) => {
-        const persona = PersonaColaboradoraRepository.buscarPorId(id)
+    listarPersonasColaboradoras = async () => {
+        const personas = await this.personaColaboradoraRepository.buscarTodos();
+        return personas.map(p => new PersonaColaboradora(p).toJSON());
+    }
+
+    obtenerPersonaColaboradoraPorId = async (id) => {
+        const persona = await this.personaColaboradoraRepository.buscarPorId(id);
         if(!persona){
-            throw new NotFoundError("Persona colaboradora no encontrada")
+            throw new NotFoundError("Persona colaboradora no encontrada");
         }
-        return persona
+        return new PersonaColaboradora(persona).toJSON();
     }
 
-    crearPersonaColaboradora = (personaColaboradora) => {
-        const nuevaPersonaColaboradora = new PersonaColaboradora(personaColaboradora)
-        return PersonaColaboradoraRepository.guardar(nuevaPersonaColaboradora)
+    crearPersonaColaboradora = async (personaColaboradora) => {
+        const nuevaPersonaColaboradora = new PersonaColaboradora(personaColaboradora);
+        const resultado = await this.personaColaboradoraRepository.guardar(nuevaPersonaColaboradora);
+        return new PersonaColaboradora(resultado).toJSON();
     }
 
-    agregarHabilidad = (id, habilidad) => {
-        const personaColaboradora = this.obtenerPersonaColaboradoraPorId(id)
-        if(!personaColaboradora){
-            throw new NotFoundError("Persona colaboradora no encontrada")
-        }
-        personaColaboradora.agregarHabilidad(habilidad)
-        return PersonaColaboradoraRepository.guardar(personaColaboradora)
+    agregarHabilidad = async (id, habilidad) => {
+        const personaData = await this.obtenerPersonaColaboradoraPorId(id);
+        const personaColaboradora = new PersonaColaboradora(personaData);
+        personaColaboradora.agregarHabilidad(habilidad);
+        const resultado = await this.personaColaboradoraRepository.guardar(personaColaboradora);
+        return new PersonaColaboradora(resultado).toJSON();
     }
 
-    actualizarPersonaColaboradora = (id, datos) => {
-        const persona = this.obtenerPersonaColaboradoraPorId(id);
+    actualizarPersonaColaboradora = async (id, datos) => {
+        const personaData = await this.obtenerPersonaColaboradoraPorId(id);
+        const persona = new PersonaColaboradora(personaData);
         if (datos.nombreFantasia !== undefined) persona.nombreFantasia = datos.nombreFantasia;
         if (datos.nombre !== undefined) persona.nombre = datos.nombre;
         if (datos.apellido !== undefined) persona.apellido = datos.apellido;
@@ -44,11 +50,45 @@ export class PersonaColaboradoraService{
             persona.mediosDeContacto = [];
             medios.forEach((medio) => persona.agregarMedioDeContacto(medio));
         }
-        return PersonaColaboradoraRepository.guardar(persona);
+        const resultado = await this.personaColaboradoraRepository.guardar(persona);
+        return new PersonaColaboradora(resultado).toJSON();
     }
 
-    eliminarPersonaColaboradora = (id) => {
-        this.obtenerPersonaColaboradoraPorId(id);
-        return PersonaColaboradoraRepository.eliminarPorId(id);
+    eliminarPersonaColaboradora = async (id) => {
+        await this.obtenerPersonaColaboradoraPorId(id);
+        return await this.personaColaboradoraRepository.eliminarPorId(id);
+    }
+    listarMediosDeContacto = async (id) => {
+        const personaData = await this.obtenerPersonaColaboradoraPorId(id);
+        const persona = new PersonaColaboradora(personaData);
+        return persona.mediosDeContacto;
+    }
+
+    agregarMedioDeContacto = async (id, datosMedio) => {
+        const personaData = await this.obtenerPersonaColaboradoraPorId(id);
+        const persona = new PersonaColaboradora(personaData);
+        persona.agregarMedioDeContacto(datosMedio);
+        const resultado = await this.personaColaboradoraRepository.guardar(persona);
+        return new PersonaColaboradora(resultado).toJSON();
+    }
+
+    actualizarMediosDeContacto = async (id, nuevoMedios) => {
+        const personaData = await this.personaColaboradoraRepository.buscarPorId(id);
+        const persona = new PersonaColaboradora(personaData);
+        persona.actualizarMediosDeContacto(nuevoMedios);
+        const resultado = await this.personaColaboradoraRepository.guardar(persona);
+        return new PersonaColaboradora(resultado).toJSON();
+    }
+
+    eliminarMedioDeContacto = async (id, tipoMedio) => {
+        const personaData = await this.obtenerPersonaColaboradoraPorId(id);
+        const persona = new PersonaColaboradora(personaData);
+        const medioAEliminar = persona.mediosDeContacto.find((medio) => medio.tipo === tipoMedio);
+        if (!medioAEliminar) {
+            throw new NotFoundError(`La persona colaboradora '${persona.nombreFantasia}' no posee el medio de contacto '${tipoMedio}'.`)
+        }
+        persona.mediosDeContacto = persona.mediosDeContacto.filter(m => m.tipo !== tipoMedio);
+        const resultado = await this.personaColaboradoraRepository.guardar(persona);
+        return new PersonaColaboradora(resultado).toJSON();
     }
 }

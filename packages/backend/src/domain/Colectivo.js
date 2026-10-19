@@ -1,11 +1,13 @@
 import { EstadoProyecto } from './enums.js'
 import { ConflictError, NotFoundError, UnprocessableEntityError } from '../errors/AppError.js'
+import {randomUUID} from "crypto";
 
 export class Colectivo {
-    constructor({ nombre, descripcion, tipo, ubicacion }) {
+    constructor({ id, nombre, descripcion, tipo, ubicacion }) {
         if (!nombre || !tipo) {
             throw new UnprocessableEntityError('El colectivo debe poseer un nombre y un tipo');
         }
+        this.id = id || randomUUID();
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.tipo = tipo;

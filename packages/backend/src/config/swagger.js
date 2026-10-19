@@ -506,6 +506,10 @@ export const swaggerDocument = {
                   personaColaboradoraId: {
                     type: "string",
                     example: "colab-1"
+                  },
+                  esAnonima: {
+                    type: "boolean",
+                    example: "true",
                   }
                 }
               }
@@ -1259,6 +1263,171 @@ export const swaggerDocument = {
           "400": respuestaDeError("Se envió un query param no reconocido o con el tipo incorrecto"),
           "404": respuestaDeError("Persona colaboradora no encontrada"),
           "422": respuestaDeError("Un query param llegó bien pero con un valor inadmisible (por ejemplo limite=0)")
+        }
+      }
+    },
+    "/personas-colaboradoras/{id}/medios-contacto": {
+      get: {
+        tags: ["Personas Colaboradoras"],
+        summary: "Lista los medios de contacto a una persona colaboradora",
+        description: "Listado de los medios de contacto al perfil de la persona colaboradora.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID de la persona colaboradora",
+            schema: {
+              type: "string",
+              example: "colab-1"
+            }
+          }
+        ],
+        responses: {
+          "200": {
+            description: "Lista de medios de contacto",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "array",
+                  items: {
+                    $ref: "#/components/schemas/MediosDeContacto"
+                  }
+                }
+              }
+            }
+          },
+          "400": respuestaDeError("Algún campo de la habilidad tiene el tipo incorrecto o se envió un campo no permitido"),
+          "404": respuestaDeError("Persona colaboradora no encontrada"),
+          "409": respuestaDeError("Esa habilidad ya había sido agregada a la persona colaboradora"),
+          "422": respuestaDeError("No se indicó una habilidad válida")
+        }
+      },
+      post: {
+        tags: ["Personas Colaboradoras"],
+        summary: "Agregar un medio de contacto a una persona colaboradora",
+        description: "Asocia un nuevo medio de contacto al perfil de la persona colaboradora.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID de la persona colaboradora",
+            schema: {
+              type: "string",
+              example: "colab-1"
+            }
+          }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/MediosDeContactoInput"
+              }
+            }
+          }
+        },
+        responses: {
+          "201": {
+            description: "Medio de contacto agregado exitosamente",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/MediosDeContacto"
+                }
+              }
+            }
+          },
+          "400": respuestaDeError("Algún campo de la habilidad tiene el tipo incorrecto o se envió un campo no permitido"),
+          "404": respuestaDeError("Persona colaboradora no encontrada"),
+          "409": respuestaDeError("Esa habilidad ya había sido agregada a la persona colaboradora"),
+          "422": respuestaDeError("No se indicó una habilidad válida")
+        }
+      },
+      patch: {
+        tags: ["Personas Colaboradoras"],
+        summary: "Modifica un medio de contacto a una persona colaboradora",
+        description: "Modifica un medio de contacto de la persona colaboradora.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID de la persona colaboradora",
+            schema: {
+              type: "string",
+              example: "colab-1"
+            }
+          }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/MediosDeContacto"
+
+              }
+            }
+          }
+        },
+        responses: {
+          "201": {
+            description: "Medios de contacto actualizados exitosamente",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "array",
+                  items: {
+                    $ref: "#/components/schemas/MediosDeContacto"
+                  }
+                }
+              }
+            }
+          },
+          "400": respuestaDeError("Algún campo de la habilidad tiene el tipo incorrecto o se envió un campo no permitido"),
+          "404": respuestaDeError("Persona colaboradora no encontrada"),
+          "409": respuestaDeError("Esa habilidad ya había sido agregada a la persona colaboradora"),
+          "422": respuestaDeError("No se indicó una habilidad válida")
+        }
+      }
+    },
+    "/personas-colaboradoras/{id}/medios-contacto/{tipoMedio}": {
+      delete:{
+        tags: ["Personas Colaboradoras"],
+        summary: "Elimina un medio de contacto",
+        description: "Elimina un medio de contacto de la persona colaboradora",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID de la persona colaboradora",
+            schema: {
+              type: "string",
+              example: "colab-1"
+            }
+          },
+          {
+            name: "tipoMedio",
+            in: "path",
+            required: true,
+            description: "tipo de medio de contacto",
+            schema: {
+              type: "string",
+              example: "EMAIL"
+            }
+          }
+        ],
+        responses: {
+          "204": {
+            description: "Medio de contacto eliminado exitosamente"
+          },
+          "404": {
+            description: "Medio de contacto no encontrado"
+          }
         }
       }
     },
@@ -2101,21 +2270,9 @@ export const swaggerDocument = {
           },
           mediosDeContacto: {
             type: "array",
-            description: "Medios externos registrados internamente para replicar notificaciones (HU11). No se muestran públicamente.",
+            description: "Medios externos registrados internamente para replicar notificaciones. No se muestran públicamente.",
             items: {
-              type: "object",
-              required: ["tipo", "valor"],
-              properties: {
-                tipo: {
-                  type: "string",
-                  enum: ["EMAIL", "WHATSAPP", "SMS"],
-                  example: "EMAIL"
-                },
-                valor: {
-                  type: "string",
-                  example: "ana@example.com"
-                }
-              }
+              $ref: "#/components/schemas/MediosDeContacto"
             }
           }
         }
@@ -2168,10 +2325,47 @@ export const swaggerDocument = {
               type: "object"
             }
           },
+          mediosDeContacto:{
+            type: "array",
+            description: "Medios externos registrados internamente para replicar notificaciones. No se muestran públicamente.",
+            items: {
+              $ref: "#/components/schemas/MediosDeContacto"
+            }
+          },
           mensajesInternos: {
             type: "boolean",
             description: "Indica si la persona aceptó ser contactada por mensajería interna. Los medios de contacto no se exponen públicamente.",
             example: true
+          }
+        }
+      },
+      MediosDeContactoInput: {
+        type: "object",
+        required: ["tipo", "valor"],
+        properties: {
+          tipo: {
+            type: "string",
+            enum: ["EMAIL", "WHATSAPP", "SMS"],
+            example: "EMAIL"
+          },
+          valor: {
+            type: "string",
+            example: "ana@example.com"
+          }
+        }
+      },
+      MediosDeContacto: {
+        type: "object",
+        required: ["tipo", "valor"],
+        properties: {
+          tipo: {
+            type: "string",
+            enum: ["EMAIL", "WHATSAPP", "SMS"],
+            example: "EMAIL"
+          },
+          valor: {
+            type: "string",
+            example: "ana@example.com"
           }
         }
       },

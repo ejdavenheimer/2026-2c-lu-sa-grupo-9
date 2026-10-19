@@ -1,63 +1,75 @@
+import { PersonaColaboradoraModel } from "../schemas/PersonaColaboradoraSchema.js";
 import { ConflictError } from "../errors/AppError.js";
 
-export class PersonaColaboradoraRepository {
-    static #colaboradores = [];
-    static #nextId = 1;
+const aRegistro = (c) => ({
+    id: c.id,
+    nombre: c.nombre,
+    apellido: c.apellido,
+    nombreFantasia: c.nombreFantasia,
+    pronombres: c.pronombres,
+    presentacion: c.presentacion,
+    cuentas: c.cuentas,
+    habilidades: c.habilidades,
+    colaboraciones: c.colaboraciones,
+    mensajesInternos: c.mensajesInternos,
+    mediosDeContacto: c.mediosDeContacto
+});
 
-    static guardar(colaborador) {
-        if (colaborador.id) {
-            const index = this.#colaboradores.findIndex((c) => c.id === colaborador.id);
-            if (index >= 0) {
-                this.#colaboradores[index] = colaborador;
-                return colaborador;
-            }
-        }
+export class PersonaColaboradoraRepository {
+
+    static async guardar(colaborador) {
+        if (!PersonaColaboradoraModel) return colaborador;
 
         if (colaborador.nombreFantasia) {
-            const existePorNombre = this.#colaboradores.some(
-                (c) => c.nombreFantasia && c.nombreFantasia === colaborador.nombreFantasia
-            );
+            const existePorNombre = await PersonaColaboradoraModel.findOne({
+                nombreFantasia: colaborador.nombreFantasia,
+                id: { $ne: colaborador.id }
+            }).lean();
+
             if (existePorNombre) {
                 throw new ConflictError(`Ya existe una persona colaboradora con el nombre de fantasía '${colaborador.nombreFantasia}'`);
             }
         }
 
-        if (!colaborador.id) {
-            colaborador.id = `colab-${this.#nextId++}`;
-        }
-        this.#colaboradores.push(colaborador);
+        await PersonaColaboradoraModel.findOneAndUpdate(
+            { id: colaborador.id },
+            aRegistro(colaborador),
+            { upsert: true, new: true }
+        );
+
         return colaborador;
     }
 
-    static buscarTodos() {
-        return [...this.#colaboradores];
+    static async buscarPorId(id) {
+        if (!PersonaColaboradoraModel) return null;
+        return await PersonaColaboradoraModel.findOne({ id }).lean();
     }
 
-    static buscarPorId(id) {
-        return this.#colaboradores.find((c) => c.id === id) || null;
+    static async buscarTodos(filtro = {}) {
+        if (!PersonaColaboradoraModel) return [];
+        return await PersonaColaboradoraModel.find(filtro).lean();
     }
 
     static async buscarPorHabilidades(codigos) {
+        if (!PersonaColaboradoraModel) return [];
         if (!Array.isArray(codigos) || codigos.length === 0) {
             return [];
         }
-        return this.#colaboradores.filter((colaborador) =>
-            codigos.some((codigo) => colaborador.tieneHabilidad(codigo))
-        );
+        return await PersonaColaboradoraModel.find({
+            "habilidades.codigo": { $in: codigos }
+        }).lean();
     }
 
-    static eliminarPorId(id) {
-        const index = this.#colaboradores.findIndex((c) => c.id === id);
-        if (index === -1) {
-            return false;
-        }
-        this.#colaboradores.splice(index, 1);
-        return true;
+    static async eliminarPorId(id) {
+        if (!PersonaColaboradoraModel) return false;
+        const res = await PersonaColaboradoraModel.deleteOne({ id });
+        return res.deletedCount > 0;
     }
 
-    static limpiar() {
-        this.#colaboradores = [];
-        this.#nextId = 1;
+    static async limpiar() {
+        if (!PersonaColaboradoraModel) return;
+        await PersonaColaboradoraModel.deleteMany({});
     }
+
+
 }
-
