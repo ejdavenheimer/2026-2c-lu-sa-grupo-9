@@ -477,6 +477,35 @@ export const swaggerDocument = {
         }
       }
     },
+    "/proyectos/{id}/cerrar": {
+      patch: {
+        tags: ["Proyectos"],
+        summary: "Cerrar un proyecto",
+        description:
+          "Marca el proyecto como CERRADO y registra su fecha de cierre. A partir de ese momento no se admiten " +
+          "nuevas colaboraciones, perfiles ni hitos. No requiere cuerpo.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "ID del proyecto a cerrar",
+            schema: { type: "string", example: "proy-1" }
+          }
+        ],
+        responses: {
+          200: {
+            description: "Proyecto cerrado",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/Proyecto" }
+              }
+            }
+          },
+          404: respuestaDeError("No se encontró el proyecto con el ID indicado")
+        }
+      }
+    },
     "/proyectos/{id}/colaboraciones": {
       post: {
         tags: ["Proyectos"],
