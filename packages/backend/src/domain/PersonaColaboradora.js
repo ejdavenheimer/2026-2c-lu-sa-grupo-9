@@ -1,6 +1,6 @@
 import {ConflictError, NotFoundError, UnprocessableEntityError} from "../errors/AppError.js";
 import {TipoMedioContacto} from "./enums.js";
-import {randomUUID} from "crypto";
+import {randomUUID} from "  crypto";
 
 export class PersonaColaboradora {
     constructor({
@@ -119,12 +119,8 @@ export class PersonaColaboradora {
             colaboraciones: this.colaboraciones.map((c) => ({
                 id: c.id,
                 fechaInscripcion: c.fechaInscripcion,
-                proyecto: c.proyecto ? {
-                    id: c.proyecto.id,
-                    titulo: c.proyecto.titulo,
-                    descripcion: c.proyecto.descripcion,
-                    estado: c.proyecto.estado
-                } : null
+                proyectoId: c.proyectoId,
+                tituloProyecto: c.tituloProyecto,
             }))
         };
     }
