@@ -119,12 +119,8 @@ export class PersonaColaboradora {
             colaboraciones: this.colaboraciones.map((c) => ({
                 id: c.id,
                 fechaInscripcion: c.fechaInscripcion,
-                proyecto: c.proyecto ? {
-                    id: c.proyecto.id,
-                    titulo: c.proyecto.titulo,
-                    descripcion: c.proyecto.descripcion,
-                    estado: c.proyecto.estado
-                } : null
+                proyectoId: c.proyectoId,
+                tituloProyecto: c.tituloProyecto,
             }))
         };
     }
