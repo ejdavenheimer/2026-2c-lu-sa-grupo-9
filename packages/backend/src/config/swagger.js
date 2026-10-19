@@ -2058,10 +2058,6 @@ export const swaggerDocument = {
           descripcion: {
             type: "string",
             example: "Se completó el módulo de autenticación"
-          },
-          proyecto: {
-            type: "object",
-            description: "Resumen del proyecto al que pertenece el hito."
           }
         }
       },
@@ -2325,13 +2321,6 @@ export const swaggerDocument = {
               type: "object"
             }
           },
-          mediosDeContacto:{
-            type: "array",
-            description: "Medios externos registrados internamente para replicar notificaciones. No se muestran públicamente.",
-            items: {
-              $ref: "#/components/schemas/MediosDeContacto"
-            }
-          },
           mensajesInternos: {
             type: "boolean",
             description: "Indica si la persona aceptó ser contactada por mensajería interna. Los medios de contacto no se exponen públicamente.",
@@ -2553,16 +2542,45 @@ export const swaggerDocument = {
       },
       Colaboracion: {
         type: "object",
+        description:
+          "Inscripción de una persona colaboradora a un proyecto. Cuando se consulta el detalle del proyecto se " +
+          "omite 'proyecto', que sería redundante.",
         properties: {
+          id: {
+            type: "string",
+            example: "colab-reg-1"
+          },
           fechaInscripcion: {
             type: "string",
             format: "date-time"
           },
+          esAnonima: {
+            type: "boolean",
+            description:
+              "Si es true, la contribución figura en la plataforma pero sin revelar quién la realizó: " +
+              "'personaColaboradora' viene en null.",
+            example: false
+          },
           personaColaboradora: {
-            type: "object"
+            type: "object",
+            nullable: true,
+            description: "Datos públicos de la persona, o null si la contribución es anónima.",
+            properties: {
+              id: { type: "string", example: "colab-1" },
+              nombreFantasia: { type: "string", example: "SofiDev" },
+              nombre: { type: "string", nullable: true, example: "Sofía" },
+              apellido: { type: "string", nullable: true, example: "Gómez" }
+            }
           },
           proyecto: {
-            type: "object"
+            type: "object",
+            description: "Solo presente al anotarse (POST). Se omite dentro del detalle del proyecto.",
+            properties: {
+              id: { type: "string", example: "proy-1" },
+              titulo: { type: "string", example: "Sistema de Adopciones y Tránsitos" },
+              descripcion: { type: "string" },
+              estado: { type: "string", enum: ["PUBLICADO", "CERRADO"], example: "PUBLICADO" }
+            }
           }
         }
       },
