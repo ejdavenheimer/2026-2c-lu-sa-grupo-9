@@ -18,6 +18,7 @@ export class Colaboracion {
         return {
             id: this.id,
             fechaInscripcion: this.fechaInscripcion,
+            esAnonima: this.esAnonima,
             personaColaboradora: this.esAnonima ? null : (this.personaColaboradora ? {
                 id: this.personaColaboradora.id,
                 nombreFantasia: this.personaColaboradora.nombreFantasia,

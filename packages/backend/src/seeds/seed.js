@@ -28,6 +28,11 @@ async function ejecutarSeed() {
         console.log("🧩 [SEED] Insertando habilidades...");
         const habilidadesData = [
             {
+                codigo: "testing_e2e",
+                titulo: "Testing E2E con Cypress",
+                descripcion: "Pruebas automatizadas de punta a punta sobre la interfaz web"
+            },
+            {
                 codigo: "react",
                 titulo: "React",
                 descripcion: "Biblioteca de JavaScript para interfaces de usuario modernas y componentes reactivos"
@@ -89,7 +94,7 @@ async function ejecutarSeed() {
                 id: "colectivo-2",
                 nombre: "Cooperativa Tecnológica Conectando Raíces",
                 descripcion: "Cooperativa de desarrollo e infraestructura popular para llevar internet y sensores a escuelas rurales.",
-                tipo: "COOPERATIVA",
+                tipo: "ASOCIACION_BARRIAL",
                 ubicacion: {
                     pais: "Argentina",
                     provincia: "Córdoba",
@@ -97,10 +102,21 @@ async function ejecutarSeed() {
                 }
             },
             {
+                id: "colectivo-4",
+                nombre: "Asamblea Vecinal Parque Avellaneda",
+                descripcion: "Vecinas y vecinos autoconvocados por la defensa del espacio publico y el arbolado urbano.",
+                tipo: "ASAMBLEA",
+                ubicacion: {
+                    pais: "Argentina",
+                    provincia: "Buenos Aires",
+                    ciudad: "Avellaneda"
+                }
+            },
+            {
                 id: "colectivo-3",
                 nombre: "Biblioteca Popular Alfonsina Storni",
                 descripcion: "Espacio cultural sin fines de lucro para la alfabetización comunitaria, talleres de oficio y memoria barrial.",
-                tipo: "INSTITUCION_EDUCATIVA",
+                tipo: "FUNDACION",
                 ubicacion: {
                     pais: "Argentina",
                     provincia: "Santa Fe",
@@ -178,7 +194,7 @@ async function ejecutarSeed() {
                 nombreFantasia: "AlexPixel",
                 pronombres: ["elle"],
                 presentacion: "Diseñadore UI/UX comprometide con el diseño accesible, sistemas visuales intuitivos y empatía comunitaria.",
-                cuentas: [{ nombreUsuario: "alexpixel_ui", tipo: "BEHANCE" }],
+                cuentas: [{ nombreUsuario: "alexpixel_ui", tipo: "GITLAB" }],
                 habilidades: [
                     { codigo: "ui_ux", titulo: "Diseño UI/UX" },
                     { codigo: "react", titulo: "React" }
@@ -190,13 +206,29 @@ async function ejecutarSeed() {
                 colaboraciones: []
             },
             {
+                id: "colab-5",
+                nombreFantasia: "ElGatoQueProgramaba",
+                pronombres: ["elle"],
+                presentacion: "Prefiero colaborar sin dar mi nombre. Backend y automatizacion.",
+                cuentas: [{ nombreUsuario: "gatoprograma", tipo: "GITLAB" }],
+                habilidades: [
+                    { codigo: "node_js", titulo: "Node.js" },
+                    { codigo: "mongodb", titulo: "MongoDB" }
+                ],
+                mensajesInternos: true,
+                mediosDeContacto: [
+                    { tipo: "SMS", valor: "+5491166667777" }
+                ],
+                colaboraciones: []
+            },
+            {
                 id: "colab-4",
                 nombre: "Valentina",
                 apellido: "Rossi",
                 nombreFantasia: "ValenGestora",
                 pronombres: ["ella"],
                 presentacion: "Coordinadora de proyectos sociales y facilitadora ágil. Apasionada por tender puentes entre la comunidad y la técnica.",
-                cuentas: [{ nombreUsuario: "valenrossi", tipo: "LINKEDIN" }],
+                cuentas: [{ nombreUsuario: "valenrossi", tipo: "GITHUB" }],
                 habilidades: [
                     { codigo: "gestion_proyectos", titulo: "Gestión de Proyectos" },
                     { codigo: "comunicacion", titulo: "Comunicación Social" }
@@ -209,6 +241,11 @@ async function ejecutarSeed() {
             }
         ];
         const personas = await PersonaColaboradoraModel.insertMany(personasData);
+
+        // Las colaboraciones referencian a la persona por ObjectId (asi lo
+        // declara ProyectoSchema, siguiendo el patron de referencias de la
+        // guia de la catedra), no por su id de dominio.
+        const objectIdPorPersona = new Map(personas.map((p) => [p.id, p._id]));
         console.log(`   ✓ ${personas.length} personas colaboradoras insertadas.`);
 
         // 5. Proyectos
@@ -252,6 +289,17 @@ async function ejecutarSeed() {
                 cantidadHoras: 8,
                 modalidadesColaboracion: ["CON_INCENTIVO_ECONOMICO"],
                 proyectoId: "proy-2"
+            },
+            {
+                id: "perfil-4",
+                nombre: "Tester",
+                descripcion: "Pruebas de punta a punta del panel de alertas antes de cada despliegue.",
+                habilidadesRequeridas: [{ codigo: "testing_e2e", titulo: "Testing E2E" }],
+                habilidadesOpcionales: [{ codigo: "docker", titulo: "Docker" }],
+                unidadCompromiso: "HORAS_MENSUALES",
+                cantidadHoras: 5,
+                modalidadesColaboracion: ["CON_POSIBILIDAD_CONTRATACION"],
+                proyectoId: "proy-2"
             }
         ];
 
@@ -265,18 +313,9 @@ async function ejecutarSeed() {
                 modalidadesColaboracion: ["GRATUITA"],
                 estado: "PUBLICADO",
                 fechaAlta: new Date("2026-02-01"),
-                colectivoId: "colectivo-1",
-                colectivo: {
-                    id: "colectivo-1",
-                    nombre: "Asociación Civil Huellas Solidarias",
-                    tipo: "ONG",
-                    ubicacion: { pais: "Argentina", provincia: "Ciudad Autónoma de Buenos Aires", ciudad: "Caballito" }
-                },
-                habilidadesRequeridas: [
-                    { codigo: "react", titulo: "React" },
-                    { codigo: "node_js", titulo: "Node.js" }
-                ],
-                perfiles: perfilesProy1,
+                colectivo: "colectivo-1",
+                habilidadesRequeridas: ["react", "node_js"],
+                perfiles: ["perfil-1", "perfil-2"],
                 hitos: [
                     {
                         id: "hito-1",
@@ -294,26 +333,16 @@ async function ejecutarSeed() {
                 colaboraciones: [
                     {
                         id: "colab-reg-1",
-                        perfilId: "perfil-1",
-                        personaColaboradoraId: "colab-1",
-                        personaColaboradora: {
-                            id: "colab-1",
-                            nombreFantasia: "SofiDev",
-                            nombre: "Sofía",
-                            apellido: "Gómez"
-                        },
+                        personaColaboradora: objectIdPorPersona.get("colab-1"),
+                        esAnonima: false,
                         fechaInscripcion: new Date("2026-02-20")
                     },
                     {
                         id: "colab-reg-2",
-                        perfilId: "perfil-2",
-                        personaColaboradoraId: "colab-2",
-                        personaColaboradora: {
-                            id: "colab-2",
-                            nombreFantasia: "LukeSkycoder",
-                            nombre: "Lucas",
-                            apellido: "Martínez"
-                        },
+                        personaColaboradora: objectIdPorPersona.get("colab-2"),
+                        // Contribucion anonima (HU07): figura en la plataforma
+                        // pero sin revelar quien la realizo.
+                        esAnonima: true,
                         fechaInscripcion: new Date("2026-02-22")
                     }
                 ],
@@ -329,18 +358,9 @@ async function ejecutarSeed() {
                 modalidadesColaboracion: ["CON_INCENTIVO_ECONOMICO"],
                 estado: "PUBLICADO",
                 fechaAlta: new Date("2026-01-10"),
-                colectivoId: "colectivo-2",
-                colectivo: {
-                    id: "colectivo-2",
-                    nombre: "Cooperativa Tecnológica Conectando Raíces",
-                    tipo: "COOPERATIVA",
-                    ubicacion: { pais: "Argentina", provincia: "Córdoba", ciudad: "Villa General Belgrano" }
-                },
-                habilidadesRequeridas: [
-                    { codigo: "python", titulo: "Python" },
-                    { codigo: "docker", titulo: "Docker" }
-                ],
-                perfiles: perfilesProy2,
+                colectivo: "colectivo-2",
+                habilidadesRequeridas: ["python", "docker"],
+                perfiles: ["perfil-3", "perfil-4"],
                 hitos: [
                     {
                         id: "hito-3",
@@ -352,14 +372,8 @@ async function ejecutarSeed() {
                 colaboraciones: [
                     {
                         id: "colab-reg-3",
-                        perfilId: "perfil-3",
-                        personaColaboradoraId: "colab-2",
-                        personaColaboradora: {
-                            id: "colab-2",
-                            nombreFantasia: "LukeSkycoder",
-                            nombre: "Lucas",
-                            apellido: "Martínez"
-                        },
+                        personaColaboradora: objectIdPorPersona.get("colab-2"),
+                        esAnonima: false,
                         fechaInscripcion: new Date("2026-02-05")
                     }
                 ],
@@ -376,16 +390,8 @@ async function ejecutarSeed() {
                 estado: "CERRADO",
                 fechaAlta: new Date("2025-10-01"),
                 fechaCierre: new Date("2026-01-20"),
-                colectivoId: "colectivo-3",
-                colectivo: {
-                    id: "colectivo-3",
-                    nombre: "Biblioteca Popular Alfonsina Storni",
-                    tipo: "INSTITUCION_EDUCATIVA",
-                    ubicacion: { pais: "Argentina", provincia: "Santa Fe", ciudad: "Rosario" }
-                },
-                habilidadesRequeridas: [
-                    { codigo: "comunicacion", titulo: "Comunicación Social" }
-                ],
+                colectivo: "colectivo-3",
+                habilidadesRequeridas: ["comunicacion"],
                 perfiles: [],
                 hitos: [
                     {

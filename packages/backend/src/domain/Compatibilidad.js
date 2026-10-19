@@ -11,13 +11,15 @@ export class Compatibilidad {
         personaColaboradora,
         puntaje = 0,
         requeridasFaltantes = [],
-        opcionalesCumplidas = []
+        opcionalesCumplidas = [],
+        opcionalesFaltantes = []
     } = {}) {
         this.perfil = perfil;
         this.personaColaboradora = personaColaboradora;
         this.puntaje = puntaje;
         this.requeridasFaltantes = requeridasFaltantes;
         this.opcionalesCumplidas = opcionalesCumplidas;
+        this.opcionalesFaltantes = opcionalesFaltantes;
     }
 
     get esCompatible() {
@@ -45,7 +47,8 @@ export class Compatibilidad {
             cumpleAlgunaRequerida: this.cumpleAlgunaRequerida,
             puntaje: this.puntaje,
             requeridasFaltantes: this.requeridasFaltantes.map(comoHabilidadPublica),
-            opcionalesCumplidas: this.opcionalesCumplidas.map(comoHabilidadPublica)
+            opcionalesCumplidas: this.opcionalesCumplidas.map(comoHabilidadPublica),
+            opcionalesFaltantes: this.opcionalesFaltantes.map(comoHabilidadPublica)
         };
     }
 }

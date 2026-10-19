@@ -106,6 +106,12 @@ export class Perfil {
             personaColaboradora.tieneHabilidad(habilidad.codigo)
         );
 
+        // Las opcionales que le faltan no afectan la compatibilidad, pero le
+        // dicen a la persona que podria sumar para encajar mejor en el perfil.
+        const opcionalesFaltantes = this.habilidadesOpcionales.filter(
+            (habilidad) => !personaColaboradora.tieneHabilidad(habilidad.codigo)
+        );
+
         const cantidadRequeridasCumplidas = this.habilidadesRequeridas.length - requeridasFaltantes.length;
 
         return new Compatibilidad({
@@ -113,7 +119,8 @@ export class Perfil {
             personaColaboradora,
             puntaje: this.#calcularPuntaje(cantidadRequeridasCumplidas, opcionalesCumplidas.length),
             requeridasFaltantes,
-            opcionalesCumplidas
+            opcionalesCumplidas,
+            opcionalesFaltantes
         });
     }
 

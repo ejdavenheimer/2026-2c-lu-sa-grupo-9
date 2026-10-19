@@ -116,7 +116,6 @@ export class PersonaColaboradora {
             cuentas: this.cuentas,
             habilidades: this.habilidades,
             mensajesInternos: this.mensajesInternos,
-            // mediosDeContacto: this.mediosDeContacto,
             colaboraciones: this.colaboraciones.map((c) => ({
                 id: c.id,
                 fechaInscripcion: c.fechaInscripcion,
